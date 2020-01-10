@@ -13,8 +13,4 @@
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>rospy</exec_depend>
 
-  <build_depend>agribot_map</build_depend>
-  <build_export_depend>agribot_map</build_export_depend>
-  <exec_depend>agribot_map</exec_depend>
-
 </package>
