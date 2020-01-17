@@ -32,9 +32,13 @@ def node():
     while not rospy.is_shutdown():
         if(points_handler.are_path_points_availible()):
             goal_pose = points_handler.fill_new_msg(goal_pose)
+
+            ###### action lib approach:
             client.send_goal(goal_pose)
             rospy.loginfo("Action state {}".format(client.get_state()))
             client.wait_for_result()
+            ###### TODO: public /clicked_point (msg type: geometry_msgs/Point):
+
         else:
             rospy.loginfo("Path finished!")
         rate.sleep()
