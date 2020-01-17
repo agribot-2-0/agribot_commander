@@ -26,6 +26,16 @@ class PathPointsStuffer:
             return False
         return True
 
+    def transform_to_robot_coordinates(self):
+        if(len(self.path_points.keys()) < 0):
+            return False
+        base_lon = float(self.path_points["pose0"]["position"][0])
+        base_lat = float(self.path_points["pose0"]["position"][1])
+        for i in range(0, len(self.path_points.keys())):
+            self.path_points["pose"+str(i)]["position"][0] = (float(self.path_points["pose"+str(i)]["position"][0]) - base_lon)*10000
+            self.path_points["pose"+str(i)]["position"][1] = (float(self.path_points["pose"+str(i)]["position"][1]) - base_lat)*10000
+        print(self.path_points)
+
     def get_path_points_from_yaml(self):
         try:
             with open(self.path_name) as file:
@@ -34,5 +44,4 @@ class PathPointsStuffer:
         except IOError:
             file = open(self.path_name, "w")
         file.close()
-        print(self.path_points["pose"]["orientation"])
 

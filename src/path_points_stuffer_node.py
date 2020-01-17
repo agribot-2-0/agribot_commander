@@ -21,6 +21,7 @@ def node():
         return
 
     points_handler.get_path_points_from_yaml()
+    points_handler.transform_to_robot_coordinates()
 
     goal_pose = MoveBaseGoal()
     goal_pose.target_pose.header.frame_id = 'map'
