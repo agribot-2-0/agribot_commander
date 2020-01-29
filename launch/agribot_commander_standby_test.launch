@@ -1,0 +1,5 @@
+<launch>
+    <node name="agribot_commander_state_machine" pkg="agribot_commander" type="AgribotStateMachine.py" output="screen">
+        <param name="standby_timeout" value="10000" />
+    </node>
+</launch>

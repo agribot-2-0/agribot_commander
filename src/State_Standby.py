@@ -10,16 +10,16 @@ import string
 class Standby(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['app_input_received_standby', 'default_on_standby'])
-        self.counter=0
+        self.counter = 0
+        self.limit = rospy.get_param("~standby_timeout", 10)
 
     def execute(self, userdata):
-        string_msg="Executing state Standby "
-        if self.counter < 20:
-            #self.counter += 1
-            #string_msg="Executing state Standby waiting "+str(self.counter)
-            rospy.loginfo(string_msg)
+        if self.counter < self.limit:
+            self.counter += 1
+            if self.counter%1000 == 0:
+                string_msg="Executing state Standby waiting "+str(self.counter)
+                rospy.loginfo(string_msg)
             return 'default_on_standby'
         else:
             self.counter=0
-            rospy.loginfo(string_msg)
             return 'app_input_received_standby'
