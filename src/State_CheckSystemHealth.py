@@ -12,6 +12,7 @@ class CheckSystemHealth(smach.State):
         smach.State.__init__(self, outcomes=['system_is_healthy'])
 
     def execute(self, userdata):
+        rospy.sleep(0.010)
         string_msg="Executing state CheckSystemHealth "
         rospy.loginfo(string_msg)
         return 'system_is_healthy'

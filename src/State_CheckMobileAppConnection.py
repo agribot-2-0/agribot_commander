@@ -11,5 +11,6 @@ class CheckMobileAppConnection(smach.State):
         smach.State.__init__(self, outcomes=['connection_is_stable'])
 
     def execute(self, userdata):
+        rospy.sleep(0.010)
         rospy.loginfo('Executing state CheckMobileAppConnection')
         return 'connection_is_stable'

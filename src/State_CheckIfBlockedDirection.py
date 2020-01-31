@@ -15,6 +15,7 @@ class CheckIfBlockedDirection(smach.State):
         #Check if direction is blocked
         #
         #
+        
         string_msg="Executing state CheckIfBlockedDirection "
         rospy.loginfo(string_msg)
         return 'no_obstacles'

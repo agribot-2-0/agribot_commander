@@ -15,6 +15,7 @@ class SendData(smach.State):
         #Send data to mobile app
         #
         #
+        rospy.sleep(0.010)
         string_msg="Executing state SendData "
         rospy.loginfo(string_msg)
         return 'data_sent'

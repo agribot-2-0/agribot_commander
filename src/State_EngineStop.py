@@ -16,6 +16,7 @@ class EngineStop(smach.State):
         #Send engine stop frames
         #when engine is still, return the outcome
         #normal work, no system failure
+        rospy.sleep(0.010)
         if userdata.engine_stop_reason == 'Normal':
             return 'engine_stopped_normal'
         else:

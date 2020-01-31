@@ -15,6 +15,7 @@ class LogsAndProtocolData(smach.State):
         #Send protocol data to mobile app and save system logs
         #
         #
+        rospy.sleep(0.010)
         string_msg="Executing state LogsAndProtocolData "
         rospy.loginfo(string_msg)
         return 'logs_and_protocol_data_sent'

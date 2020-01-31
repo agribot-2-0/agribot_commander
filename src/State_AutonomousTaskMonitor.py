@@ -15,6 +15,7 @@ class AutonomousTaskMonitor(smach.State):
         #Monitore the task progression, safety, internal health of the system, weather conditions, create logs
         #
         #
+        rospy.sleep(0.010)
         string_msg="Executing state AutonomousTaskMonitor "
         rospy.loginfo(string_msg)
         return 'succes'
