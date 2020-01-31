@@ -7,11 +7,11 @@ import sys
 from os import path
 from pathpointsstuffer import PathPointsStuffer
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from geometry_msgs.msg import PointStamped
+#from geometry_msgs.msg import PointStamped
 
 def node():
     rospy.init_node('path_points_stuffer')
-    pub = rospy.Publisher('/clicked_point', PointStamped, queue_size=10)
+    #pub = rospy.Publisher('/clicked_point', PointStamped, queue_size=10)
 
     # init path handling object:
     rospack = rospkg.RosPack()
@@ -24,31 +24,32 @@ def node():
     points_handler.transform_to_robot_coordinates()
 
     #init actionlib:
-    #client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-    #client.wait_for_server()
+    client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+    client.wait_for_server()
 
     ###### action lib approach:
-    #goal_pose = MoveBaseGoal()
-    #goal_pose.target_pose.header.frame_id = 'map'
+    goal_pose = MoveBaseGoal()
+    goal_pose.target_pose.header.frame_id = 'map'
 
-    goal_pose = PointStamped()
-    rate = rospy.Rate(1000)
-    goal_pose.header.frame_id = "odom"
+    #goal_pose = PointStamped()
+    #goal_pose.header.frame_id = "odom"
     send_last_msg = True
+    rate = rospy.Rate(1000)
+
     while not rospy.is_shutdown():
         if(points_handler.are_path_points_availible()):
             ###### action lib approach:
-            #goal_pose = points_handler.fill_new_msg(goal_pose)
-            #client.send_goal(goal_pose)
-            #rospy.loginfo("Action state {}".format(client.get_state()))
-            #client.wait_for_result()
-            ###### TODO: public /clicked_point (msg type: geometry_msgs/Point):
-            goal_pose.header.stamp = rospy.get_rostime()
-            goal_pose = points_handler.fill_new_msg_point(goal_pose)
-            pub.publish(goal_pose)
+            goal_pose = points_handler.fill_new_msg(goal_pose)
+            client.send_goal(goal_pose)
+            rospy.loginfo("Action state {}".format(client.get_state()))
+            client.wait_for_result()
+            ###### HAKSY: public into /clicked_point
+            #goal_pose.header.stamp = rospy.get_rostime()
+            #goal_pose = points_handler.fill_new_msg_point(goal_pose)
+            #pub.publish(goal_pose)
         else:
             if(send_last_msg):
-                pub.publish(goal_pose)
+                #pub.publish(goal_pose)
                 send_last_msg = False
         rate.sleep()
 
