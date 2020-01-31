@@ -7,9 +7,11 @@ import sys
 from os import path
 from pathpointsstuffer import PathPointsStuffer
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from geometry_msgs.msg import Point
 
 def node():
     rospy.init_node('path_points_stuffer')
+    pub = rospy.Publisher('/clicked_point', Point, queue_size=10)
 
     # init path handling object:
     rospack = rospkg.RosPack()
@@ -22,25 +24,30 @@ def node():
     points_handler.transform_to_robot_coordinates()
 
     #init actionlib:
-    client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-    client.wait_for_server()
+    #client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+    #client.wait_for_server()
 
-    goal_pose = MoveBaseGoal()
-    goal_pose.target_pose.header.frame_id = 'map'
+    ###### action lib approach:
+    #goal_pose = MoveBaseGoal()
+    #goal_pose.target_pose.header.frame_id = 'map'
 
-    rate = rospy.Rate(0.1)
+    goal_pose = Point()
+    rate = rospy.Rate(100)
+    send_last_msg = True
     while not rospy.is_shutdown():
         if(points_handler.are_path_points_availible()):
-            goal_pose = points_handler.fill_new_msg(goal_pose)
-
             ###### action lib approach:
-            client.send_goal(goal_pose)
-            rospy.loginfo("Action state {}".format(client.get_state()))
-            client.wait_for_result()
+            #goal_pose = points_handler.fill_new_msg(goal_pose)
+            #client.send_goal(goal_pose)
+            #rospy.loginfo("Action state {}".format(client.get_state()))
+            #client.wait_for_result()
             ###### TODO: public /clicked_point (msg type: geometry_msgs/Point):
-
+            goal_pose = points_handler.fill_new_msg_point(goal_pose)
+            pub.publish(goal_pose)
         else:
-            rospy.loginfo("Path finished!")
+            if(send_last_msg):
+                pub.publish(goal_pose)
+                send_last_msg = False
         rate.sleep()
 
 if __name__ == '__main__':
