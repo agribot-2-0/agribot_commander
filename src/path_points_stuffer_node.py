@@ -32,7 +32,8 @@ def node():
     #goal_pose.target_pose.header.frame_id = 'map'
 
     goal_pose = PointStamped()
-    rate = rospy.Rate(100)
+    rate = rospy.Rate(1000)
+    goal_pose.header.frame_id = "odom"
     send_last_msg = True
     while not rospy.is_shutdown():
         if(points_handler.are_path_points_availible()):
@@ -42,7 +43,6 @@ def node():
             #rospy.loginfo("Action state {}".format(client.get_state()))
             #client.wait_for_result()
             ###### TODO: public /clicked_point (msg type: geometry_msgs/Point):
-            goal_pose.header.frame_id = "PathPoint"
             goal_pose.header.stamp = rospy.get_rostime()
             goal_pose = points_handler.fill_new_msg_point(goal_pose)
             pub.publish(goal_pose)
