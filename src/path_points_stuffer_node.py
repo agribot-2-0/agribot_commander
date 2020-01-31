@@ -7,11 +7,11 @@ import sys
 from os import path
 from pathpointsstuffer import PathPointsStuffer
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import PointStamped
 
 def node():
     rospy.init_node('path_points_stuffer')
-    pub = rospy.Publisher('/clicked_point', Point, queue_size=10)
+    pub = rospy.Publisher('/clicked_point', PointStamped, queue_size=10)
 
     # init path handling object:
     rospack = rospkg.RosPack()
@@ -31,7 +31,7 @@ def node():
     #goal_pose = MoveBaseGoal()
     #goal_pose.target_pose.header.frame_id = 'map'
 
-    goal_pose = Point()
+    goal_pose = PointStamped()
     rate = rospy.Rate(100)
     send_last_msg = True
     while not rospy.is_shutdown():
@@ -42,6 +42,8 @@ def node():
             #rospy.loginfo("Action state {}".format(client.get_state()))
             #client.wait_for_result()
             ###### TODO: public /clicked_point (msg type: geometry_msgs/Point):
+            goal_pose.header.frame_id = "PathPoint"
+            goal_pose.header.stamp = rospy.get_rostime()
             goal_pose = points_handler.fill_new_msg_point(goal_pose)
             pub.publish(goal_pose)
         else:
