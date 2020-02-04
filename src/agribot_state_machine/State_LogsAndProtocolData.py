@@ -7,15 +7,15 @@ import sys
 import string
 
 # define state Foo
-class AutonomousTaskMonitor(smach.State):
+class LogsAndProtocolData(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succes'])
+        smach.State.__init__(self, outcomes=['tr_logs_and_protocol_data_sent'])
 
     def execute(self, userdata):
-        #Monitore the task progression, safety, internal health of the system, weather conditions, create logs
+        #Send protocol data to mobile app and save system logs
         #
         #
         rospy.sleep(0.010)
-        string_msg="Executing state AutonomousTaskMonitor "
+        string_msg="Executing state LogsAndProtocolData "
         rospy.loginfo(string_msg)
-        return 'succes'
+        return 'tr_logs_and_protocol_data_sent'

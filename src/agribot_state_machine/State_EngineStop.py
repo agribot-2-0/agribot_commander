@@ -8,7 +8,7 @@ import sys
 # define state Foo
 class EngineStop(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['engine_stopped_normal', 'engine_stop_failure_reaction'], 
+        smach.State.__init__(self, outcomes=['tr_engine_stopped_normal', 'tr_engine_stop_failure_reaction'], 
                             input_keys=['engine_stop_reason'])
 
     def execute(self, userdata):
@@ -18,6 +18,6 @@ class EngineStop(smach.State):
         #normal work, no system failure
         rospy.sleep(0.010)
         if userdata.engine_stop_reason == 'Normal':
-            return 'engine_stopped_normal'
+            return 'tr_engine_stopped_normal'
         else:
-            return 'engine_stop_failure_reaction'
+            return 'tr_engine_stop_failure_reaction'

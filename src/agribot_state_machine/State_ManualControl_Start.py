@@ -9,7 +9,7 @@ import string
 # define state Foo
 class ManualControlStart(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_config_error', 'app_input_received'],
+        smach.State.__init__(self, outcomes=['tr_task_config_error', 'tr_app_input_received'],
                             input_keys=['manual_control_state_reason'],
                             output_keys=['manual_control_state_app_reason'])
 
@@ -21,8 +21,8 @@ class ManualControlStart(smach.State):
             userdata.manual_control_state_app_reason='app_input_received'
             string_msg="Executing state ManualControlStart "
             rospy.loginfo(string_msg)
-            return 'app_input_received'
+            return 'tr_app_input_received'
         else:
              userdata.manual_control_state_app_reason='task_config_error'
-             return 'task_config_error'
+             return 'tr_task_config_error'
 

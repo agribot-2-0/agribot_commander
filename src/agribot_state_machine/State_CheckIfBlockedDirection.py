@@ -9,7 +9,7 @@ import string
 # define state Foo
 class CheckIfBlockedDirection(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['no_obstacles'])
+        smach.State.__init__(self, outcomes=['tr_no_obstacles'])
 
     def execute(self, userdata):
         #Check if direction is blocked
@@ -18,4 +18,4 @@ class CheckIfBlockedDirection(smach.State):
         
         string_msg="Executing state CheckIfBlockedDirection "
         rospy.loginfo(string_msg)
-        return 'no_obstacles'
+        return 'tr_no_obstacles'

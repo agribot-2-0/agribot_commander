@@ -4,13 +4,15 @@ import rospy
 import smach
 import smach_ros
 import sys
+import string
 
 # define state Foo
-class CheckMobileAppConnection(smach.State):
+class CheckSystemHealth(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['connection_is_stable'])
+        smach.State.__init__(self, outcomes=['tr_system_is_healthy'])
 
     def execute(self, userdata):
         rospy.sleep(0.010)
-        rospy.loginfo('Executing state CheckMobileAppConnection')
-        return 'connection_is_stable'
+        string_msg="Executing state CheckSystemHealth "
+        rospy.loginfo(string_msg)
+        return 'tr_system_is_healthy'

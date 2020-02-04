@@ -12,7 +12,7 @@ import threading
 # define state Foo
 class ReadData(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['send_data_def_event', 'auto_ctrl_command', 'rec_only_move_commands'],
+        smach.State.__init__(self, outcomes=['tr_send_data_def_event', 'tr_auto_ctrl_command', 'tr_rec_only_move_commands'],
                                     output_keys=['read_data_command_out'])
         self.mutex = threading.Lock()
         self.command_received = 0
@@ -33,23 +33,25 @@ class ReadData(smach.State):
         #
         #
         #
+        output_string=''
         rospy.sleep(0.010)
-        rospy.loginfo(string_msg)
         self.mutex.acquire()
-        rospy.loginfo(string_msg)
+        
         if self.command_received==0:
             userdata.read_data_command_out='send_data_def_event'
-            rospy.loginfo(string_msg)
-            self.mutex.release()
-            return 'send_data_def_event'
+            output_string='tr_send_data_def_event'
+
         if self.command_received==1:
             userdata.read_data_command_out='aut_ctrl_command'
-            self.mutex.release()
-            return 'auto_ctrl_command'
+            command_received=0
+            output_string='tr_auto_ctrl_command'
+
         if self.command_received==2:
             userdata.read_data_command_out='rec_only_move_commands'
-            self.mutex.release()
-            return 'rec_only_move_commands'
+            command_received=0
+            output_string='tr_rec_only_move_commands'
+
+        rospy.loginfo(string_msg)
         self.mutex.release()
-        return 'send_data_def_event'
+        return output_string
        

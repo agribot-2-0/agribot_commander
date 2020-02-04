@@ -9,7 +9,7 @@ import string
 # define state Foo
 class TaskCompletionRaport(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['complete'],
+        smach.State.__init__(self, outcomes=['tr_complete'],
                                 output_keys=['task_completion_output'])
 
     def execute(self, userdata):
@@ -19,4 +19,4 @@ class TaskCompletionRaport(smach.State):
         string_msg="Executing state TaskCompletionRaport "
         userdata.task_completion_output='return_to_safe_state'
         rospy.loginfo(string_msg)
-        return 'complete'
+        return 'tr_complete'

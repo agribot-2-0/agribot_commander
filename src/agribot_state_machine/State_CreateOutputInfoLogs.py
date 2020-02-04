@@ -7,12 +7,14 @@ import sys
 import string
 
 # define state Foo
-class CheckSystemHealth(smach.State):
+class CreateOutputInfoLogs(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['system_is_healthy'])
+        smach.State.__init__(self, outcomes=['tr_executed_outputs'])
 
     def execute(self, userdata):
-        rospy.sleep(0.010)
-        string_msg="Executing state CheckSystemHealth "
+        #Create output info logs
+        #
+        #
+        string_msg="Executing state CreateOutputInfoLogs "
         rospy.loginfo(string_msg)
-        return 'system_is_healthy'
+        return 'tr_executed_outputs'

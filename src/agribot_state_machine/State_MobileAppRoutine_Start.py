@@ -9,7 +9,7 @@ import string
 # define state Foo
 class MobileAppRoutineStart(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_config_error', 'app_input_received'],
+        smach.State.__init__(self, outcomes=['tr_task_config_error', 'tr_app_input_received'],
                             input_keys=['mobile_app_routine_reason_in'])
 
     def execute(self, userdata):
@@ -20,8 +20,8 @@ class MobileAppRoutineStart(smach.State):
         if userdata.mobile_app_routine_reason_in=='app_input_received':
             #string_msg="Executing state MobileAppRoutineStart "
             rospy.loginfo(string_msg)
-            return 'app_input_received'
+            return 'tr_app_input_received'
         else:
             rospy.loginfo(string_msg)
-            return 'task_config_error'
+            return 'tr_task_config_error'
 
