@@ -15,35 +15,25 @@ class Standby(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_app_input_received_standby', 'tr_default_on_standby'],
                                     output_keys=['safe_state_reason_out'])
-        self.counter = 0
         self.mutex = threading.Lock()
-        self.two_received = False
-        self.limit = rospy.get_param("~standby_timeout", 10)
-        self.subscriber = rospy.Subscriber('/test', Int16, self.callback)
+        self.connection_received = False
+        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', mobile_app_frame, self.callbackAppCommunication)
 
-    def callback(self, data):
+    def callbackAppCommunication(self, data):
         self.mutex.acquire()
-        if data.data == 2:
-            self.two_received = True
+        if data.can_id == 10:
+            self.connection_received = True
         self.mutex.release()
 
     def execute(self, userdata):
         output_string=''
         self.mutex.acquire()
-        if self.two_received:
+        if self.connection_received:
                 #ok we received 2
+                self.connection_received = False
                 userdata.safe_state_reason_out='application_input_received'
                 output_string='tr_app_input_received_standby'
-        
-        elif self.counter < self.limit:
-            self.counter += 1
-            if self.counter%1000 == 0:
-                string_msg="Executing state Standby waiting "+str(self.counter)
-                rospy.loginfo(string_msg)
-            rospy.sleep(0.010)
-            output_string='tr_default_on_standby'
         else:
-            self.counter=0
             output_string='tr_default_on_standby'
 
         self.mutex.release()   
