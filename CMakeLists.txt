@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
    smach_ros
    std_msgs
    message_generation
+   agribot_common
 )
 
 add_message_files(
