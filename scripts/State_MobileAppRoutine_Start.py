@@ -1,27 +1,28 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('smach'); roslib.load_manifest('smach_ros')
 import rospy
 import smach
-import smach_ros
-import sys
-import string
+import roslib
+roslib.load_manifest('smach')
+roslib.load_manifest('smach_ros')
 
-# define state Foo
 class MobileAppRoutineStart(smach.State):
+    """This state decides to which branch of state machine we should transit"""
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_task_config_error', 'tr_app_input_received'],
-                            input_keys=['mobile_app_routine_reason_in'])
+                             input_keys=['mobile_app_routine_reason_in'])
 
-    def execute(self, userdata):
+    def execute(self, ud):
+        """Returns the proper transition based on the system configuration"""
         #Send data to mobile app
         #
         #
-        string_msg="Executing state MobileAppRoutineStart with input "+userdata.mobile_app_routine_reason_in
-        if userdata.mobile_app_routine_reason_in=='app_input_received':
-            #string_msg="Executing state MobileAppRoutineStart "
+        output_string = ''
+        string_msg = "Executing state MobileAppRoutineStart with input "
+        string_msg = string_msg + ud.mobile_app_routine_reason_in
+        if ud.mobile_app_routine_reason_in == 'app_input_received':
             rospy.loginfo(string_msg)
-            return 'tr_app_input_received'
+            output_string = 'tr_app_input_received'
         else:
             rospy.loginfo(string_msg)
-            return 'tr_task_config_error'
-
+            output_string = 'tr_task_config_error'
+        return  output_string

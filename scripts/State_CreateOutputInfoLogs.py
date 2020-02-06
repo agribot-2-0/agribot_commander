@@ -1,20 +1,20 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('smach'); roslib.load_manifest('smach_ros')
 import rospy
 import smach
-import smach_ros
-import sys
-import string
+import roslib
+roslib.load_manifest('smach')
+roslib.load_manifest('smach_ros')
 
-# define state Foo
 class CreateOutputInfoLogs(smach.State):
+    """This state create the sensory feedback and move commands logs"""
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_executed_outputs'])
 
-    def execute(self, userdata):
+    def execute(self, ud):
+        """Create logs of sensory feedback mesaures and move commands"""
         #Create output info logs
         #
         #
-        string_msg="Executing state CreateOutputInfoLogs "
+        string_msg = "Executing state CreateOutputInfoLogs "
         rospy.loginfo(string_msg)
         return 'tr_executed_outputs'

@@ -1,23 +1,30 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('smach'); roslib.load_manifest('smach_ros')
 import rospy
 import smach
-import smach_ros
-import sys
+import roslib
+roslib.load_manifest('smach')
+roslib.load_manifest('smach_ros')
 
-# define state Foo
 class EngineStop(smach.State):
+    """This state decides if we the engine was stopped because of system failure
+    or because the task was complited and we should go back to Standby"""
     def __init__(self):
-        smach.State.__init__(self, outcomes=['tr_engine_stopped_normal', 'tr_engine_stop_failure_reaction'], 
-                            input_keys=['engine_stop_reason'])
+        smach.State.__init__(self,
+                             outcomes=['tr_engine_stopped_normal',
+                                       'tr_engine_stop_failure_reaction'],
+                             input_keys=['engine_stop_reason'])
 
-    def execute(self, userdata):
+    def execute(self, ud):
+        """Returns the proper transition based on the system configuration
+        (the engine was stopped properly or it was a failure reaction)"""
         rospy.loginfo('Executing state EngineStop')
+        output_string = ''
         #Send engine stop frames
         #when engine is still, return the outcome
         #normal work, no system failure
         rospy.sleep(0.010)
-        if userdata.engine_stop_reason == 'Normal':
-            return 'tr_engine_stopped_normal'
+        if ud.engine_stop_reason == 'Normal':
+            output_string = 'tr_engine_stopped_normal'
         else:
-            return 'tr_engine_stop_failure_reaction'
+            output_string = 'tr_engine_stop_failure_reaction'
+        return output_string

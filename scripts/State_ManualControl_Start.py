@@ -1,28 +1,31 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('smach'); roslib.load_manifest('smach_ros')
 import rospy
 import smach
-import smach_ros
-import sys
-import string
+import roslib
+roslib.load_manifest('smach')
+roslib.load_manifest('smach_ros')
 
-# define state Foo
 class ManualControlStart(smach.State):
+    """This state is an entry state of state machine and decides which branch to pick depdending
+    on the data input received"""
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_task_config_error', 'tr_app_input_received'],
-                            input_keys=['manual_control_state_reason'],
-                            output_keys=['manual_control_state_app_reason'])
+                             input_keys=['manual_control_state_reason'],
+                             output_keys=['manual_control_state_app_reason'])
 
-    def execute(self, userdata):
+    def execute(self, ud):
+        """Returns the proper transition depending on the system situation during entry to the
+        statemachine, described by userdata (ud)"""
         #Send data to mobile app
         #
         #
-        if userdata.manual_control_state_reason=='application_input_received':
-            userdata.manual_control_state_app_reason='app_input_received'
-            string_msg="Executing state ManualControlStart "
+        output_string = ''
+        if ud.manual_control_state_reason == 'application_input_received':
+            ud.manual_control_state_app_reason = 'app_input_received'
+            string_msg = "Executing state ManualControlStart "
             rospy.loginfo(string_msg)
-            return 'tr_app_input_received'
+            output_string = 'tr_app_input_received'
         else:
-             userdata.manual_control_state_app_reason='task_config_error'
-             return 'tr_task_config_error'
-
+            ud.manual_control_state_app_reason = 'task_config_error'
+            output_string = 'tr_task_config_error'
+        return output_string
