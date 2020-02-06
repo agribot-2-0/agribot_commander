@@ -72,11 +72,11 @@ class PathPointsStuffer:
             self.point_to_send_index = self.point_to_send_index + 1
             return msg
 
-    def fill_new_msg_point(self, msg):
+    def fill_new_msg_fix(self, msg):
         if (self.point_to_send_index < len(self.path_points.keys())):
-            msg.point.x = self.path_points["pose"+str(self.point_to_send_index)]["position"][0]
-            msg.point.y = self.path_points["pose"+str(self.point_to_send_index)]["position"][1]
-            msg.point.z = 0.0
+            msg.latitude = self.path_points["pose"+str(self.point_to_send_index)]["position"][0]
+            msg.longitude = self.path_points["pose"+str(self.point_to_send_index)]["position"][1]
+            msg.altitude = self.path_points["pose"+str(self.point_to_send_index)]["position"][2]
             self.point_to_send_index = self.point_to_send_index + 1
             return msg
 
@@ -85,6 +85,3 @@ class PathPointsStuffer:
             return True
         else:
             return False
-
-
-
