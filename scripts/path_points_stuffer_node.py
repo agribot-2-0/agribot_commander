@@ -12,7 +12,7 @@ from sensor_msgs.msg import NavSatFix
 
 def node():
     rospy.init_node('path_points_stuffer')
-    pub = rospy.Publisher('/waypoints', NavSatFix, queue_size=10)
+    pub = rospy.Publisher('agribot/waypoints', NavSatFix, queue_size=10)
 
     # init path handling object:
     rospack = rospkg.RosPack()
