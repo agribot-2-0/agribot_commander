@@ -9,12 +9,12 @@ find_package(catkin REQUIRED COMPONENTS
    std_msgs
    message_generation
    agribot_common
+   agribot_msgs
 )
 
-add_message_files(
-  FILES
-  mobile_app_frame.msg
-)
+#add_message_files(
+#  FILES
+#)
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
@@ -35,8 +35,8 @@ include_directories(
   ${agribot_common_SOURCE_DIR}/include
 )
 
-add_executable(hal_mobile_app_commands src/hal_mobile_app_commands/hal_mobile_app_commands.cpp src/hal_mobile_app_commands/AppFrameInterpreter.cpp)
-target_link_libraries(hal_mobile_app_commands  ${catkin_LIBRARIES})
-add_dependencies(hal_mobile_app_commands agribot_commander_generate_messages_cpp)
+add_executable(hal_mobile_app_commands_node src/hal_mobile_app_commands/hal_mobile_app_commands_node.cpp src/hal_mobile_app_commands/AppFrameInterpreter.cpp)
+target_link_libraries(hal_mobile_app_commands_node  ${catkin_LIBRARIES})
+add_dependencies(hal_mobile_app_commands_node agribot_commander_generate_messages_cpp)
 
 

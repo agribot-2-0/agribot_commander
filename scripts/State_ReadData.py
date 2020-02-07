@@ -2,7 +2,7 @@
 import threading
 import rospy
 import smach
-from agribot_commander.msg import mobile_app_frame
+from agribot_msgs.msg import AgribotMobileAppFrame
 import roslib
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -20,7 +20,7 @@ class ReadData(smach.State):
         self.command_received_only_move = False
         self.command_received_configuration = False
         self.command_received_autonomous = False
-        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', mobile_app_frame, self.callback_appcommunication)
+        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', AgribotMobileAppFrame, self.callback_appcommunication)
 
     def callback_appcommunication(self, data):
         self.mutex.acquire()

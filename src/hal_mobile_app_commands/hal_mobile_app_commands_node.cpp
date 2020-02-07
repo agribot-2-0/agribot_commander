@@ -1,13 +1,13 @@
 #include <ros/ros.h>
 #include <ros/console.h>
-#include <agribot_commander/mobile_app_frame.h>
+#include <agribot_msgs/AgribotMobileAppFrame.h>
 #include <agribot_msgs/AgribotCaterpillar.h>
 #include <sstream>
 #include <AppFrameInterpreter.h>
 
 AppFrameInterpreter Interpreter;
 
-void app_commands_eventsCallback(const agribot_commander::mobile_app_frame::ConstPtr& msg)
+void app_commands_eventsCallback(const agribot_msgs::AgribotMobileAppFrame::ConstPtr& msg)
 {
   Interpreter.setAppFrame(msg->can_id, msg->can_byte_array);
 }
@@ -23,13 +23,13 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "hal_mobile_app_commands");
   ros::NodeHandle n;
 
-  ros::Publisher state_machine_pub = n.advertise<agribot_commander::mobile_app_frame>("agribot/mobile_app_communication", 1000);
+  ros::Publisher state_machine_pub = n.advertise<agribot_msgs::AgribotMobileAppFrame>("agribot/mobile_app_communication", 1000);
   ros::Subscriber app_commands_events_sub = n.subscribe("/agribot/app_commands_events", 1, app_commands_eventsCallback);
   ros::Subscriber app_move_commands_sub = n.subscribe("/agribot/control/caterpillar", 1, app_move_commandsCallback);
 
   ros::Rate loop_rate(10);
 
-  agribot_commander::mobile_app_frame frame_msg;
+  agribot_msgs::AgribotMobileAppFrame frame_msg;
 
   while (ros::ok())
   {

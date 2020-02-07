@@ -49,7 +49,7 @@ void AppFrameInterpreter::setMoveFrame(float fr_lin, float fr_ang, float bk_lin,
     } 
 }
 
-void AppFrameInterpreter::createStateMachineAppFrame(agribot_commander::mobile_app_frame* frame)
+void AppFrameInterpreter::createStateMachineAppFrame(agribot_msgs::AgribotMobileAppFrame* frame)
 {
     if (fresh_data)
     {

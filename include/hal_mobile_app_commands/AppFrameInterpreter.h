@@ -1,7 +1,7 @@
 #pragma once
 
 #include <agribot_common/AgribotComponent.h>
-#include <agribot_commander/mobile_app_frame.h>
+#include <agribot_msgs/AgribotMobileAppFrame.h>
 #include <boost/array.hpp>
 
 class AppFrameInterpreter: public AgribotComponent
@@ -20,7 +20,7 @@ class AppFrameInterpreter: public AgribotComponent
 
         AppFrameInterpreter();
 
-        void createStateMachineAppFrame(agribot_commander::mobile_app_frame* frame);
+        void createStateMachineAppFrame(agribot_msgs::AgribotMobileAppFrame* frame);
 
         void setAppFrame(const uint32_t rec_frame_ID, const boost::array<unsigned char, 8> rec_bytes);
         void setMoveFrame(float fr_lin, float fr_ang, float bk_lin, float bk_ang);

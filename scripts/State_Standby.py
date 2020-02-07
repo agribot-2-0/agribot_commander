@@ -2,7 +2,7 @@
 import threading
 import rospy
 import smach
-from agribot_commander.msg import mobile_app_frame
+from agribot_msgs.msg import AgribotMobileAppFrame
 import roslib
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -15,7 +15,7 @@ class Standby(smach.State):
                              output_keys=['safe_state_reason_out'])
         self.mutex = threading.Lock()
         self.connection_received = False
-        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', mobile_app_frame, self.callback_app_communication)
+        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', AgribotMobileAppFrame, self.callback_app_communication)
 
     def callback_app_communication(self, data):
         self.mutex.acquire()
