@@ -5,11 +5,12 @@ import rospkg
 from std_msgs.msg import String
 from pathpointsstuffer import PathPointsStuffer
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from geometry_msgs.msg import PointStamped
+from sensor_msgs.msg import NavSatFix
+
 
 def node():
     rospy.init_node('path_points_stuffer')
-    pub = rospy.Publisher('/clicked_point', PointStamped, queue_size=10)
+    pub = rospy.Publisher('agribot/waypoints', NavSatFix, queue_size=1000)
 
     # init path handling object:
     rospack = rospkg.RosPack()
@@ -19,7 +20,6 @@ def node():
         rospy.logerr("[Stuffer test] Path does not exists.")
         return
     points_handler.get_path_points_from_yaml()
-    #points_handler.transform_to_robot_coordinates()
 
     #init actionlib:
     #client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
@@ -29,8 +29,8 @@ def node():
     #goal_pose = MoveBaseGoal()
     #goal_pose.target_pose.header.frame_id = 'map'
 
-    goal_pose = PointStamped()
-    goal_pose.header.frame_id = "odom"
+    goal_fix = NavSatFix()
+    goal_fix.header.frame_id = "ll"
     send_last_msg = True
     rate = rospy.Rate(1000)
 
@@ -42,12 +42,14 @@ def node():
             #rospy.loginfo("Action state {}".format(client.get_state()))
             #client.wait_for_result()
             ###### HAKSY: public into /clicked_point
-            goal_pose.header.stamp = rospy.get_rostime()
-            goal_pose = points_handler.fill_new_msg_point(goal_pose)
-            pub.publish(goal_pose)
+            goal_fix.header.stamp = rospy.get_rostime()
+            goal_fix = points_handler.fill_new_msg_fix(goal_fix)
+            pub.publish(goal_fix)
         else:
             if send_last_msg:
                 pub.publish(goal_pose)
+            if(send_last_msg):
+                pub.publish(goal_fix)
                 send_last_msg = False
         rate.sleep()
 

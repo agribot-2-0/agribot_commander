@@ -10,6 +10,12 @@ find_package(catkin REQUIRED COMPONENTS
    message_generation
    agribot_common
    agribot_msgs
+  roscpp
+  rospy
+  tf2
+  tf2_ros
+  std_msgs
+  sensor_msgs
 )
 
 #add_message_files(
@@ -31,6 +37,7 @@ catkin_package(
 
 include_directories(
   include/hal_mobile_app_commands
+  include
   ${catkin_INCLUDE_DIRS}
   ${agribot_common_SOURCE_DIR}/include
 )
@@ -40,3 +47,6 @@ target_link_libraries(hal_mobile_app_commands_node  ${catkin_LIBRARIES})
 add_dependencies(hal_mobile_app_commands_node agribot_commander_generate_messages_cpp)
 
 
+add_executable(navsatfix_to_local_node src/navsatfix_to_local_node.cpp src/NavSatFixToLocalNode.cpp)
+target_link_libraries(navsatfix_to_local_node ${catkin_LIBRARIES})
+add_dependencies(navsatfix_to_local_node ${catkin_EXPORTED_TARGETS})

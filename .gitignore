@@ -1,2 +1,3 @@
 scripts/*.pyc
 src/__pycache__
+*.pyc
