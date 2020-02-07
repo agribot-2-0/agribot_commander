@@ -22,7 +22,6 @@ def node():
         rospy.logerr("[Stuffer test] Path does not exists.")
         return
     points_handler.get_path_points_from_yaml()
-    #points_handler.transform_to_robot_coordinates()
 
     #init actionlib:
     #client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
@@ -36,8 +35,6 @@ def node():
     goal_fix.header.frame_id = "ll"
     send_last_msg = True
     rate = rospy.Rate(1000)
-
-
 
     while not rospy.is_shutdown():
         if(points_handler.are_path_points_availible()):
