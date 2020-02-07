@@ -96,18 +96,13 @@ def main():
                                                     'tr_app_input_received':'CHECK_MOBILE_APP_CONNECTION'},
                                        remapping={'mobile_app_routine_reason_in':'sm_mobile_app_reason_in'})
                 smach.StateMachine.add('CHECK_MOBILE_APP_CONNECTION', CheckMobileAppConnection(),
-                                       transitions={'tr_connection_is_stable':'CHECK_SYSTEM_HEALTH'})
-                smach.StateMachine.add('CHECK_SYSTEM_HEALTH', CheckSystemHealth(),
-                                       transitions={'tr_system_is_healthy':'READ_DATA'})
+                                       transitions={'tr_connection_is_stable':'READ_DATA'})
+
                 smach.StateMachine.add('READ_DATA', ReadData(),
-                                       transitions={'tr_send_data_def_event':'SEND_DATA',
+                                       transitions={'tr_send_data_def_event':'CHECK_MOBILE_APP_CONNECTION',
                                                     'tr_auto_ctrl_command':'tr_automatic_control_command',
                                                     'tr_rec_only_move_commands':'tr_received_only_move_commands'},
                                        remapping={'read_data_command_out':'sm_mobile_app_reason_out'})
-                smach.StateMachine.add('SEND_DATA', SendData(),
-                                       transitions={'tr_data_sent':'LOGS_AND_PROTOCOL_DATA'})
-                smach.StateMachine.add('LOGS_AND_PROTOCOL_DATA', LogsAndProtocolData(),
-                                       transitions={'tr_logs_and_protocol_data_sent':'CHECK_MOBILE_APP_CONNECTION'})
             #Finish state machine transitions and add it to agribot_state_machine
             smach.StateMachine.add('MOBILE_APP_CONTROL_ROUTINE', sm_mobile_app_control_routine,
                                    transitions={'tr_automatic_control_command':'AUTONOMOUS_CONTROL_TRANSITION',
