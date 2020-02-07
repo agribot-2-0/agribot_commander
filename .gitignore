@@ -1,3 +1,2 @@
 scripts/*.pyc
-
-git commit -m "Connected agribot state machine with frames and events interpreter. Added readme about how to test the state machine and modified launch file"
+src/__pycache__
