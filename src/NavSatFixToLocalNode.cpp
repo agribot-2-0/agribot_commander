@@ -27,7 +27,7 @@ geometry_msgs::PointStamped NavSatFixToLocalNode::navSatFixToUTM(const sensor_ms
   double utm_x, utm_y;
   std::string utm_zone;
   geometry_msgs::PointStamped UTM_point;
-
+  
   // Convert Latitude/Longitude from NavSatFix to UTM coordinates
   RobotLocalization::NavsatConversions::LLtoUTM(msg.latitude, msg.longitude, utm_y, utm_x, utm_zone);
 

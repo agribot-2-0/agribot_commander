@@ -4,7 +4,6 @@ import yaml
 class PathPointsStuffer:
     def __init__(self, paths_loc):
         self.FOLDER_W_PATHS_LOCATION = paths_loc
-        self.FOLDER_W_PATHS_LOCATION = "" #location of paths folder inside agribot_map package
         self.path_name = ""
         self.point_to_send_index = 0
         self.path_points = ""
