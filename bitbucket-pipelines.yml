@@ -11,7 +11,6 @@ pipelines:
            - git clone https://github.com/panpawelchmiel/agribot_map.git
            - git clone https://github.com/panpawelchmiel/agribot_msgs.git
            - git clone https://github.com/panpawelchmiel/agribot_common.git
-           - git clone https://github.com/ros/geometry2.git
            - .industrial_ci/bitbucket.sh  ROS_DISTRO="melodic" UPSTREAM_WORKSPACE="agribot_msgs agribot_common agribot_map"
 
 definitions:
