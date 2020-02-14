@@ -45,8 +45,12 @@ geometry_msgs::PointStamped NavSatFixToLocalNode::UTMToMap(const geometry_msgs::
 {
   geometry_msgs::PointStamped map_point;
 
-  _tf2Buffer.transform(msg, map_point, "map", ros::Duration(0.2));
-  // tf2::doTransform(msg, map_point, _startingTransform);
+  // Two alternative ways
+  // 1. Get new transform for each new point
+  // _tf2Buffer.transform(msg, map_point, "map", ros::Duration(0.2));
+
+  // 2. Use _startingTransform generated in constructor
+  tf2::doTransform(msg, map_point, _startingTransform);
 
   return map_point;
 }
