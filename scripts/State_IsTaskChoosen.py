@@ -19,12 +19,12 @@ class IsTaskChosen(smach.State):
         #Check if task name has been chosen
         #
         #
-        if len(self.data_name_dummy) == '':
+        if len(self.data_name_dummy) == 0:
             string_msg = "Executing state IsTaskChosen "
             rospy.loginfo(string_msg)
             output_string = 'tr_no_active_task'
         else:
-            string_msg = "Executing state IsTaskChosen "
+            string_msg = "Executing state IsTaskChosen tr_task_is_active active_path_name: " + str(self.data_name_dummy)
             rospy.loginfo(string_msg)
             output_string = 'tr_task_is_active'
         return output_string

@@ -24,6 +24,12 @@ from State_AutonomousControl_Start import AutonomousControlStart
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
+
+smach.set_loggers(rospy.logdebug,
+                  rospy.logwarn,
+                  rospy.logdebug,
+                  rospy.logerr)
+
 def main():
     rospy.init_node('agribot_state_machine')
     # Create an agribot SMACH state machine
