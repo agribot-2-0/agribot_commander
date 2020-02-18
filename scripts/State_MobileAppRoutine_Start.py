@@ -17,7 +17,7 @@ class MobileAppRoutineStart(smach.State):
         #
         #
         output_string = ''
-        string_msg = "Executing state MobileAppRoutineStart with input "
+        string_msg = "Executing state machine MobileAppConnection with input "
         string_msg = string_msg + ud.mobile_app_routine_reason_in
         if ud.mobile_app_routine_reason_in == 'app_input_received':
             rospy.loginfo(string_msg)

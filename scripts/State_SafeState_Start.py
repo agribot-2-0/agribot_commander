@@ -17,9 +17,9 @@ class SafeStateStart(smach.State):
         #Send data to mobile app
         #
         #
-        if ud.safe_state_reason == 'return_to_safe_state':
-            string_msg = "Executing state SafeStateStart "
-            rospy.loginfo(string_msg)
+        string_msg = "Executing state SafeStateStart "
+        rospy.loginfo(string_msg)
+        if ud.safe_state_reason == 'return_to_safe_state' or ud.safe_state_reason == 'return_to_safe_state_failure':
             output_string = 'tr_in_return_to_safe_state'
         else:
             output_string = 'tr_in_system_power_up'

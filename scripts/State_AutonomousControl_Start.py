@@ -22,6 +22,10 @@ class AutonomousControlStart(smach.State):
             string_msg = "Executing state AutonomousControlStart "
             rospy.loginfo(string_msg)
             output_string = 'tr_auto_control_prepared'
+        elif ud.autonomous_control_state_reason == 'system_repaired':
+            string_msg = "Continuing state AutonomousControlStart "
+            rospy.loginfo(string_msg)
+            output_string = 'tr_sys_repaired'
         else:
             output_string = 'tr_sys_repaired'
         return output_string

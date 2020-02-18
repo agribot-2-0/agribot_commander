@@ -38,7 +38,6 @@ class ReadData(smach.State):
     def execute(self, ud):
         """Pick and return the proper transition in reaction for the received data.
         Set the proper userdata (ud)"""
-        string_msg = "Executing state ReadData "
         #read and interpret received data
         #
         #
@@ -62,8 +61,6 @@ class ReadData(smach.State):
             self.command_received_configuration = False
             ud.read_data_command_out = 'send_data_def_event'
             output_string = 'tr_send_data_def_event'
-
-        rospy.loginfo(string_msg)
         self.mutex.release()
         return output_string
        
