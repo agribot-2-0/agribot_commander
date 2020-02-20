@@ -1,0 +1,6 @@
+geopandas
+fiona
+matplotlib
+mplleaflet
+numpy
+jupyterlab
