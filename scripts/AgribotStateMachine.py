@@ -24,7 +24,6 @@ from State_AutonomousControl_Start import AutonomousControlStart
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
-
 smach.set_loggers(rospy.logdebug,
                   rospy.logwarn,
                   rospy.logdebug,
@@ -39,10 +38,8 @@ def main():
     sm_agribot.userdata.ag_auto_in = ''
     sm_agribot.userdata.ag_manual_in = 'app_input_received'
 
-    sm_agribot.userdata.ag_man_ctrl_reason_in = 'application_input_received'
-    sm_agribot.userdata.ag_man_ctrl_reason_out = 'automatic_control_prepared'
-    sm_agribot.userdata.ag_auto_ctrl_reason_in = 'app_input_received'
-    sm_agribot.userdata.ag_auto_ctrl_reason_out = 'task_conf_error'
+    rospy.set_param('/agribot/current_task_name', '')
+
     # Open the container
     with sm_agribot:
         # SAFE STATE

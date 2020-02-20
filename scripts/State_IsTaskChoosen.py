@@ -10,7 +10,6 @@ class IsTaskChosen(smach.State):
     """This state decides if we continue the partially executed task or we start a new one"""
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_task_is_active', 'tr_no_active_task'])
-        self.data_name_dummy = ''
 
     def execute(self, ud):
         """Returns the proper transition based on the system configuration
@@ -19,12 +18,13 @@ class IsTaskChosen(smach.State):
         #Check if task name has been chosen
         #
         #
-        if len(self.data_name_dummy) == 0:
+        task_name = rospy.get_param('/agribot/current_task_name')
+        if len(task_name) == 0:
             string_msg = "Executing state IsTaskChosen "
             rospy.loginfo(string_msg)
             output_string = 'tr_no_active_task'
         else:
-            string_msg = "Executing state IsTaskChosen tr_task_is_active active_path_name: " + str(self.data_name_dummy)
+            string_msg = "Executing state IsTaskChosen tr_task_is_active active_path_name: " + str(task_name)
             rospy.loginfo(string_msg)
             output_string = 'tr_task_is_active'
         return output_string

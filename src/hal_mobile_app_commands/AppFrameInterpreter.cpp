@@ -6,12 +6,13 @@
 
 AppFrameInterpreter::AppFrameInterpreter()
 {
-    command_id=0;
-    fresh_data=false;
-    int i=0;
+    command_id = 0;
+    fresh_data = false;
+    chosen_task = "";
+    int i = 0;
     while(i<8)
     {
-        msg_byte_array[i]=20;
+        msg_byte_array[i] = 20;
         i++;
     }
 }
@@ -49,6 +50,11 @@ void AppFrameInterpreter::setMoveFrame(float fr_lin, float fr_ang, float bk_lin,
     } 
 }
 
+void AppFrameInterpreter::setChosenTask(std::string task_name)
+{
+    chosen_task = task_name;
+}
+
 void AppFrameInterpreter::createStateMachineAppFrame(agribot_msgs::AgribotMobileAppFrame* frame)
 {
     if (fresh_data)
@@ -77,6 +83,13 @@ int AppFrameInterpreter::igetCommandID()
 int8_t* AppFrameInterpreter::ipgetByteArray()
 {
     return msg_byte_array;
+}
+
+std::string AppFrameInterpreter::strgetTaskName()
+{
+    std::string temp = chosen_task;
+    chosen_task="";
+    return temp;
 }
 
 int AppFrameInterpreter::configure()
