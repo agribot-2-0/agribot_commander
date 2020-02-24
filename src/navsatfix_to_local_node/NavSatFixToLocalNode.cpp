@@ -7,7 +7,30 @@ NavSatFixToLocalNode::NavSatFixToLocalNode():
   _waypointsSub = _nh.subscribe("agribot/waypoints", 1000, &NavSatFixToLocalNode::waypointCallback, this);
   _clickedPointPub = _nh.advertise<geometry_msgs::PointStamped>("clicked_point", 1000);
 
-  _startingTransform = _tf2Buffer.lookupTransform("map", "utm", ros::Time(0), ros::Duration(1.0));
+  bool transformStatus = false;
+
+  while(!transformStatus)
+  {
+      transformStatus = getMapUTMTransform();
+      if (transformStatus == false)
+      {
+          ROS_WARN("UTM -> map transform was not available. Retrying!");
+      }
+  }
+  ROS_INFO("UTM -> map transform obtained!");
+}
+
+bool NavSatFixToLocalNode::getMapUTMTransform(void)
+{
+    try
+    {
+        _startingMapUTMTransform = _tf2Buffer.lookupTransform("map", "utm", ros::Time(0), ros::Duration(1.0));
+    }
+    catch (tf2::TransformException &ex)
+    {
+        return false;
+    }
+    return true;
 }
 
 void NavSatFixToLocalNode::waypointCallback(const sensor_msgs::NavSatFix msg)
@@ -27,7 +50,7 @@ geometry_msgs::PointStamped NavSatFixToLocalNode::navSatFixToUTM(const sensor_ms
   double utm_x, utm_y;
   std::string utm_zone;
   geometry_msgs::PointStamped UTM_point;
-  
+
   // Convert Latitude/Longitude from NavSatFix to UTM coordinates
   RobotLocalization::NavsatConversions::LLtoUTM(msg.latitude, msg.longitude, utm_y, utm_x, utm_zone);
 
@@ -49,8 +72,8 @@ geometry_msgs::PointStamped NavSatFixToLocalNode::UTMToMap(const geometry_msgs::
   // 1. Get new transform for each new point
   // _tf2Buffer.transform(msg, map_point, "map", ros::Duration(0.2));
 
-  // 2. Use _startingTransform generated in constructor
-  tf2::doTransform(msg, map_point, _startingTransform);
+  // 2. Use _startingMapUTMTransform generated in constructor
+  tf2::doTransform(msg, map_point, _startingMapUTMTransform);
 
   return map_point;
 }

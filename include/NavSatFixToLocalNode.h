@@ -14,8 +14,9 @@ private:
   tf2_ros::Buffer _tf2Buffer;
   tf2_ros::TransformListener _tf2Listener;
 
-  geometry_msgs::TransformStamped _startingTransform;
+  geometry_msgs::TransformStamped _startingMapUTMTransform;
 
+  bool getMapUTMTransform(void);
   void waypointCallback(const sensor_msgs::NavSatFix msg);
   geometry_msgs::PointStamped navSatFixToUTM(const sensor_msgs::NavSatFix msg);
   geometry_msgs::PointStamped UTMToMap(const geometry_msgs::PointStamped msg);
