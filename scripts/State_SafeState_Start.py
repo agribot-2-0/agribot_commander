@@ -21,6 +21,8 @@ class SafeStateStart(smach.State):
         rospy.loginfo(string_msg)
         if ud.safe_state_reason == 'return_to_safe_state' or ud.safe_state_reason == 'return_to_safe_state_failure':
             output_string = 'tr_in_return_to_safe_state'
+            rospy.set_param('/agribot/robot_current_state', 'safe_state')
         else:
             output_string = 'tr_in_system_power_up'
+            rospy.set_param('/agribot/robot_current_state', 'safe_state')
         return output_string

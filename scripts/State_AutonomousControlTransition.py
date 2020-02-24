@@ -25,6 +25,7 @@ class AutonomousControlTransition(smach.State):
         rospy.sleep(0.010)
         if self.counter < 20:
             ud.auto_control_transition_out = 'auto_control_prepared'
+            rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
             output_string = 'tr_auto_control_prepared'
         else:
             self.counter = self.counter+1
@@ -32,6 +33,7 @@ class AutonomousControlTransition(smach.State):
 
         if self.counter == 30:
             self.counter = 0
+            rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
             output_string = 'tr_auto_control_prepared'
 
         return output_string

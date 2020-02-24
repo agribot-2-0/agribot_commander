@@ -39,6 +39,7 @@ def main():
     sm_agribot.userdata.ag_manual_in = 'app_input_received'
 
     rospy.set_param('/agribot/current_task_name', '')
+    rospy.set_param('/agribot/robot_current_state', 'safe_state')
 
     # Open the container
     with sm_agribot:
@@ -81,6 +82,8 @@ def main():
                                          input_keys=['sm_manual_in'],
                                          output_keys=['sm_manual_out_safe',
                                                       'sm_manual_out_auto'])
+
+        sm_man_ctrl.userdata.sm_manual_out_safe = ''
         with sm_man_ctrl:
              # Add states to the container
             smach.StateMachine.add('MANUAL_CONTROL_START', ManualControlStart(),
@@ -97,6 +100,7 @@ def main():
                                                                output_keys=['sm_mobile_app_out_safe',
                                                                             'sm_mobile_app_out_auto'])
             sm_mobile_app_control_routine.userdata.sm_mobile_app_reason_out = 'automatic_control_command'
+            sm_mobile_app_control_routine.userdata.sm_mobile_app_out_safe = ''
             with sm_mobile_app_control_routine:
                 # Add states to the container
                 smach.StateMachine.add('MOBILE_APP_CONTROL_START', MobileAppRoutineStart(),
@@ -150,6 +154,7 @@ def main():
                                           input_keys=['sm_auto_in'],
                                           output_keys=['sm_auto_out_man',
                                                        'sm_auto_out_safe'])
+        sm_auto_ctrl.userdata.sm_auto_out_safe = ''                                              
         with sm_auto_ctrl:
             # Add states to the container
             smach.StateMachine.add('AUTONOMOUS_CONTROL_START', AutonomousControlStart(),

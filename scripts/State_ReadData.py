@@ -24,15 +24,17 @@ class ReadData(smach.State):
 
     def callback_appcommunication(self, data):
         self.mutex.acquire()
-        if data.can_id == 53:
-            rospy.loginfo('Received only move commands')
-            self.command_received_only_move = True
-        elif data.can_id == 30:
-            rospy.loginfo('Received autonomous control command')
-            self.command_received_autonomous = True
-        elif data.can_id == 150:
-            rospy.loginfo('Received configuration command')
-            self.command_received_configuration = True
+        if rospy.has_param('/agribot/robot_current_state'):
+            current_state = rospy.get_param('/agribot/robot_current_state')  
+            if current_state == 'manual_control_state':
+                if data.can_id == 53:
+                    self.command_received_only_move = True
+                elif data.can_id == 30:
+                    rospy.loginfo('Received autonomous control command')
+                    self.command_received_autonomous = True
+                elif data.can_id == 150:
+                    rospy.loginfo('Received configuration command')
+                    self.command_received_configuration = True
         self.mutex.release()
 
     def execute(self, ud):

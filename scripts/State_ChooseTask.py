@@ -58,6 +58,7 @@ class ChooseTask(smach.State):
                         self.new_task_name = ''
                         path_loaded =  False
                         ud.choose_task_output = 'task_config_error'
+                        rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
                         output_string = 'tr_task_conf_error'
                     else:
                         self.points_handler.get_path_points_from_yaml()
@@ -83,6 +84,7 @@ class ChooseTask(smach.State):
                             output_string = 'tr_task_is_active'
         else:
             ud.choose_task_output = 'task_config_error'
+            rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
             output_string = 'tr_task_conf_error'
         self.mutex.release()
         return output_string

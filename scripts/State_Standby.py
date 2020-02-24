@@ -39,10 +39,12 @@ class Standby(smach.State):
             self.standby_com = True
             ud.safe_state_reason_man_out = 'application_input_received'
             ud.safe_state_reason_auto_out = ' '
+            rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
             output_string = 'tr_app_input_received_standby'
         else:
             ud.safe_state_reason_man_out = ' '
             ud.safe_state_reason_auto_out = ' '
+            rospy.set_param('/agribot/robot_current_state', 'safe_state')
             output_string = 'tr_default_on_standby'
         self.mutex.release()
         return output_string
