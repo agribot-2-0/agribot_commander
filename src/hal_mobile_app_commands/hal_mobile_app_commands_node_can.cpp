@@ -8,7 +8,7 @@
 #include <AppFrameInterpreter.h>
 #include <AppFrameInterpreter_can.h>
 
-#define USED_CAN "can0"
+#define USED_CAN "can1"
 
 
 AppFrameInterpreter_can CommHandlerControl(USED_CAN);
@@ -81,7 +81,6 @@ int main(int argc, char **argv)
         frame_msg.header.frame_id = "mobile_app_commands_link";
         frame_msg.can_id = 53;
         frame_msg.can_byte_array[0] = 10;
-        ROS_INFO("%s", frame_msg.header.frame_id.c_str());
         state_machine_pub.publish(frame_msg);
     }
     if((u8Status&RECEIVED_MANUAL_MODE_COMF) == RECEIVED_MANUAL_MODE_COMF)
@@ -90,7 +89,6 @@ int main(int argc, char **argv)
         frame_msg.header.frame_id = "mobile_app_commands_link";
         frame_msg.can_id = 10;
         frame_msg.can_byte_array[0] = 10;
-        ROS_INFO("%s", frame_msg.header.frame_id.c_str());
         state_machine_pub.publish(frame_msg);
     }
     if((u8Status&RECEIVED_AUTO_STEERING) == RECEIVED_AUTO_STEERING)
@@ -99,10 +97,16 @@ int main(int argc, char **argv)
         frame_msg.header.frame_id = "mobile_app_commands_link";
         frame_msg.can_id = 30;
         frame_msg.can_byte_array[0] = 10;
-        ROS_INFO("%s", frame_msg.header.frame_id.c_str());
         state_machine_pub.publish(frame_msg);
     }
-
+    if((u8Status&RECEIVED_AUTO_STEERING) == RECEIVED_AUTO_STEERING)
+    {
+        frame_msg.header.stamp = ros::Time::now();
+        frame_msg.header.frame_id = "mobile_app_commands_link";
+        frame_msg.can_id = 30;
+        frame_msg.can_byte_array[0] = 10;
+        state_machine_pub.publish(frame_msg);
+    }
     ros::spinOnce();
 
     loop_rate.sleep();

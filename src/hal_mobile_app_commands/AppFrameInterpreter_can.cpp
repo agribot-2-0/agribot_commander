@@ -74,7 +74,7 @@ uint8_t AppFrameInterpreter_can::u8ParseCanFrames()
         } 
         else if((PROTOCOL_HB_FRAME&ADDR_MASK) == (message.can_id&ADDR_MASK))
         {
-            u8Status |= RECEIVED_HEARBEAT;
+            u8Status |= RECEIVED_HEARTBEAT;
         }
         else if((PROTOCOL_MANUALSTEERING&ADDR_MASK) == (message.can_id&ADDR_MASK))
         {

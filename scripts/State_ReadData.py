@@ -45,7 +45,7 @@ class ReadData(smach.State):
         #
         #
         output_string = ''
-        rospy.sleep(0.010)
+        rospy.sleep(0.10)
         self.mutex.acquire()
         if self.command_received_configuration:
             self.command_received_configuration = False
