@@ -50,3 +50,7 @@ add_dependencies(hal_mobile_app_commands_node agribot_commander_generate_message
 add_executable(navsatfix_to_local_node src/navsatfix_to_local_node/navsatfix_to_local_node.cpp src/navsatfix_to_local_node/NavSatFixToLocalNode.cpp)
 target_link_libraries(navsatfix_to_local_node ${catkin_LIBRARIES})
 add_dependencies(navsatfix_to_local_node ${catkin_EXPORTED_TARGETS})
+
+add_executable(hal_mobile_app_commands_can_node src/hal_mobile_app_commands/hal_mobile_app_commands_node_can.cpp ${agribot_common_SOURCE_DIR}/src/Can.cpp src/hal_mobile_app_commands/AppFrameInterpreter_can.cpp src/hal_mobile_app_commands/AppFrameInterpreter.cpp)
+target_link_libraries(hal_mobile_app_commands_can_node ${catkin_LIBRARIES})
+add_dependencies(hal_mobile_app_commands_can_node ${catkin_EXPORTED_TARGETS})
