@@ -12,16 +12,12 @@
 
 
 AppFrameInterpreter_can CommHandlerControl(USED_CAN);
+//right now used only for task name, need different solution
 AppFrameInterpreter Interpreter;
 
 void app_commands_eventsCallback(const agribot_msgs::AgribotMobileAppFrame::ConstPtr& msg)
 {
   Interpreter.setAppFrame(msg->can_id, msg->can_byte_array);
-}
-
-void app_move_commandsCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& msg)
-{
-  Interpreter.setMoveFrame(msg->front_linear, msg->front_angular, msg->back_linear, msg->back_angular);
 }
 
 void app_task_choosed_eventCallback(const std_msgs::String::ConstPtr& msg)
@@ -40,13 +36,12 @@ int main(int argc, char **argv)
 
   ros::Subscriber app_task_choosed_events_sub = nh.subscribe("/agribot/chosen_task_name", 1, app_task_choosed_eventCallback);
   ros::Subscriber app_commands_events_sub = nh.subscribe("/agribot/app_commands_events", 1, app_commands_eventsCallback);
-  //ros::Subscriber app_move_commands_sub = nh.subscribe("/agribot/control/caterpillar", 1, app_move_commandsCallback);
-  
 
   ros::Rate loop_rate(10);
 
   agribot_msgs::AgribotMobileAppFrame frame_msg;
   geometry_msgs::Twist ManualSteeringMsg;
+  
   uint8_t u8Status=0x00;
 
   while (ros::ok())
@@ -89,7 +84,7 @@ int main(int argc, char **argv)
         ROS_INFO("%s", frame_msg.header.frame_id.c_str());
         state_machine_pub.publish(frame_msg);
     }
-    if((u8Status&RECEIVED_MANUAL_STEERING) == RECEIVED_MANUAL_STEERING)
+    if((u8Status&RECEIVED_MANUAL_MODE_COMF) == RECEIVED_MANUAL_MODE_COMF)
     {
         frame_msg.header.stamp = ros::Time::now();
         frame_msg.header.frame_id = "mobile_app_commands_link";
