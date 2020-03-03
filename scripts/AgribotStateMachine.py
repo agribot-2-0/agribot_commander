@@ -29,6 +29,8 @@ smach.set_loggers(rospy.logdebug,
                   rospy.logdebug,
                   rospy.logerr)
 
+#move_base/result
+
 def main():
     rospy.init_node('agribot_state_machine')
     # Create an agribot SMACH state machine
