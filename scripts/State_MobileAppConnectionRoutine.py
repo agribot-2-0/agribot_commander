@@ -31,8 +31,8 @@ class MobileAppConnectionRoutine(smach.State):
             #Check for error frames
             if data.can_id == 200:
                 #heartbeat failed
-                if data.can_byte_array[0] == 0x00:
-                    if data.can_byte_array[1] == 0x0F:
+                if ord(data.can_byte_array[0]) == 0x00:
+                    if ord(data.can_byte_array[1]) == 0x0F:
                         rospy.loginfo('Received  failed connection frame')
                         self.connection_failed_received = True
             if current_state == 'manual_control_state':
