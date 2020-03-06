@@ -30,7 +30,6 @@ class ChooseTask(smach.State):
 
     def callback_choosentask(self, data):
         self.mutex.acquire()
-        rospy.loginfo("Dostalem "+str(data.data))
         self.new_task_name = str(data.data)
         self.received_new_task = True
         self.mutex.release()
@@ -45,7 +44,8 @@ class ChooseTask(smach.State):
         if rospy.has_param('/agribot/chosen_task_name'):
             self.new_task_name = rospy.get_param('/agribot/chosen_task_name')
         else:
-            self.new_task_name = ''        
+            self.new_task_name = '' 
+        self.mutex.release()
         #Check if we received any task name
         if self.new_task_name != '':
             path_loaded =  False
@@ -86,5 +86,5 @@ class ChooseTask(smach.State):
             ud.choose_task_output = 'task_config_error'
             rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
             output_string = 'tr_task_conf_error'
-        self.mutex.release()
+        
         return output_string

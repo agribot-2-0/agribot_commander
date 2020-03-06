@@ -5,7 +5,7 @@ import smach_ros
 import roslib
 from State_Standby import Standby
 from State_EngineStop import EngineStop
-from State_CheckMobileAppConnection import CheckMobileAppConnection
+from State_MobileAppConnectionRoutine import MobileAppConnectionRoutine
 from State_CheckSystemHealth import CheckSystemHealth
 from State_ReadData import ReadData
 from State_SendData import SendData
@@ -62,8 +62,7 @@ def main():
                                                 'tr_in_return_to_safe_state':'ENGINE_STOP'},
                                    remapping={'safe_state_reason':'sm_safestate_in'})
             smach.StateMachine.add('STANDBY', Standby(),
-                                   transitions={'tr_app_input_received_standby':'tr_application_input_received',
-                                                'tr_default_on_standby':'STANDBY'},
+                                   transitions={'tr_app_input_received_standby':'tr_application_input_received'},
                                    remapping={'safe_state_reason_man_out':'sm_safestate_out_manual',
                                               'safe_state_reason_auto_out':'sm_safestate_out_auto'})
             smach.StateMachine.add('ENGINE_STOP', EngineStop(),
@@ -106,18 +105,20 @@ def main():
             with sm_mobile_app_control_routine:
                 # Add states to the container
                 smach.StateMachine.add('MOBILE_APP_CONTROL_START', MobileAppRoutineStart(),
-                                       transitions={'tr_task_config_error':'CHECK_MOBILE_APP_CONNECTION',
-                                                    'tr_app_input_received':'CHECK_MOBILE_APP_CONNECTION'},
+                                       transitions={'tr_task_config_error':'MOBILE_APP_CONNECTION_ROUTINE',
+                                                    'tr_app_input_received':'MOBILE_APP_CONNECTION_ROUTINE'},
                                        remapping={'mobile_app_routine_reason_in':'sm_mobile_app_reason_in'})
-                smach.StateMachine.add('CHECK_MOBILE_APP_CONNECTION', CheckMobileAppConnection(),
-                                       transitions={'tr_connection_is_stable':'READ_DATA',
-                                                    'tr_connection_is_unstable':'tr_mob_app_failed_connection'},
-                                       remapping={'connection_check_out':'sm_mobile_app_out_safe'})
-                smach.StateMachine.add('READ_DATA', ReadData(),
-                                       transitions={'tr_send_data_def_event':'CHECK_MOBILE_APP_CONNECTION',
+                smach.StateMachine.add('MOBILE_APP_CONNECTION_ROUTINE', MobileAppConnectionRoutine(),
+                                       transitions={'tr_connection_is_unstable':'tr_mob_app_failed_connection',
                                                     'tr_auto_ctrl_command':'tr_automatic_control_command',
                                                     'tr_rec_only_move_commands':'tr_received_only_move_commands'},
-                                       remapping={'read_data_command_out':'sm_mobile_app_out_auto'})
+                                       remapping={'connection_check_out':'sm_mobile_app_out_safe',
+                                                  'read_data_command_out':'sm_mobile_app_out_auto'})
+                #smach.StateMachine.add('READ_DATA', ReadData(),
+                                      # transitions={'tr_send_data_def_event':'MOBILE_APP_CONNECTION_ROUTINE',
+                                           #         'tr_auto_ctrl_command':'tr_automatic_control_command',
+                                           #         'tr_rec_only_move_commands':'tr_received_only_move_commands'},
+                                      # remapping={'read_data_command_out':'sm_mobile_app_out_auto'})
             #Finish state machine transitions and add it to agribot_state_machine
             smach.StateMachine.add('MOBILE_APP_CONTROL_ROUTINE', sm_mobile_app_control_routine,
                                    transitions={'tr_automatic_control_command':'AUTONOMOUS_CONTROL_TRANSITION',

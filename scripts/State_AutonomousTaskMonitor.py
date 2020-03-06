@@ -24,8 +24,7 @@ class AutonomousTaskMonitor(smach.State):
             if current_state == 'auto_control_state':
                 self.counter = self.counter + 1
             else: 
-                self.counter = 0
-               
+                self.counter = 0   
         self.mutex.release()
 
     def execute(self, ud):
