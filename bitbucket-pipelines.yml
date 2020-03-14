@@ -13,7 +13,7 @@ pipelines:
          script:
            - apk add --update bash coreutils tar python3 py3-pip
            - pip3 install pylint
-           - cpplint scripts/*
+           - pylint scripts/*
      - step:
          name: "ROS Build"
          services:
