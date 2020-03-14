@@ -3,6 +3,12 @@ image: docker:git
 pipelines:
   default:
      - step:
+         name: "Check cpplint"
+         script:
+           - apk add --update bash coreutils tar python3 py3-pip
+           - pip3 install cpplint
+           - cpplint --filter=-whitespace/braces,-legal/copyright src/*
+     - step:
          services:
            - docker
          script:
