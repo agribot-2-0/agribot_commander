@@ -9,6 +9,13 @@ pipelines:
            - pip3 install cpplint
            - cpplint --filter=-whitespace/braces,-legal/copyright --recursive src/*
      - step:
+         name: "Check pylint"
+         script:
+           - apk add --update bash coreutils tar python3 py3-pip
+           - pip3 install pylint
+           - cpplint scripts/*
+     - step:
+         name: "ROS Build"
          services:
            - docker
          script:
