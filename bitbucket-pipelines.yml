@@ -7,7 +7,7 @@ pipelines:
          script:
            - apk add --update bash coreutils tar python3 py3-pip
            - pip3 install cpplint
-           - cpplint --filter=-whitespace/braces,-legal/copyright src/*
+           - cpplint --filter=-whitespace/braces,-legal/copyright --recursive src/*
      - step:
          services:
            - docker
