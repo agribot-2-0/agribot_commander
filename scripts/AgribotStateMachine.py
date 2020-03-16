@@ -6,10 +6,6 @@ import roslib
 from State_Standby import Standby
 from State_EngineStop import EngineStop
 from State_MobileAppConnectionRoutine import MobileAppConnectionRoutine
-from State_CheckSystemHealth import CheckSystemHealth
-from State_ReadData import ReadData
-from State_SendData import SendData
-from State_LogsAndProtocolData import LogsAndProtocolData
 from State_CheckIfBlockedDirection import CheckIfBlockedDirection
 from State_CreateOutputInfoLogs import CreateOutputInfoLogs
 from State_AutonomousControlTransition import AutonomousControlTransition
@@ -28,8 +24,6 @@ smach.set_loggers(rospy.logdebug,
                   rospy.logwarn,
                   rospy.logdebug,
                   rospy.logerr)
-
-#move_base/result
 
 def main():
     rospy.init_node('agribot_state_machine')
@@ -53,7 +47,7 @@ def main():
                                            input_keys=['sm_safestate_in'],
                                            output_keys=['sm_safestate_out_auto',
                                                         'sm_safestate_out_manual'])
-        sm_safe_state.userdata.sm_safestate_in='system_power_up'
+        sm_safe_state.userdata.sm_safestate_in = 'system_power_up'
         # Open the container
         with sm_safe_state:
             # Add states to the container
@@ -95,7 +89,7 @@ def main():
             #MOBILE APP CONTROL ROUTINE
             # Create the sub SMACH state machine
             sm_mobile_app_control_routine = smach.StateMachine(outcomes=['tr_automatic_control_command',
-                                                                         'tr_received_only_move_commands', 
+                                                                         'tr_received_only_move_commands',
                                                                          'tr_mob_app_failed_connection'],
                                                                input_keys=['sm_mobile_app_reason_in'],
                                                                output_keys=['sm_mobile_app_out_safe',
@@ -146,7 +140,7 @@ def main():
                                    remapping={'auto_control_transition_out':'sm_manual_out_auto'})
         #Finish state machine transitions and add it to agribot_state_machine
         smach.StateMachine.add('MANUAL_CONTROL_STATE', sm_man_ctrl,
-                               transitions={'tr_auto_ctrl_prepared':'AUTONOMOUS_CONTROL_STATE', 
+                               transitions={'tr_auto_ctrl_prepared':'AUTONOMOUS_CONTROL_STATE',
                                             'tr_man_failed_connection':'SAFE_STATE'},
                                remapping={'sm_manual_in':'ag_manual_in',
                                           'sm_manual_out_safe':'ag_safestate_in',
@@ -157,7 +151,7 @@ def main():
                                           input_keys=['sm_auto_in'],
                                           output_keys=['sm_auto_out_man',
                                                        'sm_auto_out_safe'])
-        sm_auto_ctrl.userdata.sm_auto_out_safe = ''                                              
+        sm_auto_ctrl.userdata.sm_auto_out_safe = ''
         with sm_auto_ctrl:
             # Add states to the container
             smach.StateMachine.add('AUTONOMOUS_CONTROL_START', AutonomousControlStart(),
