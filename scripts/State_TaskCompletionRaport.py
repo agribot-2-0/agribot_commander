@@ -20,4 +20,5 @@ class TaskCompletionRaport(smach.State):
         ud.task_completion_output = 'return_to_safe_state'
         rospy.loginfo(string_msg)
         rospy.set_param('/agribot/robot_current_state', 'safe_state')
+        rospy.set_param('/agribot/current_task_name', '')
         return 'tr_complete'

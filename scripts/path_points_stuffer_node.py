@@ -12,7 +12,6 @@ new_task_name = ""
 def callback_choosentask(data):
     global received_new_task
     global new_task_name
-    rospy.loginfo("Dostalem "+str(data.data))
     new_task_name = str(data.data)
     received_new_task = True
 
@@ -43,14 +42,14 @@ def node():
                 rospy.logerr("[Stuffer test] Path " + str(new_task_name)+ "does not exists.")
                 send_last_msg = False
                 received_new_task = False
-                path_loaded =  False
+                path_loaded = False
             else:
                 points_handler.get_path_points_from_yaml()
                 goal_fix = NavSatFix()
                 goal_fix.header.frame_id = "ll"
                 send_last_msg = True
                 received_new_task = False
-                path_loaded =  True
+                path_loaded = True
         if path_loaded:
             if points_handler.are_path_points_availible():
                 goal_fix.header.stamp = rospy.get_rostime()
@@ -58,7 +57,7 @@ def node():
                 pub.publish(goal_fix)
             else:
                 if send_last_msg:
-                    rospy.loginfo("Loading path " + str(new_task_name) + " loaded succesfully")
+                    rospy.loginfo("Path " + str(new_task_name) + " loaded succesfully")
                     pub.publish(goal_fix)
                     send_last_msg = False
                     path_loaded = False

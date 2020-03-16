@@ -44,11 +44,11 @@ class ChooseTask(smach.State):
         if rospy.has_param('/agribot/chosen_task_name'):
             self.new_task_name = rospy.get_param('/agribot/chosen_task_name')
         else:
-            self.new_task_name = '' 
+            self.new_task_name = ''
         self.mutex.release()
         #Check if we received any task name
         if self.new_task_name != '':
-            path_loaded =  False
+            path_loaded = False
             #Check if task name is ok and if the task itself is proper
             while path_loaded or self.new_task_name != '':
                 if self.new_task_name != '':
@@ -56,7 +56,7 @@ class ChooseTask(smach.State):
                         rospy.logerr("Path " + str(self.new_task_name)+ "does not exists.")
                         send_last_msg = False
                         self.new_task_name = ''
-                        path_loaded =  False
+                        path_loaded = False
                         ud.choose_task_output = 'task_config_error'
                         rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
                         output_string = 'tr_task_conf_error'
@@ -67,7 +67,7 @@ class ChooseTask(smach.State):
                         send_last_msg = True
                         rospy.set_param('/agribot/current_task_name', self.new_task_name)
                         self.new_task_name = ''
-                        path_loaded =  True
+                        path_loaded = True
                 if path_loaded:
                     if self.points_handler.are_path_points_availible():
                         goal_fix.header.stamp = rospy.get_rostime()
@@ -79,12 +79,11 @@ class ChooseTask(smach.State):
                             self.pub.publish(goal_fix)
                             send_last_msg = False
                             path_loaded = False
-                            rospy.set_param('/agribot/current_task_name', '')
+                            rospy.set_param('/agribot/chosen_task_name', '')
                             ud.choose_task_output = 'task_is_active'
                             output_string = 'tr_task_is_active'
         else:
             ud.choose_task_output = 'task_config_error'
             rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
             output_string = 'tr_task_conf_error'
-        
         return output_string
