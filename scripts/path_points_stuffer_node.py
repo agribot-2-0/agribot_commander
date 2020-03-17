@@ -1,70 +1,59 @@
 #!/usr/bin/env python
-from os import path
-from sensor_msgs.msg import NavSatFix
 import rospy
 import rospkg
 from std_msgs.msg import String
+from sensor_msgs.msg import NavSatFix
 from pathpointsstuffer import PathPointsStuffer
 
-received_new_task = False
-new_task_name = ""
 
-def callback_choosentask(data):
-    global received_new_task
-    global new_task_name
-    new_task_name = str(data.data)
-    received_new_task = True
+class PathPointsStufferNode(object):
+    def __init__(self):
+        self.received_new_task = False
+        self.new_task_name = ""
 
-def node():
-    global received_new_task
-    global new_task_name
+        rospy.init_node('path_points_stuffer_node')
 
-    rospy.init_node('path_points_stuffer_node')
-    sub = rospy.Subscriber('/agribot/chosen_task_name', String, callback_choosentask)
-    pub = rospy.Publisher('agribot/waypoints', NavSatFix, queue_size=1000)
+        rospack = rospkg.RosPack()
+        path_location_folder = rospack.get_path('agribot_map') + "/paths/"
+        self.points_stuffer = PathPointsStuffer(path_location_folder)
 
-    received_new_task = False
-    send_last_msg = False
-    path_loaded = False
+        self.pub = rospy.Publisher('/agribot/waypoints',
+                                   NavSatFix,
+                                   queue_size=1000)
+        self.sub = rospy.Subscriber('/agribot/chosen_task_name',
+                                    String,
+                                    self.callback_chosentask)
 
-    # init path handling object:
-    rospack = rospkg.RosPack()
-    pth_location_folder = rospack.get_path('agribot_map') + "/paths/"
+    def callback_chosentask(self, msg):
+        self.new_task_name = msg.data
 
-    points_handler = PathPointsStuffer(pth_location_folder)
+        if self.points_stuffer.set_path_name(self.new_task_name):
+            goal_fix = NavSatFix()
+            goal_fix.header.frame_id = "ll"
+            self.points_stuffer.get_path_points_from_yaml()
 
-    rate = rospy.Rate(1000)
-
-    while not rospy.is_shutdown():
-        
-        if received_new_task:
-            if not points_handler.set_path_name(str(new_task_name)):
-                rospy.logerr("[Stuffer test] Path " + str(new_task_name)+ "does not exists.")
-                send_last_msg = False
-                received_new_task = False
-                path_loaded = False
-            else:
-                points_handler.get_path_points_from_yaml()
-                goal_fix = NavSatFix()
-                goal_fix.header.frame_id = "ll"
-                send_last_msg = True
-                received_new_task = False
-                path_loaded = True
-        if path_loaded:
-            if points_handler.are_path_points_availible():
+            # Publish path
+            while self.points_stuffer.are_path_points_availible():
                 goal_fix.header.stamp = rospy.get_rostime()
-                goal_fix = points_handler.fill_new_msg_fix(goal_fix)
-                pub.publish(goal_fix)
-            else:
-                if send_last_msg:
-                    rospy.loginfo("Path " + str(new_task_name) + " loaded succesfully")
-                    pub.publish(goal_fix)
-                    send_last_msg = False
-                    path_loaded = False
-        rate.sleep()
+                goal_fix = self.points_stuffer.fill_new_msg_fix(goal_fix)
+                self.pub.publish(goal_fix)
+
+            # Path finished - repeat last waypoint
+            self.pub.publish(goal_fix)
+            rospy.loginfo("[PathPointsStuffer] Path {} loaded succesfully"
+                          .format(self.new_task_name))
+        else:
+            rospy.logerr("[PathPointsStuffer] Path {} does not exist"
+                         .format(self.new_task_name))
+
+    @staticmethod
+    def run():
+        rospy.spin()
+
 
 if __name__ == '__main__':
     try:
-        node()
+        path_points_stuffer_node = PathPointsStufferNode()
+        path_points_stuffer_node.run()
     except rospy.ROSInterruptException:
         pass

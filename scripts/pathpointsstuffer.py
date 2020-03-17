@@ -1,16 +1,17 @@
 import os
 import yaml
 
-class PathPointsStuffer:
+
+class PathPointsStuffer(object):
     def __init__(self, paths_loc):
-        self.FOLDER_W_PATHS_LOCATION = paths_loc
+        self.folder_w_paths_location = paths_loc
         self.path_name = ""
         self.point_to_send_index = 0
         self.path_points = ""
 
     def get_path_location(self, path_nam):
-        if os.path.isfile(self.FOLDER_W_PATHS_LOCATION + path_nam + ".yaml"):
-            return self.FOLDER_W_PATHS_LOCATION + path_nam + ".yaml"
+        if os.path.isfile(self.folder_w_paths_location + path_nam + ".yaml"):
+            return self.folder_w_paths_location + path_nam + ".yaml"
         return ""
 
     def set_path_name(self, path_nam):
@@ -30,11 +31,14 @@ class PathPointsStuffer:
 
     def fill_new_msg_fix(self, msg):
         if self.point_to_send_index < len(self.path_points.keys()):
-            msg.latitude = self.path_points["pose"+str(self.point_to_send_index)]["position"][0]
-            msg.longitude = self.path_points["pose"+str(self.point_to_send_index)]["position"][1]
-            msg.altitude = self.path_points["pose"+str(self.point_to_send_index)]["position"][2]
-            self.point_to_send_index = self.point_to_send_index + 1
+            pose_str = "pose"+str(self.point_to_send_index)
+            position = self.path_points[pose_str]["position"]
+            msg.latitude = position[0]
+            msg.longitude = position[1]
+            msg.altitude = position[2]
+            self.point_to_send_index += 1
             return msg
+        return None
 
     def are_path_points_availible(self):
         return self.point_to_send_index < len(self.path_points.keys())
