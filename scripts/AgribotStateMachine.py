@@ -33,9 +33,9 @@ def main():
     sm_agribot.userdata.ag_safestate_in = 'system_power_up'
     sm_agribot.userdata.ag_auto_in = ''
     sm_agribot.userdata.ag_manual_in = 'app_input_received'
-
-    rospy.set_param('/agribot/current_task_name', '')
-    rospy.set_param('/agribot/robot_current_state', 'safe_state')
+    
+    rospy.set_param('/agribot/current_task_name', '') 
+    rospy.set_param('/agribot/robot_current_state', 'safe_state') 
 
     # Open the container
     with sm_agribot:
@@ -43,6 +43,7 @@ def main():
         # Create the sub SMACH state machine
         sm_safe_state = smach.StateMachine(outcomes=['tr_application_input_received',
                                                      'tr_system_repaired',
+                                                     'tr_autonomous_start',
                                                      'tr_system_power_is_off'],
                                            input_keys=['sm_safestate_in'],
                                            output_keys=['sm_safestate_out_auto',
@@ -56,7 +57,8 @@ def main():
                                                 'tr_in_return_to_safe_state':'ENGINE_STOP'},
                                    remapping={'safe_state_reason':'sm_safestate_in'})
             smach.StateMachine.add('STANDBY', Standby(),
-                                   transitions={'tr_app_input_received_standby':'tr_application_input_received'},
+                                   transitions={'tr_app_input_received_standby':'tr_application_input_received',
+                                                'tr_autonomous_config_standby':'tr_autonomous_start'},
                                    remapping={'safe_state_reason_man_out':'sm_safestate_out_manual',
                                               'safe_state_reason_auto_out':'sm_safestate_out_auto'})
             smach.StateMachine.add('ENGINE_STOP', EngineStop(),
@@ -67,7 +69,8 @@ def main():
         smach.StateMachine.add('SAFE_STATE', sm_safe_state,
                                transitions={'tr_application_input_received':'MANUAL_CONTROL_STATE',
                                             'tr_system_repaired':'tr_agribot_offline',
-                                            'tr_system_power_is_off':'tr_agribot_offline'},
+                                            'tr_system_power_is_off':'tr_agribot_offline',
+                                            'tr_autonomous_start':'AUTONOMOUS_CONTROL_STATE'},
                                remapping={'sm_safestate_in':'ag_safestate_in',
                                           'sm_safestate_out_auto':'ag_auto_in',
                                           'sm_safestate_out_manual':'ag_manual_in'})
@@ -108,11 +111,6 @@ def main():
                                                     'tr_rec_only_move_commands':'tr_received_only_move_commands'},
                                        remapping={'connection_check_out':'sm_mobile_app_out_safe',
                                                   'read_data_command_out':'sm_mobile_app_out_auto'})
-                #smach.StateMachine.add('READ_DATA', ReadData(),
-                                      # transitions={'tr_send_data_def_event':'MOBILE_APP_CONNECTION_ROUTINE',
-                                           #         'tr_auto_ctrl_command':'tr_automatic_control_command',
-                                           #         'tr_rec_only_move_commands':'tr_received_only_move_commands'},
-                                      # remapping={'read_data_command_out':'sm_mobile_app_out_auto'})
             #Finish state machine transitions and add it to agribot_state_machine
             smach.StateMachine.add('MOBILE_APP_CONTROL_ROUTINE', sm_mobile_app_control_routine,
                                    transitions={'tr_automatic_control_command':'AUTONOMOUS_CONTROL_TRANSITION',

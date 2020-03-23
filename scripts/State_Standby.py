@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import threading
 import rospy
+import rospkg
 import smach
 from agribot_msgs.msg import AgribotMobileAppFrame
+from config_reader import ConfigReader
 import roslib
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -11,18 +13,28 @@ class Standby(smach.State):
     """This is a default robot state in which it awaits the input from application"""
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['tr_app_input_received_standby'],
+                             outcomes=['tr_app_input_received_standby','tr_autonomous_config_standby'],
                              output_keys=['safe_state_reason_man_out', 'safe_state_reason_auto_out'])
         self.mutex = threading.Lock()
         self.connection_received = False
         self.standby_com = True
+        path_to_conf = rospack.get_path('agribot_map') + "/task/"
+        rospy.loginfo(path_to_conf)
         self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', AgribotMobileAppFrame, self.callback_app_communication)
+
 
     def callback_app_communication(self, data):
         self.mutex.acquire()
         if data.can_id == 10:
             self.connection_received = True
         self.mutex.release()
+
+    def check_config_file(self):
+        self.mutex.acquire()
+        #read config file
+        config_present = False
+        self.mutex.release()
+        return config_present
 
     def execute(self, ud):
         """Awaiting the application input"""
@@ -42,6 +54,13 @@ class Standby(smach.State):
                 ud.safe_state_reason_auto_out = ' '
                 rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
                 output_string = 'tr_app_input_received_standby'
+                self.mutex.release()
+                break
+            elif self.check_config_file():
+                ud.safe_state_reason_man_out = ''
+                ud.safe_state_reason_auto_out = 'autonomous_config_present'
+                rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
+                output_string = 'tr_autonomous_config_standby'
                 self.mutex.release()
                 break
             else:
