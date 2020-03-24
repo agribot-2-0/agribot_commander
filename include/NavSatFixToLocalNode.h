@@ -1,3 +1,6 @@
+#ifndef AGRIBOT_COMMANDER_INCLUDE_NAVSATFIXTOLOCALNODE_H_
+#define AGRIBOT_COMMANDER_INCLUDE_NAVSATFIXTOLOCALNODE_H_
+
 #include <ros/ros.h>
 #include <tf2/utils.h>
 #include <tf2_ros/transform_listener.h>
@@ -7,7 +10,7 @@
 
 class NavSatFixToLocalNode
 {
-private:
+ private:
   ros::NodeHandle _nh;
   ros::Subscriber _waypointsSub;
   ros::Publisher _clickedPointPub;
@@ -22,7 +25,9 @@ private:
   geometry_msgs::PointStamped UTMToMap(const geometry_msgs::PointStamped msg);
 
 
-public:
+ public:
   NavSatFixToLocalNode();
   void run();
 };
+
+#endif  // AGRIBOT_COMMANDER_INCLUDE_NAVSATFIXTOLOCALNODE_H_

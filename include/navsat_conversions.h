@@ -37,8 +37,8 @@
 * https://github.com/austin-robot/utexas-art-ros-pkg/blob/afd147a1eb944fc3dbd138574c39699813f797bf/stacks/art_vehicle/art_common/include/art/conversions.h
 */
 
-#ifndef ROBOT_LOCALIZATION_NAVSAT_CONVERSIONS_H
-#define ROBOT_LOCALIZATION_NAVSAT_CONVERSIONS_H
+#ifndef AGRIBOT_COMMANDER_INCLUDE_NAVSAT_CONVERSIONS_H_
+#define AGRIBOT_COMMANDER_INCLUDE_NAVSAT_CONVERSIONS_H_
 
 /**  @file
 
@@ -48,11 +48,11 @@
      @author Chuck Gantz- chuck.gantz@globalstar.com
  */
 
-#include <cmath>
-#include <string>
-
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <cmath>
+#include <string>
 
 namespace RobotLocalization
 {
@@ -225,8 +225,10 @@ static inline void LLtoUTM(const double Lat, const double Long,
 
   // Compute the UTM Zone from the latitude and longitude
   char zone_buf[] = {0, 0, 0, 0};
-        // We &0x3fU to let GCC know the size of ZoneNumber.  In this case, it's under 63 (6bits)
-  snprintf(zone_buf, sizeof(zone_buf), "%d%c", ZoneNumber & 0x3fU, UTMLetterDesignator(Lat));
+  // We &0x3fU to let GCC know the size of ZoneNumber.
+  // In this case, it's under 63 (6bits)
+  snprintf(zone_buf, sizeof(zone_buf), "%d%c",
+           ZoneNumber & 0x3fU, UTMLetterDesignator(Lat));
   UTMZone = std::string(zone_buf);
 
   eccPrimeSquared = (eccSquared)/(1-eccSquared);
@@ -294,7 +296,8 @@ static inline void LLtoUTM(const double Lat, const double Long,
  * Written by Chuck Gantz- chuck.gantz@globalstar.com
  */
 static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting,
-                           const std::string &UTMZone, double& Lat, double& Long, double &gamma)
+                           const std::string &UTMZone, double& Lat,
+                           double& Long, double &gamma)
 {
   double k0 = UTM_K0;
   double a = WGS84_A;
@@ -363,7 +366,8 @@ static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting,
  * Written by Chuck Gantz- chuck.gantz@globalstar.com
  */
 static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting,
-                           const std::string &UTMZone, double& Lat, double& Long)
+                           const std::string &UTMZone, double& Lat,
+                           double& Long)
 {
   double gamma;
   UTMtoLL(UTMNorthing, UTMEasting, UTMZone, Lat, Long, gamma);
@@ -372,4 +376,4 @@ static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting,
 }  // namespace NavsatConversions
 }  // namespace RobotLocalization
 
-#endif  // ROBOT_LOCALIZATION_NAVSAT_CONVERSIONS_H
+#endif  // AGRIBOT_COMMANDER_INCLUDE_NAVSAT_CONVERSIONS_H_
