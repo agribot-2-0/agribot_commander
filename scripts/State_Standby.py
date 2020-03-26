@@ -18,22 +18,29 @@ class Standby(smach.State):
         self.mutex = threading.Lock()
         self.connection_received = False
         self.standby_com = True
-        path_to_conf = rospack.get_path('agribot_map') + "/task/"
-        rospy.loginfo(path_to_conf)
+        rospack = rospkg.RosPack()
+        path_to_conf = rospack.get_path('agribot_map') + "/tasks/"
+        self.config_reader = ConfigReader(path_to_conf)
         self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', AgribotMobileAppFrame, self.callback_app_communication)
 
 
     def callback_app_communication(self, data):
         self.mutex.acquire()
-        if data.can_id == 10:
+        if data.can_id == 21:
             self.connection_received = True
         self.mutex.release()
 
     def check_config_file(self):
-        self.mutex.acquire()
-        #read config file
-        config_present = False
-        self.mutex.release()
+        if self.config_reader.set_task_name("test_task"):
+            if self.config_reader.get_task_conf_from_yaml():
+                rospy.set_param('/agribot/chosen_task_name',
+                                self.config_reader.return_tasks_path_name())
+                rospy.loginfo("Loaded task configuration: chosen_path_name: '"+self.config_reader.return_tasks_path_name()+"'")
+                config_present = True
+            else:
+                config_present = False
+        else:
+            config_present = False
         return config_present
 
     def execute(self, ud):

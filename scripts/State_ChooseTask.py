@@ -21,9 +21,6 @@ class ChooseTask(smach.State):
         self.choosen_path_name = ''
         self.received_new_task = False
         self.new_task_name = ''
-        # sub = rospy.Subscriber('/agribot/chosen_task_name', String, self.callback_choosentask)
-        # init path handling object:
-        #get the paths directory localisation
         rospack = rospkg.RosPack()
         pth_location_folder = rospack.get_path('agribot_map') + "/paths/"
         self.points_handler = PathPointsStuffer(pth_location_folder)
@@ -49,6 +46,21 @@ class ChooseTask(smach.State):
         #Check if we received any task name
         if self.new_task_name != '':
             path_loaded = False
+            #Check if move_base planner nodes are ready, else wait
+            rate = rospy.Rate(10) # ROS Rate at 10Hz
+            string_msg = "Waiting for planners "
+            rospy.loginfo(string_msg)
+            while(True):
+                if rospy.has_param('/agribot/waypoint_global_planer/is_inited'):
+                    waypoint_planner_inited = rospy.get_param('/agribot/waypoint_global_planer/is_inited')
+                    if waypoint_planner_inited:
+                        if rospy.has_param('/agribot/simple_local_planer/is_inited'):
+                            simple_planner_inited = rospy.get_param('/agribot/simple_local_planer/is_inited')
+                            if simple_planner_inited:
+                                break
+                rate.sleep()
+            string_msg = "Planners are ready, now loading the chosen path path "
+            rospy.loginfo(string_msg)
             #Check if task name is ok and if the task itself is proper
             while path_loaded or self.new_task_name != '':
                 if self.new_task_name != '':

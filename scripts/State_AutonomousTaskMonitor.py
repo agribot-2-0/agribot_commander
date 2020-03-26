@@ -17,7 +17,7 @@ class AutonomousTaskMonitor(smach.State):
         self.command_received_only_move = False
         self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', AgribotMobileAppFrame, self.callback_appcommunication)
         self.sub_goal_status = rospy.Subscriber('/move_base/status', GoalStatusArray, self.callback_move_base_status)
-        self.goal_status = 10
+        self.goal_status = 10 # the 'no action' value
         self.received_frame_id = 0
 
     def callback_appcommunication(self, data):
@@ -38,7 +38,7 @@ class AutonomousTaskMonitor(smach.State):
             current_task = rospy.get_param('/agribot/current_task_name')
             if current_state == 'auto_control_state' and len(current_task) != 0 and len(data.status_list) != 0:
                 self.goal_status = data.status_list[0].status
-                rospy.loginfo(self.goal_status)
+                #rospy.loginfo(self.goal_status)
             else:
                 self.goal_status = 10
         self.mutex.release()
@@ -47,6 +47,8 @@ class AutonomousTaskMonitor(smach.State):
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
         rospy.sleep(0.100)
+        string_msg = "Executing state AutonomousTaskMonitor "
+        rospy.loginfo(string_msg)
         outcome_name = ''
         #false_preemptive_trigerred = true
         while(True):
