@@ -8,7 +8,8 @@ roslib.load_manifest('smach_ros')
 class SafeStateStart(smach.State):
     """This is an entrance state used to decide which branch of state machine should be picked"""
     def __init__(self):
-        smach.State.__init__(self, outcomes=['tr_in_system_power_up', 'tr_in_return_to_safe_state'],
+        smach.State.__init__(self, outcomes=['tr_in_system_power_up',
+                                             'tr_in_return_to_safe_state'],
                              input_keys=['safe_state_reason'])
 
     def execute(self, ud):
@@ -19,7 +20,8 @@ class SafeStateStart(smach.State):
         #
         string_msg = "Executing state SafeStateStart "
         rospy.loginfo(string_msg)
-        if ud.safe_state_reason == 'return_to_safe_state' or ud.safe_state_reason == 'return_to_safe_state_failure':
+        if ud.safe_state_reason == 'return_to_safe_state' or \
+           ud.safe_state_reason == 'return_to_safe_state_failure':
             output_string = 'tr_in_return_to_safe_state'
             rospy.set_param('/agribot/robot_current_state', 'safe_state')
         else:

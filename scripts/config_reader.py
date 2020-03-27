@@ -30,8 +30,7 @@ class ConfigReader(object):
         reader.close()
         if self.path_name_from_conf == '':
             return False
-        else:
-            return True
-        
+        return True
+
     def return_tasks_path_name(self):
-        return self.path_name_from_conf#[1:(len(self.path_name_from_conf)-1)]
+        return self.path_name_from_conf

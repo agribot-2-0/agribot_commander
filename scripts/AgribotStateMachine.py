@@ -33,9 +33,8 @@ def main():
     sm_agribot.userdata.ag_safestate_in = 'system_power_up'
     sm_agribot.userdata.ag_auto_in = ''
     sm_agribot.userdata.ag_manual_in = 'app_input_received'
-    
-    rospy.set_param('/agribot/current_task_name', '') 
-    rospy.set_param('/agribot/robot_current_state', 'safe_state') 
+    rospy.set_param('/agribot/current_task_name', '')
+    rospy.set_param('/agribot/robot_current_state', 'safe_state')
 
     # Open the container
     with sm_agribot:
@@ -53,30 +52,47 @@ def main():
         with sm_safe_state:
             # Add states to the container
             smach.StateMachine.add('SAFE_STATE_START', SafeStateStart(),
-                                   transitions={'tr_in_system_power_up':'STANDBY',
-                                                'tr_in_return_to_safe_state':'ENGINE_STOP'},
-                                   remapping={'safe_state_reason':'sm_safestate_in'})
+                                   transitions={'tr_in_system_power_up':
+                                                'STANDBY',
+                                                'tr_in_return_to_safe_state':
+                                                'ENGINE_STOP'},
+                                   remapping={'safe_state_reason':
+                                              'sm_safestate_in'})
             smach.StateMachine.add('STANDBY', Standby(),
-                                   transitions={'tr_app_input_received_standby':'tr_application_input_received',
-                                                'tr_autonomous_config_standby':'tr_autonomous_start'},
-                                   remapping={'safe_state_reason_man_out':'sm_safestate_out_manual',
-                                              'safe_state_reason_auto_out':'sm_safestate_out_auto'})
+                                   transitions={'tr_app_input_received_standby':
+                                                'tr_application_input_received',
+                                                'tr_autonomous_config_standby':
+                                                'tr_autonomous_start'},
+                                   remapping={'safe_state_reason_man_out':
+                                              'sm_safestate_out_manual',
+                                              'safe_state_reason_auto_out':
+                                              'sm_safestate_out_auto'})
             smach.StateMachine.add('ENGINE_STOP', EngineStop(),
-                                   transitions={'tr_engine_stopped_normal':'STANDBY',
-                                                'tr_engine_stop_failure_reaction':'tr_system_power_is_off'},
+                                   transitions={'tr_engine_stopped_normal':
+                                                'STANDBY',
+                                                'tr_engine_stop_failure_reaction':
+                                                'tr_system_power_is_off'},
                                    remapping={'engine_stop_reason':'sm_safestate_in'})
         #Finish state machine transitions and add it to agribot_state_machine
         smach.StateMachine.add('SAFE_STATE', sm_safe_state,
-                               transitions={'tr_application_input_received':'MANUAL_CONTROL_STATE',
-                                            'tr_system_repaired':'tr_agribot_offline',
-                                            'tr_system_power_is_off':'tr_agribot_offline',
-                                            'tr_autonomous_start':'AUTONOMOUS_CONTROL_STATE'},
-                               remapping={'sm_safestate_in':'ag_safestate_in',
-                                          'sm_safestate_out_auto':'ag_auto_in',
-                                          'sm_safestate_out_manual':'ag_manual_in'})
+                               transitions={'tr_application_input_received':
+                                            'MANUAL_CONTROL_STATE',
+                                            'tr_system_repaired':
+                                            'tr_agribot_offline',
+                                            'tr_system_power_is_off':
+                                            'tr_agribot_offline',
+                                            'tr_autonomous_start':
+                                            'AUTONOMOUS_CONTROL_STATE'},
+                               remapping={'sm_safestate_in':
+                                          'ag_safestate_in',
+                                          'sm_safestate_out_auto':
+                                          'ag_auto_in',
+                                          'sm_safestate_out_manual':
+                                          'ag_manual_in'})
         #MANUAL CONTROL STATE
         # Create the sub SMACH state machine
-        sm_man_ctrl = smach.StateMachine(outcomes=['tr_auto_ctrl_prepared', 'tr_man_failed_connection'],
+        sm_man_ctrl = smach.StateMachine(outcomes=['tr_auto_ctrl_prepared',
+                                                   'tr_man_failed_connection'],
                                          input_keys=['sm_manual_in'],
                                          output_keys=['sm_manual_out_safe',
                                                       'sm_manual_out_auto'])
@@ -85,67 +101,100 @@ def main():
         with sm_man_ctrl:
              # Add states to the container
             smach.StateMachine.add('MANUAL_CONTROL_START', ManualControlStart(),
-                                   transitions={'tr_task_config_error':'MOBILE_APP_CONTROL_ROUTINE',
-                                                'tr_app_input_received':'MOBILE_APP_CONTROL_ROUTINE'},
-                                   remapping={'manual_control_state_reason':'sm_manual_in',
-                                              'manual_control_state_app_reason':'sm_mobile_app_reason_in'})
+                                   transitions={'tr_task_config_error':
+                                                'MOBILE_APP_CONTROL_ROUTINE',
+                                                'tr_app_input_received':
+                                                'MOBILE_APP_CONTROL_ROUTINE'},
+                                   remapping={'manual_control_state_reason':
+                                              'sm_manual_in',
+                                              'manual_control_state_app_reason':
+                                              'sm_mobile_app_reason_in'})
             #MOBILE APP CONTROL ROUTINE
             # Create the sub SMACH state machine
-            sm_mobile_app_control_routine = smach.StateMachine(outcomes=['tr_automatic_control_command',
-                                                                         'tr_received_only_move_commands',
-                                                                         'tr_mob_app_failed_connection'],
-                                                               input_keys=['sm_mobile_app_reason_in'],
-                                                               output_keys=['sm_mobile_app_out_safe',
-                                                                            'sm_mobile_app_out_auto'])
-            sm_mobile_app_control_routine.userdata.sm_mobile_app_reason_out = 'automatic_control_command'
+            sm_mobile_app_control_routine = \
+            smach.StateMachine(outcomes=['tr_automatic_control_command',
+                                         'tr_received_only_move_commands',
+                                         'tr_mob_app_failed_connection'],
+                               input_keys=['sm_mobile_app_reason_in'],
+                               output_keys=['sm_mobile_app_out_safe',
+                                            'sm_mobile_app_out_auto'])
+            sm_mobile_app_control_routine.userdata.sm_mobile_app_reason_out = \
+            'automatic_control_command'
             sm_mobile_app_control_routine.userdata.sm_mobile_app_out_safe = ''
             with sm_mobile_app_control_routine:
                 # Add states to the container
                 smach.StateMachine.add('MOBILE_APP_CONTROL_START', MobileAppRoutineStart(),
-                                       transitions={'tr_task_config_error':'MOBILE_APP_CONNECTION_ROUTINE',
-                                                    'tr_app_input_received':'MOBILE_APP_CONNECTION_ROUTINE'},
-                                       remapping={'mobile_app_routine_reason_in':'sm_mobile_app_reason_in'})
-                smach.StateMachine.add('MOBILE_APP_CONNECTION_ROUTINE', MobileAppConnectionRoutine(),
-                                       transitions={'tr_connection_is_unstable':'tr_mob_app_failed_connection',
-                                                    'tr_auto_ctrl_command':'tr_automatic_control_command',
-                                                    'tr_rec_only_move_commands':'tr_received_only_move_commands'},
-                                       remapping={'connection_check_out':'sm_mobile_app_out_safe',
-                                                  'read_data_command_out':'sm_mobile_app_out_auto'})
+                                       transitions={'tr_task_config_error':
+                                                    'MOBILE_APP_CONNECTION_ROUTINE',
+                                                    'tr_app_input_received':
+                                                    'MOBILE_APP_CONNECTION_ROUTINE'},
+                                       remapping={'mobile_app_routine_reason_in':
+                                                  'sm_mobile_app_reason_in'})
+                smach.StateMachine.add('MOBILE_APP_CONNECTION_ROUTINE',
+                                       MobileAppConnectionRoutine(),
+                                       transitions={'tr_connection_is_unstable':
+                                                    'tr_mob_app_failed_connection',
+                                                    'tr_auto_ctrl_command':
+                                                    'tr_automatic_control_command',
+                                                    'tr_rec_only_move_commands':
+                                                    'tr_received_only_move_commands'},
+                                       remapping={'connection_check_out':
+                                                  'sm_mobile_app_out_safe',
+                                                  'read_data_command_out':
+                                                  'sm_mobile_app_out_auto'})
             #Finish state machine transitions and add it to agribot_state_machine
             smach.StateMachine.add('MOBILE_APP_CONTROL_ROUTINE', sm_mobile_app_control_routine,
-                                   transitions={'tr_automatic_control_command':'AUTONOMOUS_CONTROL_TRANSITION',
-                                                'tr_received_only_move_commands':'EXECUTE_MOVE_COMMANDS',
-                                                'tr_mob_app_failed_connection':'tr_man_failed_connection'},
-                                   remapping={'sm_mobile_app_out_safe':'sm_manual_out_safe',
-                                              'sm_mobile_app_out_auto':'sm_manual_out_auto'})
+                                   transitions={'tr_automatic_control_command':
+                                                'AUTONOMOUS_CONTROL_TRANSITION',
+                                                'tr_received_only_move_commands':
+                                                'EXECUTE_MOVE_COMMANDS',
+                                                'tr_mob_app_failed_connection':
+                                                'tr_man_failed_connection'},
+                                   remapping={'sm_mobile_app_out_safe':
+                                              'sm_manual_out_safe',
+                                              'sm_mobile_app_out_auto':
+                                              'sm_manual_out_auto'})
             #EXECUTE MOVE COMMANDS ROUTINE
             # Create the sub SMACH state machine
             sm_execute_move_commands = smach.StateMachine(outcomes=['tr_executed_move_commands'])
             with sm_execute_move_commands:
                 # Add states to the container
                 smach.StateMachine.add('CHECK_IF_BLOCKED_DIRECTION', CheckIfBlockedDirection(),
-                                       transitions={'tr_no_obstacles':'CREATE_INFO_LOGS'})
+                                       transitions={'tr_no_obstacles':
+                                                    'CREATE_INFO_LOGS'})
                 smach.StateMachine.add('CREATE_INFO_LOGS', CreateOutputInfoLogs(),
-                                       transitions={'tr_executed_outputs':'tr_executed_move_commands'})
+                                       transitions={'tr_executed_outputs':
+                                                    'tr_executed_move_commands'})
             #Finish state machine transitions and add it to agribot_state_machine
             smach.StateMachine.add('EXECUTE_MOVE_COMMANDS', sm_execute_move_commands,
-                                   transitions={'tr_executed_move_commands':'MOBILE_APP_CONTROL_ROUTINE'})
+                                   transitions={'tr_executed_move_commands':
+                                                'MOBILE_APP_CONTROL_ROUTINE'})
             # Add states to the container
             smach.StateMachine.add('AUTONOMOUS_CONTROL_TRANSITION', AutonomousControlTransition(),
-                                   transitions={'tr_auto_mode_failed':'MOBILE_APP_CONTROL_ROUTINE',
-                                                'tr_auto_control_prepared':'tr_auto_ctrl_prepared',
-                                                'tr_in_progress':'AUTONOMOUS_CONTROL_TRANSITION'},
-                                   remapping={'auto_control_transition_out':'sm_manual_out_auto'})
+                                   transitions={'tr_auto_mode_failed':
+                                                'MOBILE_APP_CONTROL_ROUTINE',
+                                                'tr_auto_control_prepared':
+                                                'tr_auto_ctrl_prepared',
+                                                'tr_in_progress':
+                                                'AUTONOMOUS_CONTROL_TRANSITION'},
+                                   remapping={'auto_control_transition_out':
+                                              'sm_manual_out_auto'})
         #Finish state machine transitions and add it to agribot_state_machine
         smach.StateMachine.add('MANUAL_CONTROL_STATE', sm_man_ctrl,
-                               transitions={'tr_auto_ctrl_prepared':'AUTONOMOUS_CONTROL_STATE',
-                                            'tr_man_failed_connection':'SAFE_STATE'},
-                               remapping={'sm_manual_in':'ag_manual_in',
-                                          'sm_manual_out_safe':'ag_safestate_in',
-                                          'sm_manual_out_auto':'ag_auto_in'})
+                               transitions={'tr_auto_ctrl_prepared':
+                                            'AUTONOMOUS_CONTROL_STATE',
+                                            'tr_man_failed_connection':
+                                            'SAFE_STATE'},
+                               remapping={'sm_manual_in':
+                                          'ag_manual_in',
+                                          'sm_manual_out_safe':
+                                          'ag_safestate_in',
+                                          'sm_manual_out_auto':
+                                          'ag_auto_in'})
         #AUTONOMOUS CONTROL STATE
         # Create the sub SMACH state machine
-        sm_auto_ctrl = smach.StateMachine(outcomes=['tr_task_configuration_failed', 'tr_return_to_save_state'],
+        sm_auto_ctrl = smach.StateMachine(outcomes=['tr_task_configuration_failed',
+                                                    'tr_return_to_save_state'],
                                           input_keys=['sm_auto_in'],
                                           output_keys=['sm_auto_out_man',
                                                        'sm_auto_out_safe'])
@@ -153,33 +202,51 @@ def main():
         with sm_auto_ctrl:
             # Add states to the container
             smach.StateMachine.add('AUTONOMOUS_CONTROL_START', AutonomousControlStart(),
-                                   transitions={'tr_auto_control_prepared':'IS_TASK_CHOSEN',
-                                                'tr_sys_repaired':'AUTONOMOUS_TASK_MONITOR'},
-                                   remapping={'autonomous_control_state_reason':'sm_auto_in'})
+                                   transitions={'tr_auto_control_prepared':
+                                                'IS_TASK_CHOSEN',
+                                                'tr_sys_repaired':
+                                                'AUTONOMOUS_TASK_MONITOR'},
+                                   remapping={'autonomous_control_state_reason':
+                                              'sm_auto_in'})
             smach.StateMachine.add('IS_TASK_CHOSEN', IsTaskChosen(),
-                                   transitions={'tr_task_is_active':'AUTONOMOUS_TASK_MONITOR',
-                                                'tr_no_active_task':'CHOOSE_TASK'})
+                                   transitions={'tr_task_is_active':
+                                                'AUTONOMOUS_TASK_MONITOR',
+                                                'tr_no_active_task':
+                                                'CHOOSE_TASK'})
             smach.StateMachine.add('CHOOSE_TASK', ChooseTask(),
-                                   transitions={'tr_task_is_active':'AUTONOMOUS_TASK_MONITOR',
-                                                'tr_task_conf_error':'tr_task_configuration_failed'},
-                                   remapping={'choose_task_output':'sm_auto_out_man'})
+                                   transitions={'tr_task_is_active':
+                                                'AUTONOMOUS_TASK_MONITOR',
+                                                'tr_task_conf_error':
+                                                'tr_task_configuration_failed'},
+                                   remapping={'choose_task_output':
+                                              'sm_auto_out_man'})
             smach.StateMachine.add('AUTONOMOUS_TASK_MONITOR', AutonomousTaskMonitor(),
-                                   transitions={'tr_succes':'TASK_COMPLETION_RAPORT'})
+                                   transitions={'tr_succes':
+                                                'TASK_COMPLETION_RAPORT'})
             smach.StateMachine.add('TASK_COMPLETION_RAPORT', TaskCompletionRaport(),
-                                   transitions={'tr_complete':'tr_return_to_save_state'},
-                                   remapping={'task_completion_output':'sm_auto_control_reason_out'})
+                                   transitions={'tr_complete':
+                                                'tr_return_to_save_state'},
+                                   remapping={'task_completion_output':
+                                              'sm_auto_control_reason_out'})
          #Finish state machine transitions and add it to agribot_state_machine
         smach.StateMachine.add('AUTONOMOUS_CONTROL_STATE', sm_auto_ctrl,
-                               transitions={'tr_task_configuration_failed':'MANUAL_CONTROL_STATE',
-                                            'tr_return_to_save_state':'SAFE_STATE'},
-                               remapping={'sm_auto_in':'ag_auto_in',
-                                          'sm_auto_out_man':'ag_manual_in',
-                                          'sm_auto_out_safe':'ag_safe_in'})
+                               transitions={'tr_task_configuration_failed':
+                                            'MANUAL_CONTROL_STATE',
+                                            'tr_return_to_save_state':
+                                            'SAFE_STATE'},
+                               remapping={'sm_auto_in':
+                                          'ag_auto_in',
+                                          'sm_auto_out_man':
+                                          'ag_manual_in',
+                                          'sm_auto_out_safe':
+                                          'ag_safe_in'})
     # Create and start the introspection server
-    sis = smach_ros.IntrospectionServer('agribot_state_machine_intro_server', sm_agribot, '/SM_ROOT')
+    sis = smach_ros.IntrospectionServer('agribot_state_machine_intro_server',
+                                        sm_agribot,
+                                        '/SM_ROOT')
     sis.start()
     # Execute SMACH plan
-    outcome = sm_agribot.execute()
+    sm_agribot.execute()
     # Wait for ctrl-c to stop the application
     rospy.spin()
     sis.stop()

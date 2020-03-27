@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
-import smach
 import roslib
+import smach
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 

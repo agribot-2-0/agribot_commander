@@ -53,7 +53,7 @@ class PathPointsStufferNode(object):
 
 if __name__ == '__main__':
     try:
-        path_points_stuffer_node = PathPointsStufferNode()
-        path_points_stuffer_node.run()
+        PATH_POINT_STUFFER_NODE = PathPointsStufferNode()
+        PATH_POINT_STUFFER_NODE.run()
     except rospy.ROSInterruptException:
         pass

@@ -15,8 +15,12 @@ class AutonomousTaskMonitor(smach.State):
         smach.State.__init__(self, outcomes=['tr_succes'])
         self.mutex = threading.Lock()
         self.command_received_only_move = False
-        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', AgribotMobileAppFrame, self.callback_appcommunication)
-        self.sub_goal_status = rospy.Subscriber('/move_base/status', GoalStatusArray, self.callback_move_base_status)
+        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
+                                           AgribotMobileAppFrame,
+                                           self.callback_appcommunication)
+        self.sub_goal_status = rospy.Subscriber('/move_base/status',
+                                                GoalStatusArray,
+                                                self.callback_move_base_status)
         self.goal_status = 10 # the 'no action' value
         self.received_frame_id = 0
 
@@ -33,10 +37,13 @@ class AutonomousTaskMonitor(smach.State):
 
     def callback_move_base_status(self, data):
         self.mutex.acquire()
-        if rospy.has_param('/agribot/robot_current_state') and rospy.has_param('/agribot/current_task_name'):
+        if rospy.has_param('/agribot/robot_current_state') and \
+           rospy.has_param('/agribot/current_task_name'):
             current_state = rospy.get_param('/agribot/robot_current_state')
             current_task = rospy.get_param('/agribot/current_task_name')
-            if current_state == 'auto_control_state' and len(current_task) != 0 and len(data.status_list) != 0:
+            if current_state == 'auto_control_state' and \
+               current_task != '' and \
+               data.status_list != '':
                 self.goal_status = data.status_list[0].status
                 #rospy.loginfo(self.goal_status)
             else:
@@ -51,7 +58,7 @@ class AutonomousTaskMonitor(smach.State):
         rospy.loginfo(string_msg)
         outcome_name = ''
         #false_preemptive_trigerred = true
-        while(True):
+        while True:
             self.mutex.acquire()
             #if task is loaded
             if self.goal_status != 10:
@@ -60,31 +67,39 @@ class AutonomousTaskMonitor(smach.State):
                     outcome_name = 'tr_succes'
                     break
                 #task pending for processing or is active
-                if (self.goal_status == 0) or (self.goal_status == 1) or (self.goal_status == 6) or (self.goal_status == 7):
+                if self.goal_status == 0 or \
+                   self.goal_status == 1 or \
+                   self.goal_status == 6 or \
+                   self.goal_status == 7:
                     #goal is pending, active, or being prempted or recalled
                     #trace the position, wait for safety events or mobile app interruption
                     outcome_name = ''
                 #if (self.goal_status == 2):
                 #    if not false_preemptive_trigerred:
-                #        rospy.loginfo("Leaving AutonomousTaskMonitor state because current goal was PREEMPTED")
+                #        rospy.loginfo("Leaving AutonomousTaskMonitor state \
+                #                      because current goal was PREEMPTED")
                 #        outcome_name = 'tr_succes'
                 #        break
                 #    else:
                 #        false_preemptive_trigerred = False
-                if (self.goal_status == 4):
-                    rospy.loginfo("Leaving AutonomousTaskMonitor state because current goal was ABORTED")
+                if self.goal_status == 4:
+                    rospy.loginfo("Leaving AutonomousTaskMonitor state \
+                                  because current goal was ABORTED")
                     outcome_name = 'tr_succes'
                     break
-                if (self.goal_status == 6):
-                    rospy.loginfo("Leaving AutonomousTaskMonitor state because current goal was REJECTED")
+                if self.goal_status == 6:
+                    rospy.loginfo("Leaving AutonomousTaskMonitor state \
+                                  because current goal was REJECTED")
                     outcome_name = 'tr_succes'
                     break
-                if (self.goal_status == 8):
-                    rospy.loginfo("Leaving AutonomousTaskMonitor state because current goal was RECALLED")
+                if self.goal_status == 8:
+                    rospy.loginfo("Leaving AutonomousTaskMonitor state \
+                                  because current goal was RECALLED")
                     outcome_name = 'tr_succes'
                     break
-                if (self.goal_status == 9):
-                    rospy.loginfo("Leaving AutonomousTaskMonitor state because current goal was LOST")
+                if self.goal_status == 9:
+                    rospy.loginfo("Leaving AutonomousTaskMonitor state \
+                                  because current goal was LOST")
                     outcome_name = 'tr_succes'
                     break
             self.mutex.release()

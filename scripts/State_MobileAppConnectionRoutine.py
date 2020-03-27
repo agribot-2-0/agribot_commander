@@ -22,12 +22,14 @@ class MobileAppConnectionRoutine(smach.State):
         self.command_received_only_move = False
         self.command_received_configuration = False
         self.command_received_autonomous = False
-        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication', AgribotMobileAppFrame, self.callback_app_communication)
+        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
+                                           AgribotMobileAppFrame,
+                                           self.callback_app_communication)
 
     def callback_app_communication(self, data):
         self.mutex.acquire()
         if rospy.has_param('/agribot/robot_current_state'):
-            current_state = rospy.get_param('/agribot/robot_current_state')  
+            current_state = rospy.get_param('/agribot/robot_current_state')
             #Check for error frames
             if data.can_id == 200:
                 #heartbeat failed
@@ -47,13 +49,12 @@ class MobileAppConnectionRoutine(smach.State):
         self.mutex.release()
 
     def execute(self, ud):
-        """Check the connection state, if we doesnt received hearbeat error etc, 
+        """Check the connection state, if we doesnt received hearbeat error etc,
         otherwise return to Save-State state"""
-        output_string=''
+        output_string = ''
         rospy.loginfo("Executing MobileAppConnectionRoutine")
         rate = rospy.Rate(100) # ROS Rate at 100Hz
-        
-        while not rospy.is_shutdown():   
+        while not rospy.is_shutdown():
             self.mutex.acquire()
             if self.connection_failed_received:
                 self.connection_failed_received = False

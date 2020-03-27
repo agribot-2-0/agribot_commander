@@ -18,7 +18,8 @@ class AutonomousControlStart(smach.State):
         #Send data to mobile app
         #
         #
-        if ud.autonomous_control_state_reason == 'auto_control_prepared' or ud.autonomous_control_state_reason == 'autonomous_config_present':
+        if ud.autonomous_control_state_reason == 'auto_control_prepared' or \
+           ud.autonomous_control_state_reason == 'autonomous_config_present':
             string_msg = "Executing state AutonomousControlStart "
             rospy.loginfo(string_msg)
             output_string = 'tr_auto_control_prepared'
