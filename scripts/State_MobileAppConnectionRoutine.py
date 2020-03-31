@@ -35,24 +35,24 @@ class MobileAppConnectionRoutine(smach.State):
                 #heartbeat failed
                 if ord(data.can_byte_array[0]) == 0x00:
                     if ord(data.can_byte_array[1]) == 0x0F:
-                        rospy.loginfo('Received  failed connection frame')
+                        rospy.loginfo('[State Machine] Received  failed connection frame')
                         self.connection_failed_received = True
             if current_state == 'manual_control_state':
                 if data.can_id == 53:
                     self.command_received_only_move = True
                 elif data.can_id == 31:
-                    rospy.loginfo('Received autonomous control command')
+                    rospy.loginfo('[State Machine] Received autonomous control command')
                     self.command_received_autonomous = True
                 elif data.can_id == 150:
-                    rospy.loginfo('Received configuration command')
+                    rospy.loginfo('[State Machine] Received configuration command')
                     self.command_received_configuration = True
         self.mutex.release()
 
-    def execute(self, ud):
+    def execute(self, ud): # pylint: disable=invalid-name
         """Check the connection state, if we doesnt received hearbeat error etc,
         otherwise return to Save-State state"""
         output_string = ''
-        rospy.loginfo("Executing MobileAppConnectionRoutine")
+        rospy.loginfo("[State Machine] Executing MobileAppConnectionRoutine")
         rate = rospy.Rate(100) # ROS Rate at 100Hz
         while not rospy.is_shutdown():
             self.mutex.acquire()

@@ -7,6 +7,7 @@ roslib.load_manifest('smach_ros')
 
 # define state Foo
 class AutonomousControlTransition(smach.State):
+    # pylint: disable=too-few-public-methods
     """This states is responsible for preparations to entry autonomous control and ensure
     the safe transition between manual and automatic control"""
     def __init__(self):
@@ -15,7 +16,7 @@ class AutonomousControlTransition(smach.State):
                              output_keys=['auto_control_transition_out'])
         self.counter = 0
 
-    def execute(self, ud):
+    def execute(self, ud): # pylint: disable=invalid-name
         """Checks if agribot is ready for the autonomous control, all needed hardware is inited,
         configured and apriopriate ROS nodes are functional"""
         output_string = ''

@@ -10,6 +10,7 @@ roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
 class Standby(smach.State):
+    # pylint: disable=too-few-public-methods
     """This is a default robot state in which it awaits the input from application"""
     def __init__(self):
         smach.State.__init__(self,
@@ -42,7 +43,8 @@ class Standby(smach.State):
                     self.last_task_name = self.config_reader.return_tasks_path_name()
                     rospy.set_param('/agribot/chosen_task_name',
                                     self.last_task_name)
-                    rospy.loginfo("Loaded task configuration: chosen_path_name: '" + \
+                    rospy.loginfo("[State Machine] Loaded task configuration: " + \
+                                  "chosen_path_name: '" + \
                                   self.last_task_name + "'")
                     config_present = True
                 else:
@@ -53,10 +55,10 @@ class Standby(smach.State):
             config_present = False
         return config_present
 
-    def execute(self, ud):
+    def execute(self, ud): # pylint: disable=invalid-name
         """Awaiting the application input"""
         if self.standby_com:
-            string_msg = "Executing state Standby "
+            string_msg = "[State Machine] Executing state Standby "
             rospy.loginfo(string_msg)
             self.standby_com = False
         output_string = ''

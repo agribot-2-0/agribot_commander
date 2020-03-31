@@ -11,13 +11,13 @@ class MobileAppRoutineStart(smach.State):
         smach.State.__init__(self, outcomes=['tr_task_config_error', 'tr_app_input_received'],
                              input_keys=['mobile_app_routine_reason_in'])
 
-    def execute(self, ud):
+    def execute(self, ud): # pylint: disable=invalid-name, no-self-use
         """Returns the proper transition based on the system configuration"""
         #Send data to mobile app
         #
         #
         output_string = ''
-        string_msg = "Executing state machine MobileAppConnection with input "
+        string_msg = "[State Machine] Executing state machine MobileAppConnection with input "
         string_msg = string_msg + ud.mobile_app_routine_reason_in
         if ud.mobile_app_routine_reason_in == 'app_input_received':
             rospy.loginfo(string_msg)

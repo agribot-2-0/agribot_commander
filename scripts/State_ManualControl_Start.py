@@ -13,7 +13,7 @@ class ManualControlStart(smach.State):
                              input_keys=['manual_control_state_reason'],
                              output_keys=['manual_control_state_app_reason'])
 
-    def execute(self, ud):
+    def execute(self, ud): # pylint: disable=invalid-name, no-self-use
         """Returns the proper transition depending on the system situation during entry to the
         statemachine, described by userdata (ud)"""
         #Send data to mobile app
@@ -22,7 +22,7 @@ class ManualControlStart(smach.State):
         output_string = ''
         if ud.manual_control_state_reason == 'application_input_received':
             ud.manual_control_state_app_reason = 'app_input_received'
-            string_msg = "Executing state ManualControlStart "
+            string_msg = "[State Machine] Executing state ManualControlStart "
             rospy.loginfo(string_msg)
             output_string = 'tr_app_input_received'
         else:

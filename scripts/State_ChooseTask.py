@@ -39,19 +39,13 @@ class ChooseTask(smach.State):
         self.points_handler = PathPointsStuffer(pth_location_folder)
         self.output_string = ''
 
-    def callback_choosentask(self, data):
-        self.mutex.acquire()
-        self.new_task_name = str(data.data)
-        self.received_new_task = True
-        self.mutex.release()
-
     def load_the_chosen_path(self):
         path_loaded = False
         choose_task_output = ''
         while path_loaded or self.new_task_name != '':
             if self.new_task_name != '':
                 if not self.points_handler.set_path_name(str(self.new_task_name)):
-                    rospy.logerr("Path " + \
+                    rospy.logerr("[State Machine] Path " + \
                                  str(self.new_task_name) + \
                                  "does not exists.")
                     send_last_msg = False
@@ -77,8 +71,8 @@ class ChooseTask(smach.State):
                     self.pub.publish(goal_fix)
                 else:
                     if send_last_msg:
-                        rospy.loginfo("Path :" + \
-                                      str(self.new_task_name) + \
+                        rospy.loginfo("[State Machine] Path name: " + \
+                                      rospy.get_param('/agribot/chosen_task_name') + \
                                       " loaded succesfully")
                         self.pub.publish(goal_fix)
                         send_last_msg = False
@@ -88,11 +82,11 @@ class ChooseTask(smach.State):
                         self.output_string = 'tr_task_is_active'
         return choose_task_output
 
-    def execute(self, ud):
+    def execute(self, ud): # pylint: disable=invalid-name
         """Pick and return the proper transition. Choose the proper the task name picked
         by the user or if it cant be found return to manual or safe state"""
         self.output_string = ''
-        string_msg = "Executing state ChooseTask "
+        string_msg = "[State Machine] Executing state ChooseTask "
         rospy.loginfo(string_msg)
         self.mutex.acquire()
         if rospy.has_param('/agribot/chosen_task_name'):
@@ -103,10 +97,10 @@ class ChooseTask(smach.State):
         #Check if we received any task name
         if self.new_task_name != '':
             #Check if move_base planner nodes are ready, else wait
-            string_msg = "Waiting for planners "
+            string_msg = "[State Machine] Waiting for planners "
             rospy.loginfo(string_msg)
             wait_for_planners()
-            string_msg = "Planners are ready, now loading the chosen path path "
+            string_msg = "[State Machine] Planners are ready, now loading the chosen path path "
             rospy.loginfo(string_msg)
             #Check if task name is ok and if the task itself is proper
             ud.choose_task_output = self.load_the_chosen_path()

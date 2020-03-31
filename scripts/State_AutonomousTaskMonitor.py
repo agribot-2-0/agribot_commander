@@ -9,6 +9,7 @@ roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
 class AutonomousTaskMonitor(smach.State):
+    # pylint: disable=too-few-public-methods
     """State is used to monitore the task progression, safety,
      internal health of the system, weather conditions, create logs"""
     def __init__(self):
@@ -43,18 +44,18 @@ class AutonomousTaskMonitor(smach.State):
             current_task = rospy.get_param('/agribot/current_task_name')
             if current_state == 'auto_control_state' and \
                current_task != '' and \
-               data.status_list != '':
+               data.status_list:
                 self.goal_status = data.status_list[0].status
                 #rospy.loginfo(self.goal_status)
             else:
                 self.goal_status = 10
         self.mutex.release()
 
-    def execute(self, ud):
+    def execute(self, ud): # pylint: disable=invalid-name, unused-argument
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
         rospy.sleep(0.100)
-        string_msg = "Executing state AutonomousTaskMonitor "
+        string_msg = "[State Machine] Executing state AutonomousTaskMonitor "
         rospy.loginfo(string_msg)
         outcome_name = ''
         #false_preemptive_trigerred = true
@@ -83,22 +84,22 @@ class AutonomousTaskMonitor(smach.State):
                 #    else:
                 #        false_preemptive_trigerred = False
                 if self.goal_status == 4:
-                    rospy.loginfo("Leaving AutonomousTaskMonitor state \
+                    rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state \
                                   because current goal was ABORTED")
                     outcome_name = 'tr_succes'
                     break
                 if self.goal_status == 6:
-                    rospy.loginfo("Leaving AutonomousTaskMonitor state \
+                    rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state \
                                   because current goal was REJECTED")
                     outcome_name = 'tr_succes'
                     break
                 if self.goal_status == 8:
-                    rospy.loginfo("Leaving AutonomousTaskMonitor state \
+                    rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state \
                                   because current goal was RECALLED")
                     outcome_name = 'tr_succes'
                     break
                 if self.goal_status == 9:
-                    rospy.loginfo("Leaving AutonomousTaskMonitor state \
+                    rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state \
                                   because current goal was LOST")
                     outcome_name = 'tr_succes'
                     break
