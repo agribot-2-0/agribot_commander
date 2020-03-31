@@ -6,6 +6,7 @@ roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
 class MobileAppRoutineStart(smach.State):
+    # pylint: disable=too-few-public-methods
     """This state decides to which branch of state machine we should transit"""
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_task_config_error', 'tr_app_input_received'],

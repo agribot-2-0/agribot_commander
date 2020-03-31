@@ -6,6 +6,7 @@ roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
 class ManualControlStart(smach.State):
+    # pylint: disable=too-few-public-methods
     """This state is an entry state of state machine and decides which branch to pick depdending
     on the data input received"""
     def __init__(self):

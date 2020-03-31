@@ -11,7 +11,7 @@ class CreateOutputInfoLogs(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_executed_outputs'])
 
-    def execute(self, ud): # pylint: disable=invalid-name
+    def execute(self, ud): # pylint: disable=invalid-name, unused-argument, no-self-use
         """Create logs of sensory feedback mesaures and move commands"""
         #Create output info logs
         #
