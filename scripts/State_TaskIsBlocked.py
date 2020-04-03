@@ -36,10 +36,7 @@ class TaskIsBlocked(smach.State):
 
     def callback_obstacle_detected(self, data):
         self.mutex.acquire()
-        if data.data != 0:
-            self.blocked_path = True
-        else:
-            self.blocked_path = False
+        self.blocked_path = bool(data.data != 0)
         self.mutex.release()
 
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument
@@ -62,8 +59,8 @@ class TaskIsBlocked(smach.State):
                                 'auto_control_state')
                 output_string = 'tr_continue_task'
                 string_msg = "[State Machine] Task is no longer blocked, leaving the blocked state"
-                rospy.loginfo(string_msg)
                 self.mutex.release()
+                rospy.loginfo(string_msg)
                 break
             self.mutex.release()
             rate.sleep()

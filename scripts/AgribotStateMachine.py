@@ -226,11 +226,11 @@ def main():
                                                 'TASK_COMPLETION_RAPORT',
                                                 'tr_danger':
                                                 'TASK_IS_BLOCKED'})
-            smach.StateMachine.add('TASK_IS_BLOCKED',TaskIsBlocked(),
-                                    transitions={'tr_continue_task':
-                                                 'AUTONOMOUS_TASK_MONITOR',
-                                                 'tr_human_intervention':
-                                                 'TASK_COMPLETION_RAPORT'})
+            smach.StateMachine.add('TASK_IS_BLOCKED', TaskIsBlocked(),
+                                   transitions={'tr_continue_task':
+                                                'AUTONOMOUS_TASK_MONITOR',
+                                                'tr_human_intervention':
+                                                'TASK_COMPLETION_RAPORT'})
             smach.StateMachine.add('TASK_COMPLETION_RAPORT', TaskCompletionRaport(),
                                    transitions={'tr_complete':
                                                 'tr_return_to_save_state'},

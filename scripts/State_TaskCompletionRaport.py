@@ -23,7 +23,7 @@ class TaskCompletionRaport(smach.State):
         current_state = rospy.get_param('/agribot/robot_current_state')
         if current_state == 'auto_control_state':
             string_msg = "[State Machine] Task completed, all went good"
-        else: 
+        else:
             string_msg = "[State Machine] Task ended with human intervention"
         rospy.loginfo(string_msg)
         rospy.set_param('/agribot/robot_current_state', 'safe_state')

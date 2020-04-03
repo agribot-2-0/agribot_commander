@@ -3,7 +3,7 @@ import threading
 import rospy
 import smach
 import actionlib
-from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from move_base_msgs.msg import MoveBaseAction
 from agribot_msgs.msg import AgribotMobileAppFrame
 from actionlib_msgs.msg import GoalStatusArray
 from actionlib_msgs.msg import GoalID
@@ -13,7 +13,7 @@ roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
 class AutonomousTaskMonitor(smach.State):
-    # pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """State is used to monitore the task progression, safety,
      internal health of the system, weather conditions, create logs"""
     def __init__(self):
@@ -30,11 +30,8 @@ class AutonomousTaskMonitor(smach.State):
                                                     UInt32,
                                                     self.callback_obstacle_detected)
         self.move_base = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
-        #self.pub_cancel_goal = rospy.Publisher('/move_base/cancel',
-        #                                       GoalID,
-        #                                       1)
         self.goal_status = 10 # the 'no action' value
-        self.goal_ID = GoalID()
+        self.goal_id = GoalID()
         self.received_frame_id = 0
         self.task_is_blocked = False
 
@@ -59,7 +56,7 @@ class AutonomousTaskMonitor(smach.State):
                current_task != '' and \
                data.status_list:
                 self.goal_status = data.status_list[0].status
-                self.goal_ID = data.status_list[0].goal_id
+                self.goal_id = data.status_list[0].goal_id
             else:
                 self.goal_status = 10
         self.mutex.release()
@@ -68,11 +65,8 @@ class AutonomousTaskMonitor(smach.State):
         self.mutex.acquire()
         current_state = rospy.get_param('/agribot/robot_current_state')
         if current_state == 'auto_control_state':
-            if data.data != 0:
-                self.task_is_blocked = True
-            else:
-                self.task_is_blocked = False
-        self.mutex.release()       
+            self.task_is_blocked = bool(data.data != 0)
+        self.mutex.release()
 
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument
         """Monitore the task progression, safety,
