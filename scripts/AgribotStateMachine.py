@@ -14,6 +14,7 @@ from State_ChooseTask import ChooseTask
 from State_AutonomousTaskMonitor import AutonomousTaskMonitor
 from State_TaskCompletionRaport import TaskCompletionRaport
 from State_SafeState_Start import SafeStateStart
+from State_TaskIsBlocked import TaskIsBlocked
 from State_ManualControl_Start import ManualControlStart
 from State_MobileAppRoutine_Start import MobileAppRoutineStart
 from State_AutonomousControl_Start import AutonomousControlStart
@@ -222,7 +223,14 @@ def main():
                                               'sm_auto_out_man'})
             smach.StateMachine.add('AUTONOMOUS_TASK_MONITOR', AutonomousTaskMonitor(),
                                    transitions={'tr_succes':
-                                                'TASK_COMPLETION_RAPORT'})
+                                                'TASK_COMPLETION_RAPORT',
+                                                'tr_danger':
+                                                'TASK_IS_BLOCKED'})
+            smach.StateMachine.add('TASK_IS_BLOCKED',TaskIsBlocked(),
+                                    transitions={'tr_continue_task':
+                                                 'AUTONOMOUS_TASK_MONITOR',
+                                                 'tr_human_intervention':
+                                                 'TASK_COMPLETION_RAPORT'})
             smach.StateMachine.add('TASK_COMPLETION_RAPORT', TaskCompletionRaport(),
                                    transitions={'tr_complete':
                                                 'tr_return_to_save_state'},
