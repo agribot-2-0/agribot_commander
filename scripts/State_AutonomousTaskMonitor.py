@@ -2,8 +2,11 @@
 import threading
 import rospy
 import smach
+import actionlib
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from agribot_msgs.msg import AgribotMobileAppFrame
 from actionlib_msgs.msg import GoalStatusArray
+from actionlib_msgs.msg import GoalID
 from std_msgs.msg import UInt32
 import roslib
 roslib.load_manifest('smach')
@@ -26,7 +29,12 @@ class AutonomousTaskMonitor(smach.State):
         self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
                                                     UInt32,
                                                     self.callback_obstacle_detected)
+        self.move_base = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
+        #self.pub_cancel_goal = rospy.Publisher('/move_base/cancel',
+        #                                       GoalID,
+        #                                       1)
         self.goal_status = 10 # the 'no action' value
+        self.goal_ID = GoalID()
         self.received_frame_id = 0
         self.task_is_blocked = False
 
@@ -51,7 +59,7 @@ class AutonomousTaskMonitor(smach.State):
                current_task != '' and \
                data.status_list:
                 self.goal_status = data.status_list[0].status
-                #rospy.loginfo(self.goal_status)
+                self.goal_ID = data.status_list[0].goal_id
             else:
                 self.goal_status = 10
         self.mutex.release()
@@ -80,6 +88,9 @@ class AutonomousTaskMonitor(smach.State):
             if self.task_is_blocked:
                 rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state \
                               because current task is blocked by obstacle")
+                #self.goal_ID.stamp = rospy.Time.now()
+                #self.pub_cancel_goal.publish(self.goal_ID)
+                self.move_base.cancel_all_goals()
                 outcome_name = 'tr_danger'
                 self.mutex.release()
                 break

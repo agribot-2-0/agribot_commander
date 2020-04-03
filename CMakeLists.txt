@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   std_msgs
   sensor_msgs
+  actionlib_msgs
 )
 
 #add_message_files(
@@ -26,6 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
 generate_messages(
   DEPENDENCIES
   std_msgs
+  actionlib_msgs
 )
 
 catkin_package(

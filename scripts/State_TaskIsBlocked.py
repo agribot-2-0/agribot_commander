@@ -37,9 +37,9 @@ class TaskIsBlocked(smach.State):
     def callback_obstacle_detected(self, data):
         self.mutex.acquire()
         if data.data != 0:
-            self.blocked_path = False
-        else:
             self.blocked_path = True
+        else:
+            self.blocked_path = False
         self.mutex.release()
 
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument
