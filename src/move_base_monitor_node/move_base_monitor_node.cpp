@@ -1,0 +1,9 @@
+#include <MoveBaseMonitor.h>
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "move_base_monitor_node");
+  MoveBaseMonitor _moveBaseMonitor;
+  _moveBaseMonitor.run();
+  return 0;
+}

@@ -1,4 +1,12 @@
 <launch>
     <node name="path_points_stuffer_node" pkg="agribot_commander" type="path_points_stuffer_node.py"/>
-    <node name="navsatfix_to_local_node" pkg="agribot_commander" type="navsatfix_to_local_node"/>
+    <node name="navsatfix_to_local_node"
+          pkg="agribot_commander"
+          type="navsatfix_to_local_node"
+          output="screen"/>
+
+    <node name="move_base_monitor_node"
+          pkg="agribot_commander"
+          type="move_base_monitor_node"
+          output="screen"/>
 </launch>
