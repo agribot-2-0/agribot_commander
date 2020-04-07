@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   actionlib_msgs
+  move_base_msgs
 )
 
 #add_message_files(
