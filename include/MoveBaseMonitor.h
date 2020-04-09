@@ -22,6 +22,10 @@ class MoveBaseMonitor
   ros::Subscriber _stateMachineSub;
   ros::Publisher _stateMachinePub;
   MoveBaseClient* ac;
+  ros::Publisher waypoint_marker_pub_;
+
+  void createAndPublishMarkersFromPath(const std::vector
+                                       <geometry_msgs::PoseStamped>& path);
 
   void waypointCallback(const geometry_msgs::PointStampedConstPtr& waypoint);
 

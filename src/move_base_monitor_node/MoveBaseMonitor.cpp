@@ -1,4 +1,5 @@
 #include <MoveBaseMonitor.h>
+#include <visualization_msgs/MarkerArray.h>
 
 MoveBaseMonitor::MoveBaseMonitor()
 {
@@ -12,6 +13,9 @@ MoveBaseMonitor::MoveBaseMonitor()
                                    this);
   _stateMachinePub = _nh.advertise<std_msgs::Int32>
                       ("/agribot/move_base_monitor/result", 10);
+
+  waypoint_marker_pub_ = _nh.advertise<visualization_msgs::MarkerArray>
+                        ("/agribot/move_base_monitor/waypoints", 1);
   // tell the action client that we want to spin a thread by default
   ac = new MoveBaseClient("move_base", true);
   // wait for the action server to come up
@@ -98,6 +102,7 @@ void MoveBaseMonitor::waypointCallback(
     int currentWaypoint = 0;
 
     auto pose = path_.poses[currentWaypoint];
+    createAndPublishMarkersFromPath(path_.poses);
     while (currentWaypoint < path_.poses.size())
     {
       // check if the current goal was pause, if so then wait
@@ -151,6 +156,40 @@ void MoveBaseMonitor::waypointCallback(
     clear_waypoints_ = true;
     ROS_INFO("[NavSatFixToLocalNode] All goals send");
   }
+}
+
+void MoveBaseMonitor::createAndPublishMarkersFromPath(
+  const std::vector<geometry_msgs::PoseStamped>& path)
+{
+  // clear previous markers
+  visualization_msgs::MarkerArray markers;
+  visualization_msgs::Marker marker;
+  marker.header = path[0].header;
+  marker.ns = "/move_base_monitor/waypoints";
+  marker.type = visualization_msgs::Marker::SPHERE;
+  marker.action = visualization_msgs::Marker::DELETEALL;
+  marker.scale.x = 0.4;
+  marker.scale.y = 0.4;
+  marker.scale.z = 0.4;
+  marker.color.a = 1.0;
+  marker.color.r = 0.0;
+  marker.color.g = 0.0;
+  marker.color.b = 1.0;
+  marker.id = 0;
+  markers.markers.push_back(marker);
+  waypoint_marker_pub_.publish(markers);
+  marker.action = visualization_msgs::Marker::ADD;
+  markers.markers.clear();
+
+  for (size_t i = 0; i < path.size(); i++)
+  {
+    marker.id = i;
+    marker.pose.position = path[i].pose.position;
+    marker.pose.orientation.w = 1;
+    markers.markers.push_back(marker);
+  }
+
+  waypoint_marker_pub_.publish(markers);
 }
 
 void MoveBaseMonitor::run()
