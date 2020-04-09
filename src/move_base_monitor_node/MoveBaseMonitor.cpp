@@ -17,7 +17,8 @@ MoveBaseMonitor::MoveBaseMonitor()
   // wait for the action server to come up
   while (!ac->waitForServer(ros::Duration(5.0)))
   {
-    ROS_INFO("[MoveBaseMonitor]Waiting for the move_base action server to come up");
+    ROS_INFO_STREAM("[MoveBaseMonitor]Waiting for the move_base" <<
+                    "action server to come up");
   }
 
   resultMsg.data = 0;
@@ -26,12 +27,12 @@ MoveBaseMonitor::MoveBaseMonitor()
 
 void MoveBaseMonitor::stateMachineCallback(const std_msgs::Int32 &command)
 {
-  //if the path is blocked then cancel the current goal and set the pause flag
+  // if the path is blocked then cancel the current goal and set the pause flag
   if (command.data == 1)
   {
     ac->cancelAllGoals();
     _pauseGoal = true;
-  } 
+  }
   else
   {
     _pauseGoal = false;
@@ -41,14 +42,14 @@ void MoveBaseMonitor::stateMachineCallback(const std_msgs::Int32 &command)
 void MoveBaseMonitor::isPaused()
 {
   bool cancelTrig = true;
-  while(_pauseGoal)
+  while (_pauseGoal)
   {
-    if(cancelTrig)
+    if (cancelTrig)
     {
       ac->cancelAllGoals();
       cancelTrig = false;
     }
-    ros::Duration(0.5).sleep(); // sleep for half a second
+    ros::Duration(0.5).sleep();  // sleep for half a second
   }
 }
 
@@ -93,13 +94,13 @@ void MoveBaseMonitor::waypointCallback(
     path_.header = waypoint->header;
     path_.poses.clear();
     path_.poses.insert(path_.poses.end(), waypoints_.begin(), waypoints_.end());
-    //auto last_pose = path_.poses.begin();
+    // auto last_pose = path_.poses.begin();
     int currentWaypoint = 0;
 
     auto pose = path_.poses[currentWaypoint];
-    while(currentWaypoint < path_.poses.size())
+    while (currentWaypoint < path_.poses.size())
     {
-      //check if the current goal was pause, if so then wait
+      // check if the current goal was pause, if so then wait
       isPaused();
 
       pose = path_.poses[currentWaypoint];
@@ -121,13 +122,13 @@ void MoveBaseMonitor::waypointCallback(
       }
       else if (goal_result == actionlib::SimpleClientGoalState::PREEMPTED)
       {
-        //check if the current goal is paused or we should take next goal
-        if(_pauseGoal)
+        // check if the current goal is paused or we should take next goal
+        if (_pauseGoal)
         {
           resultMsg.data = 2;
           _stateMachinePub.publish(resultMsg);
           ROS_INFO_STREAM("[MoveBaseMonitor] Goal paused");
-        } 
+        }
         else
         {
           resultMsg.data = 4;
@@ -141,7 +142,8 @@ void MoveBaseMonitor::waypointCallback(
         resultMsg.data = 10;
         _stateMachinePub.publish(resultMsg);
         currentWaypoint++;
-        ROS_INFO_STREAM("[MoveBaseMonitor] The base failed to move, trying next goal");
+        ROS_INFO_STREAM("[MoveBaseMonitor] The base failed to move," <<
+                        "trying next goal");
       }
     }
     resultMsg.data = 100;
