@@ -1,18 +1,55 @@
 #include <MoveBaseMonitor.h>
 
-#include <move_base_msgs/MoveBaseAction.h>
-#include <actionlib/client/simple_action_client.h>
-
-typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>
-        MoveBaseClient;
-
-
 MoveBaseMonitor::MoveBaseMonitor()
 {
   _waypointsSub = _nh.subscribe("/clicked_point",
                                 1000,
                                 &MoveBaseMonitor::waypointCallback,
                                 this);
+  _stateMachineSub = _nh.subscribe("/agribot/move_base_monitor/command",
+                                   10,
+                                   &MoveBaseMonitor::stateMachineCallback,
+                                   this);
+  _stateMachinePub = _nh.advertise<std_msgs::Int32>
+                      ("/agribot/move_base_monitor/result", 10);
+  // tell the action client that we want to spin a thread by default
+  ac = new MoveBaseClient("move_base", true);
+  // wait for the action server to come up
+  while (!ac->waitForServer(ros::Duration(5.0)))
+  {
+    ROS_INFO("[MoveBaseMonitor]Waiting for the move_base action server to come up");
+  }
+
+  resultMsg.data = 0;
+  _pauseGoal = false;
+}
+
+void MoveBaseMonitor::stateMachineCallback(const std_msgs::Int32 &command)
+{
+  //if the path is blocked then cancel the current goal and set the pause flag
+  if (command.data == 1)
+  {
+    ac->cancelAllGoals();
+    _pauseGoal = true;
+  } 
+  else
+  {
+    _pauseGoal = false;
+  }
+}
+
+void MoveBaseMonitor::isPaused()
+{
+  bool cancelTrig = true;
+  while(_pauseGoal)
+  {
+    if(cancelTrig)
+    {
+      ac->cancelAllGoals();
+      cancelTrig = false;
+    }
+    ros::Duration(0.5).sleep(); // sleep for half a second
+  }
 }
 
 void MoveBaseMonitor::waypointCallback(
@@ -48,40 +85,67 @@ void MoveBaseMonitor::waypointCallback(
 
   if (dist < 0.01)
   {
-    // tell the action client that we want to spin a thread by default
-    MoveBaseClient ac("move_base", true);
     move_base_msgs::MoveBaseGoal goal;
-    // wait for the action server to come up
-    while (!ac.waitForServer(ros::Duration(5.0)))
-    {
-      ROS_INFO("Waiting for the move_base action server to come up");
-    }
+    actionlib::SimpleClientGoalState::StateEnum goal_result;
 
     ROS_INFO_STREAM("[MoveBaseMonitor] Start sending goals");
     p2->orientation = p1->orientation;
     path_.header = waypoint->header;
     path_.poses.clear();
     path_.poses.insert(path_.poses.end(), waypoints_.begin(), waypoints_.end());
-    for (auto pose : path_.poses)
+    //auto last_pose = path_.poses.begin();
+    int currentWaypoint = 0;
+
+    auto pose = path_.poses[currentWaypoint];
+    while(currentWaypoint < path_.poses.size())
     {
+      //check if the current goal was pause, if so then wait
+      isPaused();
+
+      pose = path_.poses[currentWaypoint];
       ROS_INFO_STREAM("[MoveBaseMonitor] Point " << pose.pose.position.x
                           << ", " << pose.pose.position.y);
-
-      // _clickedPointPub.publish(pose);
-      // goal_pub_.publish(pose);
       goal.target_pose = pose;
       ROS_INFO("[MoveBaseMonitor] sendGoal");
-      ac.sendGoal(goal);
+      ac->sendGoal(goal);
       ROS_INFO("[MoveBaseMonitor] waitForResult");
-      ac.waitForResult();
-
-      if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-        ROS_INFO_STREAM("[MoveBaseMonitor] Hooray, the base moved" <<
-                        "1 meter forward");
+      ac->waitForResult();
+      goal_result = ac->getState().state_;
+      ROS_INFO_STREAM("[MoveBaseMonitor] Result: " << goal_result);
+      if (goal_result == actionlib::SimpleClientGoalState::SUCCEEDED)
+      {
+        resultMsg.data = 1;
+        _stateMachinePub.publish(resultMsg);
+        ROS_INFO_STREAM("[MoveBaseMonitor] Goal reached");
+        currentWaypoint++;
+      }
+      else if (goal_result == actionlib::SimpleClientGoalState::PREEMPTED)
+      {
+        //check if the current goal is paused or we should take next goal
+        if(_pauseGoal)
+        {
+          resultMsg.data = 2;
+          _stateMachinePub.publish(resultMsg);
+          ROS_INFO_STREAM("[MoveBaseMonitor] Goal paused");
+        } 
+        else
+        {
+          resultMsg.data = 4;
+          _stateMachinePub.publish(resultMsg);
+          currentWaypoint++;
+          ROS_INFO_STREAM("[MoveBaseMonitor] Goal canceled");
+        }
+      }
       else
-        ROS_INFO_STREAM("[MoveBaseMonitor] The base failed to move" <<
-                        "forward 1 meter for some reason");
+      {
+        resultMsg.data = 10;
+        _stateMachinePub.publish(resultMsg);
+        currentWaypoint++;
+        ROS_INFO_STREAM("[MoveBaseMonitor] The base failed to move, trying next goal");
+      }
     }
+    resultMsg.data = 100;
+    _stateMachinePub.publish(resultMsg);
     clear_waypoints_ = true;
     ROS_INFO("[NavSatFixToLocalNode] All goals send");
   }
