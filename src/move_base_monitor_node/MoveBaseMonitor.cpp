@@ -16,6 +16,8 @@ MoveBaseMonitor::MoveBaseMonitor()
 
   waypoint_marker_pub_ = _nh.advertise<visualization_msgs::MarkerArray>
                         ("/agribot/move_base_monitor/waypoints", 1);
+  plan_pub_ = _nh.advertise<nav_msgs::Path>("/agribot/move_base_monitor/path",
+                                             1);
   // tell the action client that we want to spin a thread by default
   ac = new MoveBaseClient("move_base", true);
   // wait for the action server to come up
@@ -100,6 +102,7 @@ void MoveBaseMonitor::waypointCallback(
     path_.poses.clear();
     path_.poses.insert(path_.poses.end(), waypoints_.begin(), waypoints_.end());
     createAndPublishMarkersFromPath(path_.poses);
+    plan_pub_.publish(path_);
     _pathLoaded = true;
   }
 }
