@@ -2,11 +2,7 @@
 import threading
 import rospy
 import smach
-import actionlib
-from move_base_msgs.msg import MoveBaseAction
 from agribot_msgs.msg import AgribotMobileAppFrame
-from actionlib_msgs.msg import GoalStatusArray
-from actionlib_msgs.msg import GoalID
 from std_msgs.msg import Int32
 import roslib
 roslib.load_manifest('smach')
@@ -83,14 +79,17 @@ class AutonomousTaskMonitor(smach.State):
             if self.task_is_blocked:
                 rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state \
                               because current task is blocked by obstacle")
-                
-                #send cancel goal because  to move_base_monitor
+                #send pause goal to move_base_monitor
                 self.move_base_command_msg.data = 1
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
 
                 outcome_name = 'tr_danger'
                 self.mutex.release()
                 break
+            else:
+                #send continue command to move_base_monitor
+                self.move_base_command_msg.data = 0
+                self.pub_move_base_comm.publish(self.move_base_command_msg)
             # if task is loaded
             if self.move_base_result != 10:
                  #if task ended succesfully

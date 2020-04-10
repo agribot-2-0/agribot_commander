@@ -27,6 +27,8 @@ MoveBaseMonitor::MoveBaseMonitor()
 
   resultMsg.data = 0;
   _pauseGoal = false;
+  _pauseGoalLatch = false;
+  _pathLoaded = false;
 }
 
 void MoveBaseMonitor::stateMachineCallback(const std_msgs::Int32 &command)
@@ -36,6 +38,7 @@ void MoveBaseMonitor::stateMachineCallback(const std_msgs::Int32 &command)
   {
     ac->cancelAllGoals();
     _pauseGoal = true;
+    _pauseGoalLatch = true;
   }
   else
   {
@@ -51,9 +54,11 @@ void MoveBaseMonitor::isPaused()
     if (cancelTrig)
     {
       ac->cancelAllGoals();
+      ROS_INFO_STREAM("[MoveBaseMonitor] Goal PAUSED");
       cancelTrig = false;
     }
-    ros::Duration(0.5).sleep();  // sleep for half a second
+    ros::Duration(0.1).sleep();  // sleep for half a second
+    ros::spinOnce();
   }
 }
 
@@ -90,71 +95,12 @@ void MoveBaseMonitor::waypointCallback(
 
   if (dist < 0.01)
   {
-    move_base_msgs::MoveBaseGoal goal;
-    actionlib::SimpleClientGoalState::StateEnum goal_result;
-
-    ROS_INFO_STREAM("[MoveBaseMonitor] Start sending goals");
     p2->orientation = p1->orientation;
     path_.header = waypoint->header;
     path_.poses.clear();
     path_.poses.insert(path_.poses.end(), waypoints_.begin(), waypoints_.end());
-    // auto last_pose = path_.poses.begin();
-    int currentWaypoint = 0;
-
-    auto pose = path_.poses[currentWaypoint];
     createAndPublishMarkersFromPath(path_.poses);
-    while (currentWaypoint < path_.poses.size())
-    {
-      // check if the current goal was pause, if so then wait
-      isPaused();
-
-      pose = path_.poses[currentWaypoint];
-      ROS_INFO_STREAM("[MoveBaseMonitor] Point " << pose.pose.position.x
-                          << ", " << pose.pose.position.y);
-      goal.target_pose = pose;
-      ROS_INFO("[MoveBaseMonitor] sendGoal");
-      ac->sendGoal(goal);
-      ROS_INFO("[MoveBaseMonitor] waitForResult");
-      ac->waitForResult();
-      goal_result = ac->getState().state_;
-      ROS_INFO_STREAM("[MoveBaseMonitor] Result: " << goal_result);
-      if (goal_result == actionlib::SimpleClientGoalState::SUCCEEDED)
-      {
-        resultMsg.data = 1;
-        _stateMachinePub.publish(resultMsg);
-        ROS_INFO_STREAM("[MoveBaseMonitor] Goal reached");
-        currentWaypoint++;
-      }
-      else if (goal_result == actionlib::SimpleClientGoalState::PREEMPTED)
-      {
-        // check if the current goal is paused or we should take next goal
-        if (_pauseGoal)
-        {
-          resultMsg.data = 2;
-          _stateMachinePub.publish(resultMsg);
-          ROS_INFO_STREAM("[MoveBaseMonitor] Goal paused");
-        }
-        else
-        {
-          resultMsg.data = 4;
-          _stateMachinePub.publish(resultMsg);
-          currentWaypoint++;
-          ROS_INFO_STREAM("[MoveBaseMonitor] Goal canceled");
-        }
-      }
-      else
-      {
-        resultMsg.data = 10;
-        _stateMachinePub.publish(resultMsg);
-        currentWaypoint++;
-        ROS_INFO_STREAM("[MoveBaseMonitor] The base failed to move," <<
-                        "trying next goal");
-      }
-    }
-    resultMsg.data = 100;
-    _stateMachinePub.publish(resultMsg);
-    clear_waypoints_ = true;
-    ROS_INFO("[NavSatFixToLocalNode] All goals send");
+    _pathLoaded = true;
   }
 }
 
@@ -192,7 +138,122 @@ void MoveBaseMonitor::createAndPublishMarkersFromPath(
   waypoint_marker_pub_.publish(markers);
 }
 
+void MoveBaseMonitor::monitorPathWaypoints()
+{
+  move_base_msgs::MoveBaseGoal goal;
+  actionlib::SimpleClientGoalState::StateEnum goal_result;
+  ROS_INFO_STREAM("[MoveBaseMonitor] Start sending goals");
+  int currentWaypoint = 0;
+  bool load_point = true;
+  auto pose = path_.poses[currentWaypoint];
+  ros::Rate loop_rate(100);
+  while (currentWaypoint < path_.poses.size())
+  {
+    // check if the current goal was pause, if so then wait
+    isPaused();
+    // check if the next point should be loaded
+    if (load_point)
+    {
+      pose = path_.poses[currentWaypoint];
+      ROS_INFO_STREAM("[MoveBaseMonitor] Point " << pose.pose.position.x
+              << ", " << pose.pose.position.y << " Index " << currentWaypoint);
+      goal.target_pose = pose;
+      ac->sendGoal(goal);
+      load_point = false;
+    }
+    else
+    {
+      goal_result = ac->getState().state_;
+      if (goal_result == actionlib::SimpleClientGoalState::ACTIVE ||
+          goal_result == actionlib::SimpleClientGoalState::PENDING)
+      {
+        resultMsg.data = 1;
+        _stateMachinePub.publish(resultMsg);
+      }
+      else if (goal_result == actionlib::SimpleClientGoalState::SUCCEEDED)
+      {
+        resultMsg.data = 3;
+        _stateMachinePub.publish(resultMsg);
+        ROS_INFO_STREAM("[MoveBaseMonitor] Goal succeeded");
+        currentWaypoint++;
+        load_point = true;
+      }
+      else if (goal_result == actionlib::SimpleClientGoalState::PREEMPTED)
+      {
+        // check if the current goal is paused or we should take next goal
+        if (_pauseGoalLatch)
+        {
+          resultMsg.data = 10;
+          _stateMachinePub.publish(resultMsg);
+          load_point = true;
+          _pauseGoalLatch = false;
+        }
+        else
+        {
+          resultMsg.data = 2;
+          _stateMachinePub.publish(resultMsg);
+          ROS_INFO_STREAM("[MoveBaseMonitor] Goal PREEMPTED");
+          currentWaypoint++;
+          load_point = true;
+        }
+      }
+      else if (goal_result == actionlib::SimpleClientGoalState::ABORTED)
+      {
+        resultMsg.data = 4;
+        _stateMachinePub.publish(resultMsg);
+        currentWaypoint++;
+        load_point = true;
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was ABORTED!," <<
+                        "trying next goal");
+      }
+      else if (goal_result == actionlib::SimpleClientGoalState::REJECTED)
+      {
+        resultMsg.data = 5;
+        _stateMachinePub.publish(resultMsg);
+        currentWaypoint++;
+        load_point = true;
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was REJECTED!," <<
+                        "trying next goal");
+      }
+      else if (goal_result == actionlib::SimpleClientGoalState::RECALLED)
+      {
+        resultMsg.data = 5;
+        _stateMachinePub.publish(resultMsg);
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was RECALLED!," <<
+                        "trying next goal");
+        currentWaypoint++;
+        load_point = true;
+      }
+      else if (goal_result == actionlib::SimpleClientGoalState::LOST)
+      {
+        resultMsg.data = 5;
+        _stateMachinePub.publish(resultMsg);
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was LOST!," <<
+                        "trying next goal");
+        currentWaypoint++;
+        load_point = true;
+      }
+    }
+    ros::spinOnce();
+  }
+  resultMsg.data = 100;
+  _stateMachinePub.publish(resultMsg);
+  clear_waypoints_ = true;
+  _pathLoaded = false;
+  ROS_INFO("[MoveBaseMonitor] Path ended");
+}
+
+
 void MoveBaseMonitor::run()
 {
-  ros::spin();
+  ros::Rate loop_rate(100);
+  while (ros::ok())
+  {
+    if (_pathLoaded)
+    {
+      monitorPathWaypoints();
+    }
+    loop_rate.sleep();
+    ros::spinOnce();
+  }
 }
