@@ -13,7 +13,8 @@ class AutonomousTaskMonitor(smach.State):
     """State is used to monitore the task progression, safety,
      internal health of the system, weather conditions, create logs"""
     def __init__(self):
-        smach.State.__init__(self, outcomes=['tr_succes', 'tr_danger'])
+        smach.State.__init__(self, outcomes=['tr_succes', 'tr_danger'],
+                             output_keys=['auto_task_monitor_output'])
         self.mutex = threading.Lock()
         self.command_received_only_move = False
         self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
@@ -72,9 +73,18 @@ class AutonomousTaskMonitor(smach.State):
         string_msg = "[State Machine] Executing state AutonomousTaskMonitor "
         rospy.loginfo(string_msg)
         outcome_name = ''
-        #false_preemptive_trigerred = true
+        #trace the position, wait for safety events or mobile app interruption
         while True:
             self.mutex.acquire()
+            # check if the task is aborted by manual steering
+            if self.received_frame_id == 21:
+                outcome_name = 'tr_succes'
+                ud.auto_task_monitor_output = 'user_abort'
+                #send abort current path to move_base_monitor
+                self.move_base_command_msg.data = 2
+                self.pub_move_base_comm.publish(self.move_base_command_msg)
+                self.mutex.release()
+                break
             # check if the task is not blocked
             if self.task_is_blocked:
                 rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state \
@@ -94,6 +104,7 @@ class AutonomousTaskMonitor(smach.State):
             if self.move_base_result != 10:
                  #if task ended succesfully
                 if self.move_base_result == 100:
+                    ud.auto_task_monitor_output = 'succes'
                     outcome_name = 'tr_succes'
                     self.mutex.release()
                     break
@@ -103,7 +114,6 @@ class AutonomousTaskMonitor(smach.State):
                    self.move_base_result == 6 or \
                    self.move_base_result == 7:
                     #goal is pending, active, or being prempted or recalled
-                    #trace the position, wait for safety events or mobile app interruption
                     outcome_name = ''
             self.mutex.release()
         return outcome_name

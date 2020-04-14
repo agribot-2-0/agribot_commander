@@ -31,6 +31,7 @@ MoveBaseMonitor::MoveBaseMonitor()
   _pauseGoal = false;
   _pauseGoalLatch = false;
   _pathLoaded = false;
+  _userAbort = false;
 }
 
 void MoveBaseMonitor::stateMachineCallback(const std_msgs::Int32 &command)
@@ -42,9 +43,14 @@ void MoveBaseMonitor::stateMachineCallback(const std_msgs::Int32 &command)
     _pauseGoal = true;
     _pauseGoalLatch = true;
   }
-  else
+  else if (command.data == 0)
   {
     _pauseGoal = false;
+  }
+  // if we want to abort the current task by user request
+  else if (command.data == 2)
+  {
+    _userAbort = true;
   }
 }
 
@@ -104,6 +110,7 @@ void MoveBaseMonitor::waypointCallback(
     createAndPublishMarkersFromPath(path_.poses);
     plan_pub_.publish(path_);
     _pathLoaded = true;
+    _userAbort = false;
   }
 }
 
@@ -152,6 +159,11 @@ void MoveBaseMonitor::monitorPathWaypoints()
   ros::Rate loop_rate(100);
   while (currentWaypoint < path_.poses.size())
   {
+    if (_userAbort)
+    {
+       ac->cancelAllGoals();
+       break;
+    }
     // check if the current goal was pause, if so then wait
     isPaused();
     // check if the next point should be loaded
@@ -243,7 +255,15 @@ void MoveBaseMonitor::monitorPathWaypoints()
   _stateMachinePub.publish(resultMsg);
   clear_waypoints_ = true;
   _pathLoaded = false;
-  ROS_INFO("[MoveBaseMonitor] Path ended");
+  if (_userAbort == true)
+  {
+    _userAbort = false;
+    ROS_INFO("[MoveBaseMonitor] Path aborted by user");
+  }
+  else
+  {
+    ROS_INFO("[MoveBaseMonitor] Path ended");
+  }
 }
 
 

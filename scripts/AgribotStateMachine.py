@@ -234,7 +234,9 @@ def main():
             smach.StateMachine.add('TASK_COMPLETION_RAPORT', TaskCompletionRaport(),
                                    transitions={'tr_complete':
                                                 'tr_return_to_save_state'},
-                                   remapping={'task_completion_output':
+                                   remapping={'auto_task_monitor_input':
+                                              'auto_task_monitor_output',
+                                              'task_completion_output':
                                               'sm_auto_control_reason_out'})
          #Finish state machine transitions and add it to agribot_state_machine
         smach.StateMachine.add('AUTONOMOUS_CONTROL_STATE', sm_auto_ctrl,

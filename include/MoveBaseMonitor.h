@@ -47,6 +47,7 @@ class MoveBaseMonitor
   bool _pathLoaded;
   bool _pauseGoal;
   bool _pauseGoalLatch;
+  bool _userAbort;
   std_msgs::Int32 resultMsg;
 
  public:

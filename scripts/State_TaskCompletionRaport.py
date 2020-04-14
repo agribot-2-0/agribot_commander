@@ -10,7 +10,8 @@ class TaskCompletionRaport(smach.State):
     """State is used to create a summary report from from the Agribots work"""
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_complete'],
-                             output_keys=['task_completion_output'])
+                             output_keys=['task_completion_output'],
+                             input_keys=['auto_task_monitor_input'])
 
     def execute(self, ud): # pylint: disable=invalid-name, no-self-use
         """Create a report from the task realisation"""
@@ -21,7 +22,7 @@ class TaskCompletionRaport(smach.State):
         ud.task_completion_output = 'return_to_safe_state'
         rospy.loginfo(string_msg)
         current_state = rospy.get_param('/agribot/robot_current_state')
-        if current_state == 'auto_control_state':
+        if current_state == 'auto_control_state' and ud.auto_task_monitor_input != 'user_abort':
             string_msg = "[State Machine] Task completed, all went good"
         else:
             string_msg = "[State Machine] Task ended with human intervention"
