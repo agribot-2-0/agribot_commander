@@ -3,8 +3,8 @@ import threading
 import rospy
 import smach
 from agribot_msgs.msg import AgribotMobileAppFrame
-from std_msgs.msg import Int32
 from agribot_msgs.msg import AgribotMoveBaseMonitorResult
+from std_msgs.msg import Int32
 import roslib
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
