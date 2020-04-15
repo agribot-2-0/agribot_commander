@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   actionlib_msgs
   move_base_msgs
+  visualization_msgs
 )
 
 #add_message_files(
