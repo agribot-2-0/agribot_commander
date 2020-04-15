@@ -21,12 +21,13 @@ class AutonomousControlStart(smach.State):
         #
         #
         rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
-        switch_to_navigation = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation', Empty)
+        switch_to_navigation = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation',
+                                                  Empty)
         try:
             switch_to_navigation()
         except rospy.ServiceException as exc:
+            # pylint: disable=superfluous-parens
             print("Service did not process request: " + str(exc))
-        
         if ud.autonomous_control_state_reason == 'auto_control_prepared' or \
            ud.autonomous_control_state_reason == 'autonomous_config_present':
             string_msg = "[State Machine] Executing state AutonomousControlStart "

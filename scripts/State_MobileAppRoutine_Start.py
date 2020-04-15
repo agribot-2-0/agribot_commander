@@ -21,12 +21,13 @@ class MobileAppRoutineStart(smach.State):
         output_string = ''
         string_msg = "[State Machine] Executing state machine MobileAppConnection with input "
         rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
-        switch_to_teleop = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop', Empty)
+        switch_to_teleop = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop',
+                                              Empty)
         try:
             switch_to_teleop()
         except rospy.ServiceException as exc:
+            # pylint: disable=superfluous-parens
             print("Service did not process request: " + str(exc))
-        
         string_msg = string_msg + ud.mobile_app_routine_reason_in
         if ud.mobile_app_routine_reason_in == 'app_input_received':
             rospy.loginfo(string_msg)
