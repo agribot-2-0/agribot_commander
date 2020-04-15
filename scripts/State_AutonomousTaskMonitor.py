@@ -4,6 +4,7 @@ import rospy
 import smach
 from agribot_msgs.msg import AgribotMobileAppFrame
 from std_msgs.msg import Int32
+from agribot_msgs.msg import AgribotMoveBaseMonitorResult
 import roslib
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -21,7 +22,7 @@ class AutonomousTaskMonitor(smach.State):
                                            AgribotMobileAppFrame,
                                            self.callback_appcommunication)
         self.sub_move_base_result = rospy.Subscriber('/agribot/move_base_monitor/result',
-                                                     Int32,
+                                                     AgribotMoveBaseMonitorResult,
                                                      self.callback_move_base_result)
         self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
                                                     Int32,
@@ -32,6 +33,8 @@ class AutonomousTaskMonitor(smach.State):
         #self.move_base = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
         self.move_base_command_msg = Int32(0)
         self.move_base_result = 10 # the 'no action' value
+        self.move_base_current_waypoint = 0
+        self.move_base_total_waypoints = 0
         self.received_frame_id = 0
         self.task_is_blocked = False
 
@@ -54,7 +57,9 @@ class AutonomousTaskMonitor(smach.State):
             current_task = rospy.get_param('/agribot/current_task_name')
             if current_state == 'auto_control_state' and \
                current_task != '':
-                self.move_base_result = data.data
+                self.move_base_result = data.result
+                self.move_base_current_waypoint = data.current_waypoint
+                self.move_base_total_waypoints = data.total_waypoints
             else:
                 self.move_base_result = 10
         self.mutex.release()

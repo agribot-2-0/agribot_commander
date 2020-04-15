@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Int32.h>
+#include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
 
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
@@ -48,7 +49,7 @@ class MoveBaseMonitor
   bool _pauseGoal;
   bool _pauseGoalLatch;
   bool _userAbort;
-  std_msgs::Int32 resultMsg;
+  agribot_msgs::AgribotMoveBaseMonitorResult resultMsg;
 
  public:
   MoveBaseMonitor();
