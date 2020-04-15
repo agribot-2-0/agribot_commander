@@ -2,6 +2,7 @@
 import rospy
 import smach
 import roslib
+from std_srvs.srv import Empty
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -19,6 +20,13 @@ class AutonomousControlStart(smach.State):
         #Send data to mobile app
         #
         #
+        rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
+        switch_to_navigation = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation', Empty)
+        try:
+            switch_to_navigation()
+        except rospy.ServiceException as exc:
+            print("Service did not process request: " + str(exc))
+        
         if ud.autonomous_control_state_reason == 'auto_control_prepared' or \
            ud.autonomous_control_state_reason == 'autonomous_config_present':
             string_msg = "[State Machine] Executing state AutonomousControlStart "
