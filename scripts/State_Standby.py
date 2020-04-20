@@ -4,7 +4,7 @@ import rospy
 import rospkg
 import roslib
 import smach
-from agribot_msgs.msg import AgribotMobileAppFrame
+from industrial_msgs.msg import RobotMode
 from config_reader import ConfigReader
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -25,14 +25,14 @@ class Standby(smach.State):
         rospack = rospkg.RosPack()
         path_to_conf = rospack.get_path('agribot_map') + "/tasks/"
         self.config_reader = ConfigReader(path_to_conf)
-        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
-                                           AgribotMobileAppFrame,
+        self.subscriber = rospy.Subscriber('/agribot/state_machine/mode',
+                                           RobotMode,
                                            self.callback_app_communication)
 
 
     def callback_app_communication(self, data):
         self.mutex.acquire()
-        if data.can_id == 21:
+        if data.val == RobotMode.MANUAL:
             self.connection_received = True
         self.mutex.release()
 

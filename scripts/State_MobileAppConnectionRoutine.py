@@ -3,6 +3,8 @@ import threading
 import rospy
 import smach
 from agribot_msgs.msg import AgribotMobileAppFrame
+from industrial_msgs.msg import RobotMode
+from std_msgs.msg import Int32
 import roslib
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -24,28 +26,45 @@ class MobileAppConnectionRoutine(smach.State):
         self.command_received_autonomous = False
         self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
                                            AgribotMobileAppFrame,
-                                           self.callback_app_communication)
+                                           self.callback_app_frames_communication)
+        self.subscriberRobotMode = rospy.Subscriber('/agribot/state_machine/mode',
+                                           RobotMode,
+                                           self.callback_app_mode_communication)
+        self.subscriberErrors = rospy.Subscriber('/agribot/state_machine/error',
+                                                Int32,
+                                                self.callback_app_error_communication)
 
-    def callback_app_communication(self, data):
+    def callback_app_frames_communication(self, data):
+        self.mutex.acquire()
+        if rospy.has_param('/agribot/robot_current_state'):
+            current_state = rospy.get_param('/agribot/robot_current_state')
+            if current_state == 'manual_control_state':
+                if data.can_id == 53:
+                    self.command_received_only_move = True
+                elif data.can_id == 150:
+                    rospy.loginfo('[State Machine] Received configuration command')
+                    self.command_received_configuration = True
+        self.mutex.release()
+    
+    def callback_app_mode_communication(self, data):
+        self.mutex.acquire()
+        if rospy.has_param('/agribot/robot_current_state'):
+            current_state = rospy.get_param('/agribot/robot_current_state')
+            if current_state == 'manual_control_state':
+                if data.val == RobotMode.AUTO:
+                    rospy.loginfo('[State Machine] Received autonomous control command')
+                    self.command_received_autonomous = True
+        self.mutex.release()
+
+    def callback_app_error_communication(self, data):
         self.mutex.acquire()
         if rospy.has_param('/agribot/robot_current_state'):
             current_state = rospy.get_param('/agribot/robot_current_state')
             #Check for error frames
-            if data.can_id == 200:
-                #heartbeat failed
-                if ord(data.can_byte_array[0]) == 0x00:
-                    if ord(data.can_byte_array[1]) == 0x0F:
-                        rospy.loginfo('[State Machine] Received  failed connection frame')
-                        self.connection_failed_received = True
-            if current_state == 'manual_control_state':
-                if data.can_id == 53:
-                    self.command_received_only_move = True
-                elif data.can_id == 31:
-                    rospy.loginfo('[State Machine] Received autonomous control command')
-                    self.command_received_autonomous = True
-                elif data.can_id == 150:
-                    rospy.loginfo('[State Machine] Received configuration command')
-                    self.command_received_configuration = True
+            if (data.data == 1 or data.data == 2) and current_state == 'manual_control_state':
+                #heartbeat failed or manual steering error
+                rospy.loginfo('[State Machine] Received  failed connection frame')
+                self.connection_failed_received = True
         self.mutex.release()
 
     def execute(self, ud): # pylint: disable=invalid-name

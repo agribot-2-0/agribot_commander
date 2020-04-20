@@ -3,7 +3,7 @@ import threading
 import rospy
 import roslib
 import smach
-from agribot_msgs.msg import AgribotMobileAppFrame
+from industrial_msgs.msg import RobotMode
 from std_msgs.msg import UInt32
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -19,8 +19,8 @@ class TaskIsBlocked(smach.State):
         self.mutex = threading.Lock()
         self.intervention_received = False
         self.blocked_path = False
-        self.app_subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
-                                               AgribotMobileAppFrame,
+        self.app_subscriber = rospy.Subscriber('/agribot/state_machine/mode',
+                                               RobotMode,
                                                self.callback_app_communication)
         self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
                                                     UInt32,
@@ -30,7 +30,7 @@ class TaskIsBlocked(smach.State):
         self.mutex.acquire()
         current_state = rospy.get_param('/agribot/robot_current_state')
         if current_state == 'auto_control_state':
-            if data.can_id == 21:
+            if data.val == RobotMode.MANUAL:
                 self.intervention_received = True
         self.mutex.release()
 

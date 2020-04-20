@@ -2,8 +2,8 @@
 import threading
 import rospy
 import smach
-from agribot_msgs.msg import AgribotMobileAppFrame
 from agribot_msgs.msg import AgribotMoveBaseMonitorResult
+from industrial_msgs.msg import RobotMode
 from std_msgs.msg import Int32
 import roslib
 roslib.load_manifest('smach')
@@ -18,9 +18,9 @@ class AutonomousTaskMonitor(smach.State):
                              output_keys=['auto_task_monitor_output'])
         self.mutex = threading.Lock()
         self.command_received_only_move = False
-        self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
-                                           AgribotMobileAppFrame,
-                                           self.callback_appcommunication)
+        self.subscriber = rospy.Subscriber('/agribot/state_machine/mode',
+                                           RobotMode,
+                                           self.callback_app_communication)
         self.sub_move_base_result = rospy.Subscriber('/agribot/move_base_monitor/result',
                                                      AgribotMoveBaseMonitorResult,
                                                      self.callback_move_base_result)
@@ -35,10 +35,16 @@ class AutonomousTaskMonitor(smach.State):
         self.move_base_result = 10 # the 'no action' value
         self.move_base_current_waypoint = 0
         self.move_base_total_waypoints = 0
-        self.received_frame_id = 0
+        self.received_manual_steering = False
         self.task_is_blocked = False
 
-    def callback_appcommunication(self, data):
+    #def callback_app_error_communication(self, data):
+    #   self.mutex.acquire()
+    #   if data.data != 0:
+    #
+    #   self.mutex.release()
+
+    def callback_app_communication(self, data):
         ##TO DO
         ##The manual request abort task procedure is needed
         ##
@@ -46,7 +52,10 @@ class AutonomousTaskMonitor(smach.State):
         if rospy.has_param('/agribot/robot_current_state'):
             current_state = rospy.get_param('/agribot/robot_current_state')
             if current_state == 'auto_control_state':
-                self.received_frame_id = data.can_id
+                if data.val == RobotMode.MANUAL:
+                    self.received_manual_steering = True
+                else:
+                    self.received_manual_steering = False
         self.mutex.release()
 
     def callback_move_base_result(self, data):
@@ -82,10 +91,11 @@ class AutonomousTaskMonitor(smach.State):
         while True:
             self.mutex.acquire()
             # check if the task is aborted by manual steering
-            if self.received_frame_id == 21:
+            if self.received_manual_steering:
                 outcome_name = 'tr_succes'
                 ud.auto_task_monitor_output = 'user_abort'
                 #send abort current path to move_base_monitor
+                self.received_manual_steering = False
                 self.move_base_command_msg.data = 2
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
                 self.mutex.release()
