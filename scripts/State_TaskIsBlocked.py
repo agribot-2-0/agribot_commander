@@ -15,9 +15,11 @@ class TaskIsBlocked(smach.State):
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['tr_human_intervention',
-                                       'tr_continue_task'])
+                                       'tr_continue_task'],
+                             output_keys=['auto_task_blocked_output'])
         self.mutex = threading.Lock()
         self.intervention_received = False
+        self.user_abort = False
         self.blocked_path = False
         self.app_subscriber = rospy.Subscriber('/agribot/state_machine/mode',
                                                RobotMode,
@@ -30,8 +32,8 @@ class TaskIsBlocked(smach.State):
         self.mutex.acquire()
         current_state = rospy.get_param('/agribot/robot_current_state')
         if current_state == 'auto_control_state':
-            if data.val == RobotMode.MANUAL:
-                self.intervention_received = True
+            self.intervention_received = bool(data.val == RobotMode.MANUAL)
+            self.user_abort = bool(data.val == RobotMode.UNKNOWN)
         self.mutex.release()
 
     def callback_obstacle_detected(self, data):
@@ -45,6 +47,8 @@ class TaskIsBlocked(smach.State):
         string_msg = "[State Machine] Executing state TaskIsBlocked "
         rospy.loginfo(string_msg)
         output_string = ''
+        self.intervention_received = False
+        self.user_abort = False
         rate = rospy.Rate(100) # ROS Rate at 100Hz
         while not rospy.is_shutdown():
             self.mutex.acquire()
@@ -53,6 +57,15 @@ class TaskIsBlocked(smach.State):
                 rospy.set_param('/agribot/robot_current_state',
                                 'manual_control_state')
                 output_string = 'tr_human_intervention'
+                ud.auto_task_blocked_output = 'user_suspend'
+                self.mutex.release()
+                break
+            if self.user_abort:
+                self.user_abort = False
+                rospy.set_param('/agribot/robot_current_state',
+                                'manual_control_state')
+                output_string = 'tr_human_intervention'
+                ud.auto_task_blocked_output = 'user_abort'
                 self.mutex.release()
                 break
             if not self.blocked_path:

@@ -78,6 +78,16 @@ class AutonomousTaskMonitor(smach.State):
             self.task_is_blocked = bool(data.data != 0)
         self.mutex.release()
 
+    def clear_manual_flag(self):
+        self.mutex.acquire()
+        if self.received_manual_steering or self.received_user_abort:
+            self.received_manual_steering = False
+            self.received_user_abort = False
+            #send continue command to move_base_monitor
+            self.move_base_command_msg.data = 0
+            self.pub_move_base_comm.publish(self.move_base_command_msg)
+        self.mutex.release()
+
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
@@ -86,6 +96,9 @@ class AutonomousTaskMonitor(smach.State):
         rospy.loginfo(string_msg)
         outcome_name = ''
         warn_exception = True
+        # Check if the task was suspended by the user during the task blockage
+        # and should we continue the last path
+        self.clear_manual_flag()
         #trace the position, wait for safety events or mobile app interruption
         while True:
             self.mutex.acquire()
@@ -93,7 +106,7 @@ class AutonomousTaskMonitor(smach.State):
             if self.received_manual_steering:
                 outcome_name = 'tr_succes'
                 ud.auto_task_monitor_output = 'user_suspend'
-                #send abort current path to move_base_monitor
+                #send pause current path to move_base_monitor
                 self.received_manual_steering = False
                 self.move_base_command_msg.data = 1
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
@@ -110,8 +123,8 @@ class AutonomousTaskMonitor(smach.State):
                 break
             # check if the task is not blocked
             if self.task_is_blocked:
-                rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state \
-                              because current task is blocked by obstacle")
+                rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state " +\
+                              "because current task is blocked by obstacle")
                 #send pause goal to move_base_monitor
                 self.move_base_command_msg.data = 1
                 self.pub_move_base_comm.publish(self.move_base_command_msg)

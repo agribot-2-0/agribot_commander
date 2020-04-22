@@ -4,9 +4,9 @@ import rospy
 import rospkg
 import roslib
 import smach
+from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
 from config_reader import ConfigReader
-from std_msgs.msg import String
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -30,9 +30,9 @@ class Standby(smach.State):
         self.subscriber = rospy.Subscriber('/agribot/state_machine/mode',
                                            RobotMode,
                                            self.callback_app_communication)
-        self.subscriber_choose_task= rospy.Subscriber('/agribot/state_machine/task',
-                                                      String,
-                                                      self.callback_choose_task)
+        self.subscriber_choose_task = rospy.Subscriber('/agribot/state_machine/task',
+                                                       String,
+                                                       self.callback_choose_task)
 
     def callback_choose_task(self, data):
         self.mutex.acquire()
@@ -41,12 +41,14 @@ class Standby(smach.State):
 
     def callback_app_communication(self, data):
         self.mutex.acquire()
-        if data.val == RobotMode.MANUAL:
-            self.connection_received = True
+        current_state = rospy.get_param('/agribot/robot_current_state')
+        if current_state == 'safe_state':
+            if data.val == RobotMode.MANUAL:
+                self.connection_received = True
         self.mutex.release()
 
     def check_config_file(self):
-        if self.choosed_task_name != '' and self.choosed_task_name != self.last_task_name:
+        if self.choosed_task_name != '':
             if self.config_reader.set_task_name(self.choosed_task_name):
                 if self.config_reader.get_task_conf_from_yaml():
                     self.last_task_name = self.choosed_task_name
