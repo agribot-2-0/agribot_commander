@@ -30,12 +30,12 @@ class AutonomousTaskMonitor(smach.State):
         self.pub_move_base_comm = rospy.Publisher('/agribot/move_base_monitor/command',
                                                   Int32,
                                                   queue_size=10)
-        #self.move_base = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
         self.move_base_command_msg = Int32(0)
         self.move_base_result = 10 # the 'no action' value
         self.move_base_current_waypoint = 0
         self.move_base_total_waypoints = 0
         self.received_manual_steering = False
+        self.received_user_abort = False
         self.task_is_blocked = False
 
     #def callback_app_error_communication(self, data):
@@ -53,6 +53,7 @@ class AutonomousTaskMonitor(smach.State):
             current_state = rospy.get_param('/agribot/robot_current_state')
             if current_state == 'auto_control_state':
                 self.received_manual_steering = bool(data.val == RobotMode.MANUAL)
+                self.received_user_abort = bool(data.val == RobotMode.UNKNOWN)
         self.mutex.release()
 
     def callback_move_base_result(self, data):
@@ -84,15 +85,25 @@ class AutonomousTaskMonitor(smach.State):
         string_msg = "[State Machine] Executing state AutonomousTaskMonitor "
         rospy.loginfo(string_msg)
         outcome_name = ''
+        warn_exception = True
         #trace the position, wait for safety events or mobile app interruption
         while True:
             self.mutex.acquire()
             # check if the task is aborted by manual steering
             if self.received_manual_steering:
                 outcome_name = 'tr_succes'
-                ud.auto_task_monitor_output = 'user_abort'
+                ud.auto_task_monitor_output = 'user_suspend'
                 #send abort current path to move_base_monitor
                 self.received_manual_steering = False
+                self.move_base_command_msg.data = 1
+                self.pub_move_base_comm.publish(self.move_base_command_msg)
+                self.mutex.release()
+                break
+            if self.received_user_abort:
+                outcome_name = 'tr_succes'
+                ud.auto_task_monitor_output = 'user_abort'
+                #send abort current path to move_base_monitor
+                self.received_user_abort = False
                 self.move_base_command_msg.data = 2
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
                 self.mutex.release()
@@ -131,6 +142,8 @@ class AutonomousTaskMonitor(smach.State):
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc_auto:
-                # pylint: disable=superfluous-parens
-                print("[State Machine]: " + str(exc_auto))
+                if warn_exception:
+                    # pylint: disable=superfluous-parens
+                    print("[State Machine]: " + str(exc_auto))
+                    warn_exception = False
         return outcome_name

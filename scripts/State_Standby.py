@@ -6,11 +6,12 @@ import roslib
 import smach
 from industrial_msgs.msg import RobotMode
 from config_reader import ConfigReader
+from std_msgs.msg import String
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
 class Standby(smach.State):
-    # pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """This is a default robot state in which it awaits the input from application"""
     def __init__(self):
         smach.State.__init__(self,
@@ -21,6 +22,7 @@ class Standby(smach.State):
         self.mutex = threading.Lock()
         self.connection_received = False
         self.last_task_name = ''
+        self.choosed_task_name = ''
         self.standby_com = True
         rospack = rospkg.RosPack()
         path_to_conf = rospack.get_path('agribot_map') + "/tasks/"
@@ -28,7 +30,14 @@ class Standby(smach.State):
         self.subscriber = rospy.Subscriber('/agribot/state_machine/mode',
                                            RobotMode,
                                            self.callback_app_communication)
+        self.subscriber_choose_task= rospy.Subscriber('/agribot/state_machine/task',
+                                                      String,
+                                                      self.callback_choose_task)
 
+    def callback_choose_task(self, data):
+        self.mutex.acquire()
+        self.choosed_task_name = data.data
+        self.mutex.release()
 
     def callback_app_communication(self, data):
         self.mutex.acquire()
@@ -37,21 +46,29 @@ class Standby(smach.State):
         self.mutex.release()
 
     def check_config_file(self):
-        if self.config_reader.set_task_name("test_task"):
-            if self.config_reader.get_task_conf_from_yaml():
-                if self.last_task_name != self.config_reader.return_tasks_path_name():
-                    self.last_task_name = self.config_reader.return_tasks_path_name()
+        if self.choosed_task_name != '' and self.choosed_task_name != self.last_task_name:
+            if self.config_reader.set_task_name(self.choosed_task_name):
+                if self.config_reader.get_task_conf_from_yaml():
+                    self.last_task_name = self.choosed_task_name
+                    path_name = self.config_reader.return_tasks_path_name()
                     rospy.set_param('/agribot/chosen_task_name',
-                                    self.last_task_name)
+                                    path_name)
                     rospy.loginfo("[State Machine] Loaded task configuration: " + \
                                   "chosen_path_name: '" + \
-                                  self.last_task_name + "'")
+                                  path_name + "'")
                     config_present = True
                 else:
+                    rospy.loginfo("[State Machine] ERROR: Task configuration file '" + \
+                                  self.choosed_task_name + ".yaml' is faulty")
+                    self.choosed_task_name = ''
                     config_present = False
             else:
+                rospy.loginfo("[State Machine] ERROR: Task configuration file '" + \
+                              self.choosed_task_name + ".yaml' can't be opened or doesn't exist")
+                self.choosed_task_name = ''
                 config_present = False
         else:
+            self.choosed_task_name = ''
             config_present = False
         return config_present
 
@@ -79,6 +96,7 @@ class Standby(smach.State):
                 break
             elif self.check_config_file():
                 self.standby_com = True
+                self.choosed_task_name = ''
                 ud.safe_state_reason_man_out = ''
                 ud.safe_state_reason_auto_out = 'autonomous_config_present'
                 rospy.set_param('/agribot/robot_current_state',
