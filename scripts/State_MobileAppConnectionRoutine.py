@@ -12,6 +12,7 @@ roslib.load_manifest('smach_ros')
 
 # define state Foo
 class MobileAppConnectionRoutine(smach.State):
+    # pylint: disable=too-many-instance-attributes
     """This state is used to check the connection state, if we doesnt received hearbeat error etc"""
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_connection_is_unstable',
@@ -27,12 +28,12 @@ class MobileAppConnectionRoutine(smach.State):
         self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
                                            AgribotMobileAppFrame,
                                            self.callback_app_frames_communication)
-        self.subscriberRobotMode = rospy.Subscriber('/agribot/state_machine/mode',
-                                           RobotMode,
-                                           self.callback_app_mode_communication)
-        self.subscriberErrors = rospy.Subscriber('/agribot/state_machine/error',
-                                                Int32,
-                                                self.callback_app_error_communication)
+        self.subscriber_robot_mode = rospy.Subscriber('/agribot/state_machine/mode',
+                                                      RobotMode,
+                                                      self.callback_app_mode_communication)
+        self.subscriber_errors = rospy.Subscriber('/agribot/state_machine/error',
+                                                  Int32,
+                                                  self.callback_app_error_communication)
 
     def callback_app_frames_communication(self, data):
         self.mutex.acquire()
@@ -45,7 +46,7 @@ class MobileAppConnectionRoutine(smach.State):
                     rospy.loginfo('[State Machine] Received configuration command')
                     self.command_received_configuration = True
         self.mutex.release()
-    
+
     def callback_app_mode_communication(self, data):
         self.mutex.acquire()
         if rospy.has_param('/agribot/robot_current_state'):
@@ -94,5 +95,9 @@ class MobileAppConnectionRoutine(smach.State):
                 self.mutex.release()
                 break
             self.mutex.release()
-            rate.sleep()
+            try:
+                rate.sleep()
+            except rospy.ROSInterruptException as exc_mob:
+                # pylint: disable=superfluous-parens
+                print("[State Machine]: " + str(exc_mob))
         return output_string

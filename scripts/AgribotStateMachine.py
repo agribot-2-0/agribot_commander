@@ -21,12 +21,14 @@ from State_AutonomousControl_Start import AutonomousControlStart
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
+# if rebuilding the StateMachine change the last logger as logerr
 smach.set_loggers(rospy.logdebug,
                   rospy.logwarn,
                   rospy.logdebug,
-                  rospy.logerr)
+                  rospy.logdebug)
 
 def main():
+    # pylint: disable=too-many-statements
     rospy.init_node('agribot_state_machine')
     # Create an agribot SMACH state machine
     sm_agribot = smach.StateMachine(outcomes=['tr_agribot_offline'])
@@ -256,7 +258,11 @@ def main():
                                         '/SM_ROOT')
     sis.start()
     # Execute SMACH plan
-    sm_agribot.execute()
+    try:
+        sm_agribot.execute()
+    except smach.exceptions.InvalidUserCodeError as exc:
+        # pylint: disable=superfluous-parens
+        print("[State Machine] exception: " + str(exc))
     # Wait for ctrl-c to stop the application
     rospy.spin()
     sis.stop()

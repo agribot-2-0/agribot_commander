@@ -40,6 +40,7 @@ class TaskIsBlocked(smach.State):
         self.mutex.release()
 
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument
+    # pylint: disable=duplicate-code
         """Solving the problem by waiting, loading recovery task or receiving human intervention"""
         string_msg = "[State Machine] Executing state TaskIsBlocked "
         rospy.loginfo(string_msg)
@@ -63,5 +64,11 @@ class TaskIsBlocked(smach.State):
                 rospy.loginfo(string_msg)
                 break
             self.mutex.release()
-            rate.sleep()
+            # pylint: disable=duplicate-code
+            try:
+                rate.sleep()
+            except rospy.ROSInterruptException as exc:
+                # pylint: disable=superfluous-parens
+                print("[State Machine]: " + str(exc))
+            # pylint: enable=duplicate-code
         return output_string

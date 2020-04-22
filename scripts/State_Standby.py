@@ -56,6 +56,7 @@ class Standby(smach.State):
         return config_present
 
     def execute(self, ud): # pylint: disable=invalid-name
+    # pylint: disable=duplicate-code
         """Awaiting the application input"""
         if self.standby_com:
             string_msg = "[State Machine] Executing state Standby "
@@ -64,6 +65,7 @@ class Standby(smach.State):
         output_string = ''
         rate = rospy.Rate(100) # ROS Rate at 100Hz
         while not rospy.is_shutdown():
+        # pylint: disable=duplicate-code
             self.mutex.acquire()
             if self.connection_received:
                 self.connection_received = False
@@ -90,5 +92,9 @@ class Standby(smach.State):
                 rospy.set_param('/agribot/robot_current_state',
                                 'safe_state')
             self.mutex.release()
-            rate.sleep()
+            try:
+                rate.sleep()
+            except rospy.ROSInterruptException as exc_standby:
+                # pylint: disable=superfluous-parens
+                print("[State Machine]: " + str(exc_standby))
         return output_string

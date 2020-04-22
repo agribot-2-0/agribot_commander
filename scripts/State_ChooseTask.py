@@ -15,14 +15,22 @@ def wait_for_planners():
     simple_planner_inited = False
     while not (rospy.has_param('/agribot/waypoint_global_planer/is_inited') and
                rospy.has_param('/agribot/simple_local_planer/is_inited')):
-        rate.sleep()
+        try:
+            rate.sleep()
+        except rospy.ROSInterruptException as exc:
+            # pylint: disable=superfluous-parens
+            print("[State Machine]: " + str(exc))
     while not (waypoint_planner_inited and
                simple_planner_inited):
         waypoint_planner_inited = \
         rospy.get_param('/agribot/waypoint_global_planer/is_inited')
         simple_planner_inited = \
         rospy.get_param('/agribot/simple_local_planer/is_inited')
-        rate.sleep()
+        try:
+            rate.sleep()
+        except rospy.ROSInterruptException as exc_choose:
+            # pylint: disable=superfluous-parens
+            print("[State Machine]: " + str(exc_choose))
 
 class ChooseTask(smach.State):
     """State used to search the tasks database to pick the task for realisation"""

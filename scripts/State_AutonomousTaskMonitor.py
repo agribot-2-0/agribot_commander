@@ -52,10 +52,7 @@ class AutonomousTaskMonitor(smach.State):
         if rospy.has_param('/agribot/robot_current_state'):
             current_state = rospy.get_param('/agribot/robot_current_state')
             if current_state == 'auto_control_state':
-                if data.val == RobotMode.MANUAL:
-                    self.received_manual_steering = True
-                else:
-                    self.received_manual_steering = False
+                self.received_manual_steering = bool(data.val == RobotMode.MANUAL)
         self.mutex.release()
 
     def callback_move_base_result(self, data):
@@ -83,7 +80,7 @@ class AutonomousTaskMonitor(smach.State):
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
-        rospy.sleep(0.100)
+        rate = rospy.Rate(100) # ROS Rate at 100Hz
         string_msg = "[State Machine] Executing state AutonomousTaskMonitor "
         rospy.loginfo(string_msg)
         outcome_name = ''
@@ -131,4 +128,9 @@ class AutonomousTaskMonitor(smach.State):
                     #goal is pending, active, or being prempted or recalled
                     outcome_name = ''
             self.mutex.release()
+            try:
+                rate.sleep()
+            except rospy.ROSInterruptException as exc_auto:
+                # pylint: disable=superfluous-parens
+                print("[State Machine]: " + str(exc_auto))
         return outcome_name
