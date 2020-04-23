@@ -85,6 +85,7 @@ class ChooseTask(smach.State):
                         self.pub.publish(goal_fix)
                         send_last_msg = False
                         path_loaded = False
+                        self.points_handler.reset_path_point_stuffer()
                         rospy.set_param('/agribot/chosen_task_name', '')
                         choose_task_output = 'task_is_active'
                         self.output_string = 'tr_task_is_active'
@@ -108,7 +109,7 @@ class ChooseTask(smach.State):
             string_msg = "[State Machine] Waiting for planners "
             rospy.loginfo(string_msg)
             wait_for_planners()
-            string_msg = "[State Machine] Planners are ready, now loading the chosen path path "
+            string_msg = "[State Machine] Planners are ready, now loading the chosen path "
             rospy.loginfo(string_msg)
             #Check if task name is ok and if the task itself is proper
             ud.choose_task_output = self.load_the_chosen_path()

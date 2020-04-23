@@ -95,6 +95,7 @@ class AutonomousTaskMonitor(smach.State):
         string_msg = "[State Machine] Executing state AutonomousTaskMonitor "
         rospy.loginfo(string_msg)
         outcome_name = ''
+        self.move_base_result = 0
         warn_exception = True
         # Check if the task was suspended by the user during the task blockage
         # and should we continue the last path

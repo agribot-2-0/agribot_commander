@@ -270,8 +270,6 @@ void MoveBaseMonitor::monitorPathWaypoints()
     ros::spinOnce();
     loop_rate.sleep();
   }
-  resultMsg.result = RESULT_PATH_COMPLETED;
-  _stateMachinePub.publish(resultMsg);
   clear_waypoints_ = true;
   _pathLoaded = false;
   if (_userAbort == true)
@@ -281,6 +279,8 @@ void MoveBaseMonitor::monitorPathWaypoints()
   }
   else
   {
+    resultMsg.result = RESULT_PATH_COMPLETED;
+    _stateMachinePub.publish(resultMsg);
     ROS_INFO("[MoveBaseMonitor] Path ended");
   }
 }

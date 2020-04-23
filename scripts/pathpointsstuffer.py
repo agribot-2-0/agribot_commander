@@ -42,3 +42,8 @@ class PathPointsStuffer(object):
 
     def are_path_points_availible(self):
         return self.point_to_send_index < len(self.path_points.keys())
+
+    def reset_path_point_stuffer(self):
+        self.path_name = ""
+        self.point_to_send_index = 0
+        self.path_points = ""
