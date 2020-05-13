@@ -15,14 +15,22 @@ def wait_for_planners():
     simple_planner_inited = False
     while not (rospy.has_param('/agribot/waypoint_global_planer/is_inited') and
                rospy.has_param('/agribot/simple_local_planer/is_inited')):
-        rate.sleep()
+        try:
+            rate.sleep()
+        except rospy.ROSInterruptException as exc:
+            # pylint: disable=superfluous-parens
+            print("[State Machine]: " + str(exc))
     while not (waypoint_planner_inited and
                simple_planner_inited):
         waypoint_planner_inited = \
         rospy.get_param('/agribot/waypoint_global_planer/is_inited')
         simple_planner_inited = \
         rospy.get_param('/agribot/simple_local_planer/is_inited')
-        rate.sleep()
+        try:
+            rate.sleep()
+        except rospy.ROSInterruptException as exc_choose:
+            # pylint: disable=superfluous-parens
+            print("[State Machine]: " + str(exc_choose))
 
 class ChooseTask(smach.State):
     """State used to search the tasks database to pick the task for realisation"""
@@ -77,6 +85,7 @@ class ChooseTask(smach.State):
                         self.pub.publish(goal_fix)
                         send_last_msg = False
                         path_loaded = False
+                        self.points_handler.reset_path_point_stuffer()
                         rospy.set_param('/agribot/chosen_task_name', '')
                         choose_task_output = 'task_is_active'
                         self.output_string = 'tr_task_is_active'
@@ -100,7 +109,7 @@ class ChooseTask(smach.State):
             string_msg = "[State Machine] Waiting for planners "
             rospy.loginfo(string_msg)
             wait_for_planners()
-            string_msg = "[State Machine] Planners are ready, now loading the chosen path path "
+            string_msg = "[State Machine] Planners are ready, now loading the chosen path "
             rospy.loginfo(string_msg)
             #Check if task name is ok and if the task itself is proper
             ud.choose_task_output = self.load_the_chosen_path()

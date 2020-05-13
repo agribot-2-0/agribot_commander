@@ -21,12 +21,14 @@ from State_AutonomousControl_Start import AutonomousControlStart
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
+# if rebuilding or adding new elements to the StateMachine change the last logger as logerr
 smach.set_loggers(rospy.logdebug,
                   rospy.logwarn,
                   rospy.logdebug,
-                  rospy.logerr)
+                  rospy.logdebug)
 
 def main():
+    # pylint: disable=too-many-statements
     rospy.init_node('agribot_state_machine')
     # Create an agribot SMACH state machine
     sm_agribot = smach.StateMachine(outcomes=['tr_agribot_offline'])
@@ -195,7 +197,8 @@ def main():
         #AUTONOMOUS CONTROL STATE
         # Create the sub SMACH state machine
         sm_auto_ctrl = smach.StateMachine(outcomes=['tr_task_configuration_failed',
-                                                    'tr_return_to_save_state'],
+                                                    'tr_return_to_save_state',
+                                                    'tr_task_suspended'],
                                           input_keys=['sm_auto_in'],
                                           output_keys=['sm_auto_out_man',
                                                        'sm_auto_out_safe'])
@@ -232,13 +235,23 @@ def main():
                                                 'tr_human_intervention':
                                                 'TASK_COMPLETION_RAPORT'})
             smach.StateMachine.add('TASK_COMPLETION_RAPORT', TaskCompletionRaport(),
-                                   transitions={'tr_complete':
-                                                'tr_return_to_save_state'},
-                                   remapping={'task_completion_output':
-                                              'sm_auto_control_reason_out'})
+                                   transitions={'tr_complete_return_to_safe_state':
+                                                'tr_return_to_save_state',
+                                                'tr_suspended_return_to_manual':
+                                                'tr_task_suspended'},
+                                   remapping={'auto_task_monitor_input':
+                                              'auto_task_monitor_output',
+                                              'auto_task_blocked_input':
+                                              'auto_task_blocked_output',
+                                              'task_completion_man_out':
+                                              'sm_auto_out_man',
+                                              'task_completion_safe_out':
+                                              'sm_auto_out_safe'})
          #Finish state machine transitions and add it to agribot_state_machine
         smach.StateMachine.add('AUTONOMOUS_CONTROL_STATE', sm_auto_ctrl,
                                transitions={'tr_task_configuration_failed':
+                                            'MANUAL_CONTROL_STATE',
+                                            'tr_task_suspended':
                                             'MANUAL_CONTROL_STATE',
                                             'tr_return_to_save_state':
                                             'SAFE_STATE'},
@@ -254,7 +267,11 @@ def main():
                                         '/SM_ROOT')
     sis.start()
     # Execute SMACH plan
-    sm_agribot.execute()
+    try:
+        sm_agribot.execute()
+    except smach.exceptions.InvalidUserCodeError as exc:
+        # pylint: disable=superfluous-parens
+        print("[State Machine] exception: " + str(exc))
     # Wait for ctrl-c to stop the application
     rospy.spin()
     sis.stop()

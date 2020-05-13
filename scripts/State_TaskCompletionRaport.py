@@ -9,8 +9,12 @@ class TaskCompletionRaport(smach.State):
     # pylint: disable=too-few-public-methods
     """State is used to create a summary report from from the Agribots work"""
     def __init__(self):
-        smach.State.__init__(self, outcomes=['tr_complete'],
-                             output_keys=['task_completion_output'])
+        smach.State.__init__(self, outcomes=['tr_complete_return_to_safe_state',
+                                             'tr_suspended_return_to_manual'],
+                             output_keys=['task_completion_safe_out',
+                                          'task_completion_man_out'],
+                             input_keys=['auto_task_monitor_input',
+                                         'auto_task_blocked_input'])
 
     def execute(self, ud): # pylint: disable=invalid-name, no-self-use
         """Create a report from the task realisation"""
@@ -18,14 +22,49 @@ class TaskCompletionRaport(smach.State):
         #
         #
         string_msg = "[State Machine] Executing state TaskCompletionRaport "
-        ud.task_completion_output = 'return_to_safe_state'
         rospy.loginfo(string_msg)
         current_state = rospy.get_param('/agribot/robot_current_state')
+        output_str = ''
         if current_state == 'auto_control_state':
-            string_msg = "[State Machine] Task completed, all went good"
+            if ud.auto_task_monitor_input == 'user_abort':
+                string_msg = "[State Machine] Task aborted by the user"
+                ud.task_completion_safe_out = 'return_to_safe_state'
+                # set current robot state
+                rospy.set_param('/agribot/robot_current_state', 'safe_state')
+                # clear the current task
+                rospy.set_param('/agribot/current_task_name', '')
+                output_str = 'tr_complete_return_to_safe_state'
+
+            if ud.auto_task_monitor_input == 'user_suspend':
+                string_msg = "[State Machine] Task suspended by the user for manual control"
+                ud.task_completion_man_out = 'application_input_received'
+                # set current robot state
+                rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
+                output_str = 'tr_suspended_return_to_manual'
+
+            if ud.auto_task_monitor_input == 'succes':
+                string_msg = "[State Machine] Task completed, all went good"
+                ud.task_completion_safe_out = 'return_to_safe_state'
+                # set current robot state
+                rospy.set_param('/agribot/robot_current_state', 'safe_state')
+                # clear the current task
+                rospy.set_param('/agribot/current_task_name', '')
+                output_str = 'tr_complete_return_to_safe_state'
         else:
-            string_msg = "[State Machine] Task ended with human intervention"
+            # task aborted during blockage
+            if ud.auto_task_blocked_input == 'user_abort':
+                string_msg = "[State Machine] Task ended with human intervention"
+                ud.task_completion_safe_out = 'return_to_safe_state'
+                # set current robot state
+                rospy.set_param('/agribot/robot_current_state', 'safe_state')
+                # clear the current task
+                rospy.set_param('/agribot/current_task_name', '')
+                output_str = 'tr_complete_return_to_safe_state'
+            if ud.auto_task_blocked_input == 'user_suspend':
+                string_msg = "[State Machine] Task suspended by the user for manual control"
+                ud.task_completion_man_out = 'application_input_received'
+                # set current robot state
+                rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
+                output_str = 'tr_suspended_return_to_manual'
         rospy.loginfo(string_msg)
-        rospy.set_param('/agribot/robot_current_state', 'safe_state')
-        rospy.set_param('/agribot/current_task_name', '')
-        return 'tr_complete'
+        return output_str

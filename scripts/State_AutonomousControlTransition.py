@@ -23,7 +23,11 @@ class AutonomousControlTransition(smach.State):
         #Prepare auto control succesful or not
         #
         #
-        rospy.sleep(0.010)
+        try:
+            rospy.sleep(0.010)
+        except rospy.ROSInterruptException as exc:
+            # pylint: disable=superfluous-parens
+            print("[State Machine]: " + str(exc))
         if self.counter < 20:
             ud.auto_control_transition_out = 'auto_control_prepared'
             rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
