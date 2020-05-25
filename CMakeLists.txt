@@ -1,6 +1,12 @@
+#############################################################################
+## Set minimum required version of cmake, project name and compile options ##
+#############################################################################
 cmake_minimum_required(VERSION 2.8.3)
 project(agribot_commander)
 
+#############################################################################
+## Find catkin packages and libraries for catkin and system dependencies   ##
+#############################################################################
 find_package(catkin REQUIRED COMPONENTS
   rospy
   roscpp
@@ -21,28 +27,42 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
 )
 
+################################################
+## Declare ROS messages, services and actions ##
+################################################
 #add_message_files(
 #  FILES
 #)
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  actionlib_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+#   actionlib_msgs
+# )
 
+###################################
+## catkin specific configuration ##
+###################################
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES agribot_msgs
- CATKIN_DEPENDS message_runtime std_msgs
+# CATKIN_DEPENDS message_runtime std_msgs
 #  DEPENDS system_lib
 )
+
+#############################################################################
+## Build                                                                   ##
+#############################################################################
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${agribot_common_SOURCE_DIR}/include
+)
+
+link_directories(
+ ${PROJECT_SOURCE_DIR}
 )
 
 add_executable(navsatfix_to_local_node src/navsatfix_to_local_node/navsatfix_to_local_node.cpp src/navsatfix_to_local_node/NavSatFixToLocalNode.cpp)
@@ -52,3 +72,46 @@ add_dependencies(navsatfix_to_local_node ${catkin_EXPORTED_TARGETS})
 add_executable(move_base_monitor_node src/move_base_monitor_node/move_base_monitor_node.cpp src/move_base_monitor_node/MoveBaseMonitor.cpp)
 target_link_libraries(move_base_monitor_node ${catkin_LIBRARIES})
 add_dependencies(move_base_monitor_node ${catkin_EXPORTED_TARGETS})
+
+#############
+## Install ##
+#############
+
+install(TARGETS
+  navsatfix_to_local_node
+  move_base_monitor_node
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+catkin_install_python(PROGRAMS
+	scripts/AgribotStateMachine.py
+	scripts/pathpointsstuffer.py
+	scripts/State_AutonomousTaskMonitor.py
+	scripts/State_CreateOutputInfoLogs.py
+	scripts/State_ManualControl_Start.py
+	scripts/State_SafeState_Start.py
+	scripts/State_TaskIsBlocked.py
+	scripts/config_reader.py
+	scripts/State_AutonomousControl_Start.py
+	scripts/State_CheckIfBlockedDirection.py
+	scripts/State_EngineStop.py
+	scripts/State_MobileAppConnectionRoutine.py
+	scripts/State_Standby.py
+	scripts/path_points_stuffer_node.py
+	scripts/State_AutonomousControlTransition.py
+	scripts/State_ChooseTask.py
+	scripts/State_IsTaskChoosen.py
+	scripts/State_MobileAppRoutine_Start.py
+	scripts/State_TaskCompletionRaport.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN ".svn" EXCLUDE
+)
+
+#############
+## Testing ##
+#############
