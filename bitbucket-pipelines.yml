@@ -1,4 +1,4 @@
-image: docker:git
+image: docker:18-git
 
 pipelines:
   default:
@@ -30,7 +30,7 @@ pipelines:
            - git clone https://github.com/panpawelchmiel/agribot_map.git
            - git clone https://github.com/panpawelchmiel/agribot_msgs.git
            - git clone https://github.com/panpawelchmiel/agribot_common.git
-           - .industrial_ci/bitbucket.sh  ROS_DISTRO="melodic" UPSTREAM_WORKSPACE="agribot_msgs agribot_common agribot_map"
+           - .industrial_ci/bitbucket.sh BUILDER="colcon" ROS_DISTRO="melodic" UPSTREAM_WORKSPACE="agribot_msgs agribot_common agribot_map"
 
 definitions:
   services:
