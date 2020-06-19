@@ -2,6 +2,7 @@
 import rospy
 import smach
 import roslib
+from std_msgs.msg import String
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -15,6 +16,10 @@ class TaskCompletionRaport(smach.State):
                                           'task_completion_man_out'],
                              input_keys=['auto_task_monitor_input',
                                          'auto_task_blocked_input'])
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
+                                         String,
+                                         queue_size=10)
+        self.state_msg = String('')
 
     def execute(self, ud): # pylint: disable=invalid-name, no-self-use
         """Create a report from the task realisation"""
@@ -23,6 +28,8 @@ class TaskCompletionRaport(smach.State):
         #
         string_msg = "[State Machine] Executing state TaskCompletionRaport "
         rospy.loginfo(string_msg)
+        self.state_msg = "TaskCompletionRaport"
+        self.pub_state.publish(self.state_msg)
         current_state = rospy.get_param('/agribot/robot_current_state')
         output_str = ''
         if current_state == 'auto_control_state':

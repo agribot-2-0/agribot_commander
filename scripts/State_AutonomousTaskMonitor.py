@@ -5,6 +5,7 @@ import smach
 from agribot_msgs.msg import AgribotMoveBaseMonitorResult
 from industrial_msgs.msg import RobotMode
 from std_msgs.msg import Int32
+from std_msgs.msg import String
 import roslib
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -30,6 +31,10 @@ class AutonomousTaskMonitor(smach.State):
         self.pub_move_base_comm = rospy.Publisher('/agribot/move_base_monitor/command',
                                                   Int32,
                                                   queue_size=10)
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
+                                         String,
+                                         queue_size=10)
+        self.state_msg = String('')
         self.move_base_command_msg = Int32(0)
         self.move_base_result = 10 # the 'no action' value
         self.move_base_current_waypoint = 0
@@ -88,12 +93,14 @@ class AutonomousTaskMonitor(smach.State):
             self.pub_move_base_comm.publish(self.move_base_command_msg)
         self.mutex.release()
 
-    def execute(self, ud): # pylint: disable=invalid-name, unused-argument
+    def execute(self, ud): # pylint: disable=invalid-name, unused-argument, too-many-statements
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
         rate = rospy.Rate(100) # ROS Rate at 100Hz
         string_msg = "[State Machine] Executing state AutonomousTaskMonitor "
         rospy.loginfo(string_msg)
+        self.state_msg = "AutonomousTaskMonitor"
+        self.pub_state.publish(self.state_msg)
         outcome_name = ''
         self.move_base_result = 0
         warn_exception = True

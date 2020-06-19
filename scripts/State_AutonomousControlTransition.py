@@ -2,6 +2,7 @@
 import rospy
 import roslib
 import smach
+from std_msgs.msg import String
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -14,6 +15,10 @@ class AutonomousControlTransition(smach.State):
         smach.State.__init__(self, outcomes=['tr_auto_mode_failed', 'tr_auto_control_prepared',
                                              'tr_in_progress'],
                              output_keys=['auto_control_transition_out'])
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
+                                         String,
+                                         queue_size=10)
+        self.state_msg = String('')
         self.counter = 0
 
     def execute(self, ud): # pylint: disable=invalid-name
@@ -23,6 +28,9 @@ class AutonomousControlTransition(smach.State):
         #Prepare auto control succesful or not
         #
         #
+        if self.counter == 0:
+            self.state_msg = "AutonomousControlTransition"
+            self.pub_state.publish(self.state_msg)
         try:
             rospy.sleep(0.010)
         except rospy.ROSInterruptException as exc:
@@ -31,6 +39,7 @@ class AutonomousControlTransition(smach.State):
         if self.counter < 20:
             ud.auto_control_transition_out = 'auto_control_prepared'
             rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
+            self.counter = 0
             output_string = 'tr_auto_control_prepared'
         else:
             self.counter = self.counter+1

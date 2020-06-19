@@ -5,11 +5,12 @@ import roslib
 import smach
 from industrial_msgs.msg import RobotMode
 from std_msgs.msg import UInt32
+from std_msgs.msg import String
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
 class TaskIsBlocked(smach.State):
-    # pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """This is a danger responding robot state, the danger can be a blocked
     path or the enviroment is no longer favorable for the task"""
     def __init__(self):
@@ -27,6 +28,10 @@ class TaskIsBlocked(smach.State):
         self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
                                                     UInt32,
                                                     self.callback_obstacle_detected)
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
+                                         String,
+                                         queue_size=10)
+        self.state_msg = String('')
 
     def callback_app_communication(self, data):
         self.mutex.acquire()
@@ -47,6 +52,8 @@ class TaskIsBlocked(smach.State):
         string_msg = "[State Machine] Executing state TaskIsBlocked "
         rospy.loginfo(string_msg)
         output_string = ''
+        self.state_msg = "TaskIsBlocked"
+        self.pub_state.publish(self.state_msg)
         self.intervention_received = False
         self.user_abort = False
         rate = rospy.Rate(100) # ROS Rate at 100Hz

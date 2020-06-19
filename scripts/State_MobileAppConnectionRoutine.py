@@ -5,6 +5,7 @@ import smach
 from agribot_msgs.msg import AgribotMobileAppFrame
 from industrial_msgs.msg import RobotMode
 from std_msgs.msg import Int32
+from std_msgs.msg import String
 import roslib
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -25,6 +26,8 @@ class MobileAppConnectionRoutine(smach.State):
         self.command_received_only_move = False
         self.command_received_configuration = False
         self.command_received_autonomous = False
+        self.first_enter = True
+        self.state_msg = String('')
         self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
                                            AgribotMobileAppFrame,
                                            self.callback_app_frames_communication)
@@ -34,6 +37,9 @@ class MobileAppConnectionRoutine(smach.State):
         self.subscriber_errors = rospy.Subscriber('/agribot/state_machine/error',
                                                   Int32,
                                                   self.callback_app_error_communication)
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
+                                         String,
+                                         queue_size=10)
 
     def callback_app_frames_communication(self, data):
         self.mutex.acquire()
@@ -72,7 +78,11 @@ class MobileAppConnectionRoutine(smach.State):
         """Check the connection state, if we doesnt received hearbeat error etc,
         otherwise return to Save-State state"""
         output_string = ''
-        rospy.loginfo("[State Machine] Executing MobileAppConnectionRoutine")
+        if self.first_enter:
+            self.first_enter = False
+            self.state_msg = "MobileAppConnectionRoutine"
+            self.pub_state.publish(self.state_msg)
+            rospy.loginfo("[State Machine] Executing MobileAppConnectionRoutine")
         rate = rospy.Rate(100) # ROS Rate at 100Hz
         while not rospy.is_shutdown():
             self.mutex.acquire()
@@ -80,18 +90,21 @@ class MobileAppConnectionRoutine(smach.State):
                 self.connection_failed_received = False
                 ud.connection_check_out = 'failed_connection'
                 output_string = 'tr_connection_is_unstable'
+                self.first_enter = True
                 self.mutex.release()
                 break
             elif self.command_received_autonomous:
                 self.command_received_autonomous = False
                 ud.read_data_command_out = 'aut_ctrl_command'
                 output_string = 'tr_auto_ctrl_command'
+                self.first_enter = True
                 self.mutex.release()
                 break
             elif self.command_received_only_move:
                 self.command_received_only_move = False
                 ud.read_data_command_out = 'rec_only_move_commands'
                 output_string = 'tr_rec_only_move_commands'
+                self.first_enter = False
                 self.mutex.release()
                 break
             self.mutex.release()

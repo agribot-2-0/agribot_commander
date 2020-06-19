@@ -24,6 +24,7 @@ class Standby(smach.State):
         self.last_task_name = ''
         self.choosed_task_name = ''
         self.standby_com = True
+        self.state_msg = String('')
         rospack = rospkg.RosPack()
         path_to_conf = rospack.get_path('agribot_map') + "/tasks/"
         self.config_reader = ConfigReader(path_to_conf)
@@ -33,6 +34,9 @@ class Standby(smach.State):
         self.subscriber_choose_task = rospy.Subscriber('/agribot/state_machine/task',
                                                        String,
                                                        self.callback_choose_task)
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
+                                         String,
+                                         queue_size=10)
 
     def callback_choose_task(self, data):
         self.mutex.acquire()
@@ -80,6 +84,8 @@ class Standby(smach.State):
         if self.standby_com:
             string_msg = "[State Machine] Executing state Standby "
             rospy.loginfo(string_msg)
+            self.state_msg = "Standby"
+            self.pub_state.publish(self.state_msg)
             self.standby_com = False
         output_string = ''
         rate = rospy.Rate(100) # ROS Rate at 100Hz

@@ -5,6 +5,7 @@ import rospy
 import smach
 import roslib
 import rospkg
+from std_msgs.msg import String
 from pathpointsstuffer import PathPointsStuffer
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -33,6 +34,7 @@ def wait_for_planners():
             print("[State Machine]: " + str(exc_choose))
 
 class ChooseTask(smach.State):
+    # pylint: disable=too-many-instance-attributes
     """State used to search the tasks database to pick the task for realisation"""
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_task_is_active', 'tr_task_conf_error'],
@@ -46,6 +48,10 @@ class ChooseTask(smach.State):
         pth_location_folder = rospack.get_path('agribot_map') + "/paths/"
         self.points_handler = PathPointsStuffer(pth_location_folder)
         self.output_string = ''
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
+                                         String,
+                                         queue_size=10)
+        self.state_msg = String('')
 
     def load_the_chosen_path(self):
         path_loaded = False
@@ -97,6 +103,8 @@ class ChooseTask(smach.State):
         self.output_string = ''
         string_msg = "[State Machine] Executing state ChooseTask "
         rospy.loginfo(string_msg)
+        self.state_msg = "ChooseTask"
+        self.pub_state.publish(self.state_msg)
         self.mutex.acquire()
         if rospy.has_param('/agribot/chosen_task_name'):
             self.new_task_name = rospy.get_param('/agribot/chosen_task_name')

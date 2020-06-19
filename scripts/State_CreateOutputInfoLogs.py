@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import rospy
 import smach
 import roslib
 roslib.load_manifest('smach')
@@ -16,6 +15,6 @@ class CreateOutputInfoLogs(smach.State):
         #Create output info logs
         #
         #
-        string_msg = "[State Machine] Executing state CreateOutputInfoLogs "
-        rospy.loginfo(string_msg)
+        # string_msg = "[State Machine] Executing state CreateOutputInfoLogs "
+        #rospy.loginfo(string_msg)
         return 'tr_executed_outputs'
