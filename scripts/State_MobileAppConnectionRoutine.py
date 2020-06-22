@@ -106,7 +106,7 @@ class MobileAppConnectionRoutine(smach.State):
                 output_string = 'tr_rec_only_move_commands'
                 self.first_enter = False
                 self.mutex.release()
-                break
+                # break
             self.mutex.release()
             try:
                 rate.sleep()
