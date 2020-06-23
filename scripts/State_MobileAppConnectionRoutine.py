@@ -26,6 +26,7 @@ class MobileAppConnectionRoutine(smach.State):
         self.command_received_only_move = False
         self.command_received_configuration = False
         self.command_received_autonomous = False
+        self.obstacle_in_move_direction = False
         self.first_enter = True
         self.state_msg = String('')
         self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
@@ -40,6 +41,17 @@ class MobileAppConnectionRoutine(smach.State):
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
+        self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
+                                                    Int32,
+                                                    self.callback_obstacle_detected)
+
+    def callback_obstacle_detected(self, data)
+        self.mutex.acquire()
+        if rospy.has_param('/agribot/robot_current_state'):
+            current_state = rospy.get_param('/agribot/robot_current_state')
+            if current_state == 'manual_control_state':
+                self.obstacle_in_move_direction = bool(data.data != 0)
+        self.mutex.release()
 
     def callback_app_frames_communication(self, data):
         self.mutex.acquire()
@@ -83,7 +95,7 @@ class MobileAppConnectionRoutine(smach.State):
             self.state_msg = "MobileAppConnectionRoutine"
             self.pub_state.publish(self.state_msg)
             rospy.loginfo("[State Machine] Executing MobileAppConnectionRoutine")
-        rate = rospy.Rate(100) # ROS Rate at 100Hz
+        rate = rospy.Rate(20) # ROS Rate at 100 Hz / 20 Hz
         while not rospy.is_shutdown():
             self.mutex.acquire()
             if self.connection_failed_received:
@@ -102,11 +114,13 @@ class MobileAppConnectionRoutine(smach.State):
                 break
             elif self.command_received_only_move:
                 self.command_received_only_move = False
-                ud.read_data_command_out = 'rec_only_move_commands'
-                output_string = 'tr_rec_only_move_commands'
+                # check for the blocked path
+                if self.obstacle_in_move_direction:
+                    ud.read_data_command_out = 'rec_only_move_commands'
+                    output_string = 'tr_rec_only_move_commands'
+                    self.mutex.release()
+                    break
                 self.first_enter = False
-                self.mutex.release()
-                # break
             self.mutex.release()
             try:
                 rate.sleep()
