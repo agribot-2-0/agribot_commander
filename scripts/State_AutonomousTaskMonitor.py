@@ -2,11 +2,11 @@
 import threading
 import rospy
 import smach
-from agribot_msgs.msg import AgribotMoveBaseMonitorResult
-from industrial_msgs.msg import RobotMode
+import roslib
 from std_msgs.msg import Int32
 from std_msgs.msg import String
-import roslib
+from industrial_msgs.msg import RobotMode
+from agribot_msgs.msg import AgribotMoveBaseMonitorResult
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 

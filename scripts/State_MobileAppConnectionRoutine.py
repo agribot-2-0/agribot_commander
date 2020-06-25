@@ -2,11 +2,11 @@
 import threading
 import rospy
 import smach
-from agribot_msgs.msg import AgribotMobileAppFrame
-from industrial_msgs.msg import RobotMode
+import roslib
 from std_msgs.msg import Int32
 from std_msgs.msg import String
-import roslib
+from industrial_msgs.msg import RobotMode
+from agribot_msgs.msg import AgribotMobileAppFrame
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -45,7 +45,7 @@ class MobileAppConnectionRoutine(smach.State):
                                                     Int32,
                                                     self.callback_obstacle_detected)
 
-    def callback_obstacle_detected(self, data)
+    def callback_obstacle_detected(self, data):
         self.mutex.acquire()
         if rospy.has_param('/agribot/robot_current_state'):
             current_state = rospy.get_param('/agribot/robot_current_state')
