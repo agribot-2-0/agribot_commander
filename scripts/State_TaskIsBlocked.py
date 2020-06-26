@@ -4,8 +4,8 @@ import rospy
 import roslib
 import smach
 from industrial_msgs.msg import RobotMode
-from std_msgs.msg import UInt32
 from std_msgs.msg import String
+from agribot_msgs.msg import AgribotObstacleDetection
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -26,7 +26,7 @@ class TaskIsBlocked(smach.State):
                                                RobotMode,
                                                self.callback_app_communication)
         self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
-                                                    UInt32,
+                                                    AgribotObstacleDetection,
                                                     self.callback_obstacle_detected)
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
@@ -43,7 +43,8 @@ class TaskIsBlocked(smach.State):
 
     def callback_obstacle_detected(self, data):
         self.mutex.acquire()
-        self.blocked_path = bool(data.data != 0)
+        self.blocked_path = \
+        bool(data.status == AgribotObstacleDetection.OBSTACLE_DETECTED)
         self.mutex.release()
 
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument

@@ -6,6 +6,7 @@ import roslib
 from std_msgs.msg import Int32
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
+from agribot_msgs.msg import AgribotObstacleDetection
 from agribot_msgs.msg import AgribotMoveBaseMonitorResult
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -26,7 +27,7 @@ class AutonomousTaskMonitor(smach.State):
                                                      AgribotMoveBaseMonitorResult,
                                                      self.callback_move_base_result)
         self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
-                                                    Int32,
+                                                    AgribotObstacleDetection,
                                                     self.callback_obstacle_detected)
         self.pub_move_base_comm = rospy.Publisher('/agribot/move_base_monitor/command',
                                                   Int32,
@@ -80,7 +81,8 @@ class AutonomousTaskMonitor(smach.State):
         self.mutex.acquire()
         current_state = rospy.get_param('/agribot/robot_current_state')
         if current_state == 'auto_control_state':
-            self.task_is_blocked = bool(data.data != 0)
+            self.task_is_blocked =\
+            bool(data.status == AgribotObstacleDetection.OBSTACLE_DETECTED)
         self.mutex.release()
 
     def clear_manual_flag(self):

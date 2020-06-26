@@ -7,6 +7,7 @@ from std_msgs.msg import Int32
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
 from agribot_msgs.msg import AgribotMobileAppFrame
+from agribot_msgs.msg import AgribotObstacleDetection
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -42,7 +43,7 @@ class MobileAppConnectionRoutine(smach.State):
                                          String,
                                          queue_size=10)
         self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
-                                                    Int32,
+                                                    AgribotObstacleDetection,
                                                     self.callback_obstacle_detected)
 
     def callback_obstacle_detected(self, data):
@@ -50,7 +51,8 @@ class MobileAppConnectionRoutine(smach.State):
         if rospy.has_param('/agribot/robot_current_state'):
             current_state = rospy.get_param('/agribot/robot_current_state')
             if current_state == 'manual_control_state':
-                self.obstacle_in_move_direction = bool(data.data != 0)
+                self.obstacle_in_move_direction = \
+                bool(data.status == AgribotObstacleDetection.OBSTACLE_DETECTED)
         self.mutex.release()
 
     def callback_app_frames_communication(self, data):
