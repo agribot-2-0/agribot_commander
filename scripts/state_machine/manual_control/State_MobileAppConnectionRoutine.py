@@ -24,8 +24,6 @@ class MobileAppConnectionRoutine(smach.State):
         self.mutex = threading.Lock()
         self.connection_failed_received = False
         self.command_received_only_move = False
-        self.v_linear = 0
-        self.radius = 0
         self.command_received_configuration = False
         self.command_received_autonomous = False
         self.obstacle_in_move_direction = False
@@ -53,7 +51,8 @@ class MobileAppConnectionRoutine(smach.State):
             current_state = rospy.get_param('/agribot/robot_current_state')
             if current_state == 'manual_control_state':
                 self.obstacle_in_move_direction = \
-                bool(data.status == AgribotObstacleDetection.OBSTACLE_DETECTED)
+                bool(data.status == AgribotObstacleDetection.WAITING_FOR_FIRST_MEASUREMENT\
+                     or data.status == AgribotObstacleDetection.OBSTACLE_DETECTED)
         self.mutex.release()
 
     def callback_app_frames_communication(self, data):
@@ -63,12 +62,6 @@ class MobileAppConnectionRoutine(smach.State):
             if current_state == 'manual_control_state':
                 if data.can_id == 53:
                     self.command_received_only_move = True
-                    self.v_linear = (data.can_byte_array[2] + data.can_byte_array[3] << 8)/100
-                    self.radius = (data.can_byte_array[4] + data.can_byte_array[5] << 8)/10
-                    if data.can_byte_array[0] == 1:
-                        self.v_linear = -self.v_linear
-                    if data.can_byte_array[1] == 1:
-                        self.radius = -self.radius
                 elif data.can_id == 150:
                     rospy.loginfo('[State Machine] Received configuration command')
                     self.command_received_configuration = True
