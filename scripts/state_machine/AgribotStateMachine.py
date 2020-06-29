@@ -116,7 +116,6 @@ def main():
             # Create the sub SMACH state machine
             sm_mobile_app_control_routine = \
             smach.StateMachine(outcomes=['tr_automatic_control_command',
-                                         'tr_received_only_move_commands',
                                          'tr_mob_app_failed_connection'],
                                input_keys=['sm_mobile_app_reason_in'],
                                output_keys=['sm_mobile_app_out_safe',
@@ -138,9 +137,7 @@ def main():
                                        transitions={'tr_connection_is_unstable':
                                                     'tr_mob_app_failed_connection',
                                                     'tr_auto_ctrl_command':
-                                                    'tr_automatic_control_command',
-                                                    'tr_rec_only_move_commands':
-                                                    'tr_received_only_move_commands'},
+                                                    'tr_automatic_control_command'},
                                        remapping={'connection_check_out':
                                                   'sm_mobile_app_out_safe',
                                                   'read_data_command_out':
@@ -149,29 +146,13 @@ def main():
             smach.StateMachine.add('MOBILE_APP_CONTROL_ROUTINE', sm_mobile_app_control_routine,
                                    transitions={'tr_automatic_control_command':
                                                 'AUTONOMOUS_CONTROL_TRANSITION',
-                                                'tr_received_only_move_commands':
-                                                'EXECUTE_MOVE_COMMANDS',
                                                 'tr_mob_app_failed_connection':
                                                 'tr_man_failed_connection'},
                                    remapping={'sm_mobile_app_out_safe':
                                               'sm_manual_out_safe',
                                               'sm_mobile_app_out_auto':
                                               'sm_manual_out_auto'})
-            #EXECUTE MOVE COMMANDS ROUTINE
-            # Create the sub SMACH state machine
-            sm_execute_move_commands = smach.StateMachine(outcomes=['tr_executed_move_commands'])
-            with sm_execute_move_commands:
-                # Add states to the container
-                smach.StateMachine.add('CHECK_IF_BLOCKED_DIRECTION', CheckIfBlockedDirection(),
-                                       transitions={'tr_no_obstacles':
-                                                    'CREATE_INFO_LOGS'})
-                smach.StateMachine.add('CREATE_INFO_LOGS', CreateOutputInfoLogs(),
-                                       transitions={'tr_executed_outputs':
-                                                    'tr_executed_move_commands'})
-            #Finish state machine transitions and add it to agribot_state_machine
-            smach.StateMachine.add('EXECUTE_MOVE_COMMANDS', sm_execute_move_commands,
-                                   transitions={'tr_executed_move_commands':
-                                                'MOBILE_APP_CONTROL_ROUTINE'})
+
             # Add states to the container
             smach.StateMachine.add('AUTONOMOUS_CONTROL_TRANSITION', AutonomousControlTransition(),
                                    transitions={'tr_auto_mode_failed':

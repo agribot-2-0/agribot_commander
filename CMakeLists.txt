@@ -85,25 +85,23 @@ install(TARGETS
 )
 
 catkin_install_python(PROGRAMS
-	scripts/AgribotStateMachine.py
-	scripts/pathpointsstuffer.py
-	scripts/State_AutonomousTaskMonitor.py
-	scripts/State_CreateOutputInfoLogs.py
-	scripts/State_ManualControl_Start.py
-	scripts/State_SafeState_Start.py
-	scripts/State_TaskIsBlocked.py
-	scripts/config_reader.py
-	scripts/State_AutonomousControl_Start.py
-	scripts/State_CheckIfBlockedDirection.py
-	scripts/State_EngineStop.py
-	scripts/State_MobileAppConnectionRoutine.py
-	scripts/State_Standby.py
-	scripts/path_points_stuffer_node.py
-	scripts/State_AutonomousControlTransition.py
-	scripts/State_ChooseTask.py
-	scripts/State_IsTaskChoosen.py
-	scripts/State_MobileAppRoutine_Start.py
-	scripts/State_TaskCompletionRaport.py
+	scripts/state_machine/AgribotStateMachine.py
+	scripts/utilities/pathpointsstuffer.py
+  scripts/utilities/path_points_stuffer_node.py
+  scripts/utilities/config_reader.py
+  scripts/state_machine/autonomous_control/State_AutonomousControl_Start.py
+	scripts/state_machine/autonomous_control/State_AutonomousTaskMonitor.py
+  scripts/state_machine/autonomous_control/State_TaskIsBlocked.py
+  scripts/state_machine/autonomous_control/State_IsTaskChoosen.py
+  scripts/state_machine/autonomous_control/State_ChooseTask.py
+  scripts/state_machine/autonomous_control/State_TaskCompletionRaport.py
+  scripts/state_machine/manual_control/State_ManualControl_Start.py
+  scripts/state_machine/manual_control/State_AutonomousControlTransition.py
+  scripts/state_machine/manual_control/State_MobileAppConnectionRoutine.py
+  scripts/state_machine/manual_control/State_MobileAppRoutine_Start.py
+  scripts/state_machine/safe_state/State_Standby.py
+	scripts/state_machine/safe_state/State_SafeState_Start.py
+	scripts/state_machine/safe_state/State_EngineStop.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

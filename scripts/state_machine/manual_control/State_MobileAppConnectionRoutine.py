@@ -3,6 +3,7 @@ import threading
 import rospy
 import smach
 import roslib
+from std_srvs.srv import Empty
 from std_msgs.msg import Int32
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
@@ -11,20 +12,20 @@ from agribot_msgs.msg import AgribotObstacleDetection
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
-
 # define state Foo
 class MobileAppConnectionRoutine(smach.State):
     # pylint: disable=too-many-instance-attributes
     """This state is used to check the connection state, if we doesnt received hearbeat error etc"""
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_connection_is_unstable',
-                                             'tr_auto_ctrl_command',
-                                             'tr_rec_only_move_commands'],
+                                             'tr_auto_ctrl_command'],
                              output_keys=['connection_check_out',
                                           'read_data_command_out'])
         self.mutex = threading.Lock()
         self.connection_failed_received = False
         self.command_received_only_move = False
+        self.v_linear = 0
+        self.radius = 0
         self.command_received_configuration = False
         self.command_received_autonomous = False
         self.obstacle_in_move_direction = False
@@ -62,6 +63,12 @@ class MobileAppConnectionRoutine(smach.State):
             if current_state == 'manual_control_state':
                 if data.can_id == 53:
                     self.command_received_only_move = True
+                    self.v_linear = (data.can_byte_array[2] + data.can_byte_array[3] << 8)/100
+                    self.radius = (data.can_byte_array[4] + data.can_byte_array[5] << 8)/10
+                    if data.can_byte_array[0] == 1:
+                        self.v_linear = -self.v_linear
+                    if data.can_byte_array[1] == 1:
+                        self.radius = -self.radius
                 elif data.can_id == 150:
                     rospy.loginfo('[State Machine] Received configuration command')
                     self.command_received_configuration = True
@@ -118,10 +125,27 @@ class MobileAppConnectionRoutine(smach.State):
                 self.command_received_only_move = False
                 # check for the blocked path
                 if self.obstacle_in_move_direction:
-                    ud.read_data_command_out = 'rec_only_move_commands'
-                    output_string = 'tr_rec_only_move_commands'
-                    self.mutex.release()
-                    break
+                    # change the  cmd vel arbiter to safe state
+                    rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
+                    switch_to_navigation =\
+                        rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop',
+                                           Empty)
+                    try:
+                        switch_to_navigation()
+                    except rospy.ServiceException as exc:
+                    # pylint: disable=superfluous-parens
+                        print("Service did not process request: " + str(exc))
+                else:
+                    # change the cmd vel arbiter to manual
+                    rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
+                    switch_to_navigation =\
+                        rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop',
+                                           Empty)
+                    try:
+                        switch_to_navigation()
+                    except rospy.ServiceException as exc:
+                    # pylint: disable=superfluous-parens
+                        print("Service did not process request: " + str(exc))
                 self.first_enter = False
             self.mutex.release()
             try:
