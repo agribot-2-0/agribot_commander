@@ -119,9 +119,9 @@ class MobileAppConnectionRoutine(smach.State):
                 # check for the blocked path
                 if self.obstacle_in_move_direction:
                     # change the  cmd vel arbiter to safe state
-                    rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
+                    rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
                     switch_to_navigation =\
-                        rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop',
+                        rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation',
                                            Empty)
                     try:
                         switch_to_navigation()
