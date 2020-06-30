@@ -128,15 +128,15 @@ class MobileAppConnectionRoutine(smach.State):
                         switch_to_navigation()
                     except rospy.ServiceException as exc:
                     # pylint: disable=superfluous-parens
-                        print("Service did not process request: " + str(exc))
+                        print("Service error: " + str(exc))
                 else:
                     # change the cmd vel arbiter to manual
                     rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
-                    switch_to_navigation =\
+                    switch_to_teleop =\
                         rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop',
                                            Empty)
                     try:
-                        switch_to_navigation()
+                        switch_to_teleop()
                     except rospy.ServiceException as exc:
                     # pylint: disable=superfluous-parens
                         print("Service did not process request: " + str(exc))
