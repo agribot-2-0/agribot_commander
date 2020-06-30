@@ -6,8 +6,6 @@ import roslib
 from State_Standby import Standby
 from State_EngineStop import EngineStop
 from State_MobileAppConnectionRoutine import MobileAppConnectionRoutine
-from State_CheckIfBlockedDirection import CheckIfBlockedDirection
-from State_CreateOutputInfoLogs import CreateOutputInfoLogs
 from State_AutonomousControlTransition import AutonomousControlTransition
 from State_IsTaskChoosen import IsTaskChosen
 from State_ChooseTask import ChooseTask
