@@ -1,5 +1,4 @@
 #include <NavSatFixToLocalNode.h>
-#include <navsat_conversions.h>
 
 NavSatFixToLocalNode::NavSatFixToLocalNode():
   _tf2Listener(_tf2Buffer)
