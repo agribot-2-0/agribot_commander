@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
   move_base_msgs
   visualization_msgs
+  robot_localization
 )
 
 ################################################

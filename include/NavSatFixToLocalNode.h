@@ -7,6 +7,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <geometry_msgs/PointStamped.h>
+#include <robot_localization/navsat_conversions.h>
 
 class NavSatFixToLocalNode
 {
