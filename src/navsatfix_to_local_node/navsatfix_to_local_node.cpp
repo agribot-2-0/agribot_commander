@@ -1,4 +1,8 @@
-#include <NavSatFixToLocalNode.h>
+/*
+* Copyright (C) 2020 Agribot. All rights reserved.
+*/
+
+#include <agribot_commander/NavSatFixToLocalNode.h>
 
 int main(int argc, char **argv)
 {

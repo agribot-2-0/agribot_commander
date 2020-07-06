@@ -12,14 +12,14 @@ pipelines:
          script:
            - apk add --update bash coreutils tar python3 py3-pip
            - pip3 install cpplint==1.4.6
-           - cpplint --recursive src/* include/*
+           - cpplint --recursive .
      - step:
          name: "Check pylint"
          script:
            - apk add --update bash coreutils tar python py-pip
            - pip install pylint==1.9.5
            - git clone https://github.com/panpawelchmiel/agribot_common.git
-           - pylint -d duplicate-code --rcfile=agribot_common/pylint_conf/.pylintrc scripts/utilities/*.py scripts/state_machine/*.py scripts/state_machine/autonomous_control/*.py scripts/state_machine/manual_control/*.py  scripts/state_machine/safe_state/*.py 
+           - pylint -d duplicate-code --rcfile=agribot_common/pylint_conf/.pylintrc scripts/utilities/*.py scripts/state_machine/*.py scripts/state_machine/autonomous_control/*.py scripts/state_machine/manual_control/*.py  scripts/state_machine/safe_state/*.py
      - step:
          name: "ROS Build"
          services:
