@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import rospy
 import smach
 import roslib
@@ -26,7 +27,6 @@ class AutonomousControlStart(smach.State):
         try:
             switch_to_navigation()
         except rospy.ServiceException as exc:
-            # pylint: disable=superfluous-parens
             print("Service did not process request: " + str(exc))
         if ud.autonomous_control_state_reason == 'auto_control_prepared' or \
            ud.autonomous_control_state_reason == 'autonomous_config_present':
