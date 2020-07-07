@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# pylint: disable=duplicate-code
 import rospy
 import smach
 import roslib

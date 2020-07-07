@@ -3,7 +3,7 @@ import rospy
 import rospkg
 from std_msgs.msg import String
 from sensor_msgs.msg import NavSatFix
-from pathpointsstuffer import PathPointsStuffer
+from utilities.pathpointsstuffer import PathPointsStuffer
 
 
 class PathPointsStufferNode(object):

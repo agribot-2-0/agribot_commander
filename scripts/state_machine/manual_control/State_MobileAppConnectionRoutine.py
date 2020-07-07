@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# pylint: disable=duplicate-code
+from __future__ import print_function
 import threading
 import rospy
 import smach
@@ -13,7 +13,6 @@ from agribot_msgs.msg import AgribotObstacleDetection
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
-# define state Foo
 class MobileAppConnectionRoutine(smach.State):
     # pylint: disable=too-many-instance-attributes
     """This state is used to check the connection state, if we doesnt received hearbeat error etc"""
@@ -138,13 +137,11 @@ class MobileAppConnectionRoutine(smach.State):
                     try:
                         switch_to_teleop()
                     except rospy.ServiceException as exc:
-                    # pylint: disable=superfluous-parens
-                        print("Service did not process request: " + str(exc))
+                        print("Service did not process request: {}".format(exc))
                 self.first_enter = False
             self.mutex.release()
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc_mob:
-                # pylint: disable=superfluous-parens
-                print("[State Machine]: " + str(exc_mob))
+                print("[State Machine]: {}".format(exc_mob))
         return output_string
