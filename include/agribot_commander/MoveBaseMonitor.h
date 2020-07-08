@@ -1,5 +1,8 @@
-// #ifndef AGRIBOT_COMMANDER_INCLUDE_NAVSATFIXTOLOCALNODE_H_
-// #define AGRIBOT_COMMANDER_INCLUDE_NAVSATFIXTOLOCALNODE_H_
+/*
+* Copyright (C) 2020 Agribot. All rights reserved.
+*/
+
+#pragma once
 
 #include <ros/ros.h>
 #include <geometry_msgs/PointStamped.h>
@@ -26,8 +29,7 @@ class MoveBaseMonitor
   ros::Publisher waypoint_marker_pub_;
   ros::Publisher plan_pub_;
 
-  void createAndPublishMarkersFromPath(const std::vector
-                                       <geometry_msgs::PoseStamped>& path);
+  void createAndPublishMarkersFromPath(const std::vector <geometry_msgs::PoseStamped>& path); // NOLINT
 
   void waypointCallback(const geometry_msgs::PointStampedConstPtr& waypoint);
 
@@ -55,5 +57,3 @@ class MoveBaseMonitor
   MoveBaseMonitor();
   void run();
 };
-
-// #endif  // AGRIBOT_COMMANDER_INCLUDE_NAVSATFIXTOLOCALNODE_H_
