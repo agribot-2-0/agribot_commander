@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import threading
 import rospy
 import rospkg
@@ -121,6 +122,5 @@ class Standby(smach.State):
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc_standby:
-                # pylint: disable=superfluous-parens
                 print("[State Machine]: " + str(exc_standby))
         return output_string

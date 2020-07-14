@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import rospy
 import roslib
 import smach
@@ -34,7 +35,6 @@ class AutonomousControlTransition(smach.State):
         try:
             rospy.sleep(0.010)
         except rospy.ROSInterruptException as exc:
-            # pylint: disable=superfluous-parens
             print("[State Machine]: " + str(exc))
         if self.counter < 20:
             ud.auto_control_transition_out = 'auto_control_prepared'

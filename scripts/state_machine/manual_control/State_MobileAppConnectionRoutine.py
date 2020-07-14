@@ -5,10 +5,10 @@ import rospy
 import smach
 import roslib
 from std_srvs.srv import Empty
-from std_msgs.msg import Int32
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
 from agribot_msgs.msg import AgribotMobileAppFrame
+from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotObstacleDetection
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -36,7 +36,7 @@ class MobileAppConnectionRoutine(smach.State):
                                                       RobotMode,
                                                       self.callback_app_mode_communication)
         self.subscriber_errors = rospy.Subscriber('/agribot/state_machine/error',
-                                                  Int32,
+                                                  AgribotAppErrorFlag,
                                                   self.callback_app_error_communication)
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
@@ -82,7 +82,9 @@ class MobileAppConnectionRoutine(smach.State):
         if rospy.has_param('/agribot/robot_current_state'):
             current_state = rospy.get_param('/agribot/robot_current_state')
             #Check for error frames
-            if (data.data == 1 or data.data == 2) and current_state == 'manual_control_state':
+            if (data.error_flag == AgribotAppErrorFlag.APP_PROTOCOL_ERROR or\
+                data.error_flag == AgribotAppErrorFlag.APP_MANUAL_ERROR) and\
+                current_state == 'manual_control_state':
                 #heartbeat failed or manual steering error
                 rospy.loginfo('[State Machine] Received  failed connection frame')
                 self.connection_failed_received = True
@@ -126,7 +128,6 @@ class MobileAppConnectionRoutine(smach.State):
                     try:
                         switch_to_navigation()
                     except rospy.ServiceException as exc:
-                    # pylint: disable=superfluous-parens
                         print("Service error: " + str(exc))
                 else:
                     # change the cmd vel arbiter to manual

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import rospy
 import smach
 import smach_ros
@@ -250,7 +251,6 @@ def main():
     try:
         sm_agribot.execute()
     except smach.exceptions.InvalidUserCodeError as exc:
-        # pylint: disable=superfluous-parens
         print("[State Machine] exception: " + str(exc))
     # Wait for ctrl-c to stop the application
     rospy.spin()

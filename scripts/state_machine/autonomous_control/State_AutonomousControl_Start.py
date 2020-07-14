@@ -19,8 +19,6 @@ class AutonomousControlStart(smach.State):
         """Returns the proper transition based on the input of userdata (ud)"""
         output_string = ''
         #Send data to mobile app
-        #
-        #
         rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
         switch_to_navigation = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation',
                                                   Empty)
@@ -30,12 +28,10 @@ class AutonomousControlStart(smach.State):
             print("Service did not process request: " + str(exc))
         if ud.autonomous_control_state_reason == 'auto_control_prepared' or \
            ud.autonomous_control_state_reason == 'autonomous_config_present':
-            string_msg = "[State Machine] Executing state AutonomousControlStart "
-            rospy.loginfo(string_msg)
+            rospy.loginfo("[State Machine] Executing state AutonomousControlStart ")
             output_string = 'tr_auto_control_prepared'
         elif ud.autonomous_control_state_reason == 'system_repaired':
-            string_msg = "[State Machine] Continuing state AutonomousControlStart "
-            rospy.loginfo(string_msg)
+            rospy.loginfo("[State Machine] Continuing state AutonomousControlStart ")
             output_string = 'tr_sys_repaired'
         else:
             output_string = 'tr_sys_repaired'

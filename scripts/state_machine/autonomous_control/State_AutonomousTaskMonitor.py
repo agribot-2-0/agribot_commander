@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import threading
 import rospy
 import smach
@@ -35,20 +36,14 @@ class AutonomousTaskMonitor(smach.State):
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
-        self.state_msg = String('')
-        self.move_base_command_msg = Int32(0)
+        self.state_msg = String()
+        self.move_base_command_msg = Int32()
         self.move_base_result = 10 # the 'no action' value
         self.move_base_current_waypoint = 0
         self.move_base_total_waypoints = 0
         self.received_manual_steering = False
         self.received_user_abort = False
         self.task_is_blocked = False
-
-    #def callback_app_error_communication(self, data):
-    #   self.mutex.acquire()
-    #   if data.data != 0:
-    #
-    #   self.mutex.release()
 
     def callback_app_communication(self, data):
         ##TO DO
@@ -99,8 +94,7 @@ class AutonomousTaskMonitor(smach.State):
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
         rate = rospy.Rate(100) # ROS Rate at 100Hz
-        string_msg = "[State Machine] Executing state AutonomousTaskMonitor "
-        rospy.loginfo(string_msg)
+        rospy.loginfo("[State Machine] Executing state AutonomousTaskMonitor ")
         self.state_msg = "AutonomousTaskMonitor"
         self.pub_state.publish(self.state_msg)
         outcome_name = ''
@@ -166,7 +160,6 @@ class AutonomousTaskMonitor(smach.State):
                 rate.sleep()
             except rospy.ROSInterruptException as exc_auto:
                 if warn_exception:
-                    # pylint: disable=superfluous-parens
                     print("[State Machine]: " + str(exc_auto))
                     warn_exception = False
         return outcome_name

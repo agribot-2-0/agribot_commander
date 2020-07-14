@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import threading
 import rospy
 import roslib
@@ -89,7 +90,6 @@ class TaskIsBlocked(smach.State):
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc:
-                # pylint: disable=superfluous-parens
                 print("[State Machine]: " + str(exc))
             # pylint: enable=duplicate-code
         return output_string

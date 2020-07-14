@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import threading
 from sensor_msgs.msg import NavSatFix
 import rospy
@@ -19,7 +20,6 @@ def wait_for_planners():
         try:
             rate.sleep()
         except rospy.ROSInterruptException as exc:
-            # pylint: disable=superfluous-parens
             print("[State Machine]: " + str(exc))
     while not (waypoint_planner_inited and
                simple_planner_inited):
@@ -30,7 +30,6 @@ def wait_for_planners():
         try:
             rate.sleep()
         except rospy.ROSInterruptException as exc_choose:
-            # pylint: disable=superfluous-parens
             print("[State Machine]: " + str(exc_choose))
 
 class ChooseTask(smach.State):
