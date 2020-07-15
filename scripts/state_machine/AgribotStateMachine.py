@@ -4,20 +4,19 @@ import rospy
 import smach
 import smach_ros
 import roslib
-from state_machine.safe_state.State_Standby import Standby
-from state_machine.safe_state.State_EngineStop import EngineStop
-from state_machine.manual_control.State_MobileAppConnectionRoutine import MobileAppConnectionRoutine
-from state_machine.manual_control.State_AutonomousControlTransition import \
-        AutonomousControlTransition
-from state_machine.autonomous_control.State_IsTaskChoosen import IsTaskChosen
-from state_machine.autonomous_control.State_ChooseTask import ChooseTask
-from state_machine.autonomous_control.State_AutonomousTaskMonitor import AutonomousTaskMonitor
-from state_machine.autonomous_control.State_TaskCompletionRaport import TaskCompletionRaport
-from state_machine.safe_state.State_SafeState_Start import SafeStateStart
-from state_machine.autonomous_control.State_TaskIsBlocked import TaskIsBlocked
-from state_machine.manual_control.State_ManualControl_Start import ManualControlStart
-from state_machine.manual_control.State_MobileAppRoutine_Start import MobileAppRoutineStart
-from state_machine.autonomous_control.State_AutonomousControl_Start import AutonomousControlStart
+from state_standby import Standby
+from state_engine_stop import EngineStop
+from state_safe_state_start import SafeStateStart
+from state_mobile_app_connection_routine import MobileAppConnectionRoutine
+from state_autonomous_control_transition import AutonomousControlTransition
+from state_manual_control_start import ManualControlStart
+from state_mobile_app_routine_start import MobileAppRoutineStart
+from state_is_task_choosen import IsTaskChosen
+from state_choose_task import ChooseTask
+from state_autonomous_task_monitor import AutonomousTaskMonitor
+from state_task_completion_raport import TaskCompletionRaport
+from state_task_is_blocked import TaskIsBlocked
+from state_autonomous_control_start import AutonomousControlStart
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 

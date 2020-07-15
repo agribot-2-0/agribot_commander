@@ -8,6 +8,7 @@ import smach
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
 from config_reader import ConfigReader
+#from utilities import ConfigReader
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 

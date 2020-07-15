@@ -8,7 +8,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Int32.h>
 #include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
-
+#include <agribot_msgs/AgribotMoveBaseCommand.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include <nav_msgs/Path.h>
@@ -33,7 +33,7 @@ class MoveBaseMonitor
 
   void waypointCallback(const geometry_msgs::PointStampedConstPtr& waypoint);
 
-  void stateMachineCallback(const std_msgs::Int32 &command);
+  void stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand &command_msg);
 
   void isPaused();
 

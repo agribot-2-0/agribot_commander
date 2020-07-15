@@ -50,7 +50,7 @@ class ChooseTask(smach.State):
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
-        self.state_msg = String('')
+        self.state_msg = String()
 
     def load_the_chosen_path(self):
         path_loaded = False
@@ -100,8 +100,7 @@ class ChooseTask(smach.State):
         """Pick and return the proper transition. Choose the proper the task name picked
         by the user or if it cant be found return to manual or safe state"""
         self.output_string = ''
-        string_msg = "[State Machine] Executing state ChooseTask "
-        rospy.loginfo(string_msg)
+        rospy.loginfo("[State Machine] Executing state ChooseTask ")
         self.state_msg = "ChooseTask"
         self.pub_state.publish(self.state_msg)
         self.mutex.acquire()
@@ -113,11 +112,9 @@ class ChooseTask(smach.State):
         #Check if we received any task name
         if self.new_task_name != '':
             #Check if move_base planner nodes are ready, else wait
-            string_msg = "[State Machine] Waiting for planners "
-            rospy.loginfo(string_msg)
+            rospy.loginfo("[State Machine] Waiting for planners ")
             wait_for_planners()
-            string_msg = "[State Machine] Planners are ready, now loading the chosen path "
-            rospy.loginfo(string_msg)
+            rospy.loginfo("[State Machine] Planners are ready, now loading the chosen path ")
             #Check if task name is ok and if the task itself is proper
             ud.choose_task_output = self.load_the_chosen_path()
         else:

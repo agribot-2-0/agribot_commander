@@ -4,9 +4,9 @@ import threading
 import rospy
 import smach
 import roslib
-from std_msgs.msg import Int32
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
+from agribot_msgs.msg import AgribotMoveBaseCommand
 from agribot_msgs.msg import AgribotObstacleDetection
 from agribot_msgs.msg import AgribotMoveBaseMonitorResult
 roslib.load_manifest('smach')
@@ -31,14 +31,14 @@ class AutonomousTaskMonitor(smach.State):
                                                     AgribotObstacleDetection,
                                                     self.callback_obstacle_detected)
         self.pub_move_base_comm = rospy.Publisher('/agribot/move_base_monitor/command',
-                                                  Int32,
+                                                  AgribotMoveBaseCommand,
                                                   queue_size=10)
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
         self.state_msg = String()
-        self.move_base_command_msg = Int32()
-        self.move_base_result = 10 # the 'no action' value
+        self.move_base_command_msg = AgribotMoveBaseCommand()
+        self.move_base_result = AgribotMoveBaseMonitorResult.PAUSED
         self.move_base_current_waypoint = 0
         self.move_base_total_waypoints = 0
         self.received_manual_steering = False
@@ -69,7 +69,7 @@ class AutonomousTaskMonitor(smach.State):
                 self.move_base_current_waypoint = data.current_waypoint
                 self.move_base_total_waypoints = data.total_waypoints
             else:
-                self.move_base_result = 10
+                self.move_base_result = AgribotMoveBaseMonitorResult.PAUSED
         self.mutex.release()
 
     def callback_obstacle_detected(self, data):
@@ -86,7 +86,7 @@ class AutonomousTaskMonitor(smach.State):
             self.received_manual_steering = False
             self.received_user_abort = False
             #send continue command to move_base_monitor
-            self.move_base_command_msg.data = 0
+            self.move_base_command_msg.command = AgribotMoveBaseCommand.CONTINUE
             self.pub_move_base_comm.publish(self.move_base_command_msg)
         self.mutex.release()
 
@@ -98,7 +98,7 @@ class AutonomousTaskMonitor(smach.State):
         self.state_msg = "AutonomousTaskMonitor"
         self.pub_state.publish(self.state_msg)
         outcome_name = ''
-        self.move_base_result = 0
+        self.move_base_result = AgribotMoveBaseMonitorResult.NOACTION
         warn_exception = True
         # Check if the task was suspended by the user during the task blockage
         # and should we continue the last path
@@ -112,7 +112,7 @@ class AutonomousTaskMonitor(smach.State):
                 ud.auto_task_monitor_output = 'user_suspend'
                 #send pause current path to move_base_monitor
                 self.received_manual_steering = False
-                self.move_base_command_msg.data = 1
+                self.move_base_command_msg.command = AgribotMoveBaseCommand.PAUSE
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
                 self.mutex.release()
                 break
@@ -121,7 +121,7 @@ class AutonomousTaskMonitor(smach.State):
                 ud.auto_task_monitor_output = 'user_abort'
                 #send abort current path to move_base_monitor
                 self.received_user_abort = False
-                self.move_base_command_msg.data = 2
+                self.move_base_command_msg.command = AgribotMoveBaseCommand.ABORT
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
                 self.mutex.release()
                 break
@@ -130,7 +130,7 @@ class AutonomousTaskMonitor(smach.State):
                 rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state " +\
                               "because current task is blocked by obstacle")
                 #send pause goal to move_base_monitor
-                self.move_base_command_msg.data = 1
+                self.move_base_command_msg.command = AgribotMoveBaseCommand.PAUSE
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
 
                 outcome_name = 'tr_danger'
@@ -138,21 +138,21 @@ class AutonomousTaskMonitor(smach.State):
                 break
             else:
                 #send continue command to move_base_monitor
-                self.move_base_command_msg.data = 0
+                self.move_base_command_msg.command = AgribotMoveBaseCommand.CONTINUE
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
             # if task is loaded
-            if self.move_base_result != 10:
+            if self.move_base_result != AgribotMoveBaseMonitorResult.PAUSED:
                  #if task ended succesfully
-                if self.move_base_result == 100:
+                if self.move_base_result == AgribotMoveBaseMonitorResult.PATH_COMPLETED:
                     ud.auto_task_monitor_output = 'succes'
                     outcome_name = 'tr_succes'
                     self.mutex.release()
                     break
                 #task pending for processing or is active
-                if self.move_base_result == 0 or \
-                   self.move_base_result == 1 or \
-                   self.move_base_result == 6 or \
-                   self.move_base_result == 7:
+                if self.move_base_result == AgribotMoveBaseMonitorResult.NOACTION or \
+                   self.move_base_result == AgribotMoveBaseMonitorResult.ACTIVE or \
+                   self.move_base_result == AgribotMoveBaseMonitorResult.PREEMPTED or \
+                   self.move_base_result == AgribotMoveBaseMonitorResult.RECALLED:
                     #goal is pending, active, or being prempted or recalled
                     outcome_name = ''
             self.mutex.release()

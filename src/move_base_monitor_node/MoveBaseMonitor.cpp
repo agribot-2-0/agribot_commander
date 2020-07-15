@@ -43,7 +43,7 @@ MoveBaseMonitor::MoveBaseMonitor()
                     "action server to come up");
   }
 
-  resultMsg.result = 0;
+  resultMsg.result = resultMsg.NOACTION;
   resultMsg.current_waypoint = 0;
   resultMsg.total_waypoints = 0;
   _pauseGoal = false;
@@ -52,21 +52,21 @@ MoveBaseMonitor::MoveBaseMonitor()
   _userAbort = false;
 }
 
-void MoveBaseMonitor::stateMachineCallback(const std_msgs::Int32 &command)
+void MoveBaseMonitor::stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand &command_msg)
 {
   // if the path is blocked then cancel the current goal and set the pause flag
-  if (command.data == COMMAND_PAUSE)
+  if (command_msg.command == command_msg.PAUSE)
   {
     ac->cancelAllGoals();
     _pauseGoal = true;
     _pauseGoalLatch = true;
   }
-  else if (command.data == COMMAND_CONTINUE)
+  else if (command_msg.command == command_msg.CONTINUE)
   {
     _pauseGoal = false;
   }
   // if we want to abort the current task by user request
-  else if (command.data == COMMAND_ABORT)
+  else if (command_msg.command == command_msg.ABORT)
   {
     _userAbort = true;
   }
@@ -83,7 +83,7 @@ void MoveBaseMonitor::isPaused()
       ROS_INFO_STREAM("[MoveBaseMonitor] Goal PAUSED");
       cancelTrig = false;
     }
-    resultMsg.result = RESULT_PAUSED;
+    resultMsg.result = resultMsg.PAUSED;
     _stateMachinePub.publish(resultMsg);
     ros::Duration(0.1).sleep();  // sleep for half a second
     ros::spinOnce();
@@ -204,12 +204,12 @@ void MoveBaseMonitor::monitorPathWaypoints()
       if (goal_result == actionlib::SimpleClientGoalState::ACTIVE ||
           goal_result == actionlib::SimpleClientGoalState::PENDING)
       {
-        resultMsg.result = RESULT_ACTIVE;
+        resultMsg.result = resultMsg.ACTIVE;
         _stateMachinePub.publish(resultMsg);
       }
       else if (goal_result == actionlib::SimpleClientGoalState::SUCCEEDED)
       {
-        resultMsg.result = RESULT_SUCCES;
+        resultMsg.result = resultMsg.SUCCES;
         _stateMachinePub.publish(resultMsg);
         ROS_INFO_STREAM("[MoveBaseMonitor] Goal succeeded");
         currentWaypoint++;
@@ -220,14 +220,14 @@ void MoveBaseMonitor::monitorPathWaypoints()
         // check if the current goal is paused or we should take next goal
         if (_pauseGoalLatch)
         {
-          resultMsg.result = RESULT_PAUSED;
+          resultMsg.result = resultMsg.PAUSED;
           _stateMachinePub.publish(resultMsg);
           load_point = true;
           _pauseGoalLatch = false;
         }
         else
         {
-          resultMsg.result = RESULT_PREEMPTED;
+          resultMsg.result = resultMsg.PREEMPTED;
           _stateMachinePub.publish(resultMsg);
           ROS_INFO_STREAM("[MoveBaseMonitor] Goal PREEMPTED");
           currentWaypoint++;
@@ -236,7 +236,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
       }
       else if (goal_result == actionlib::SimpleClientGoalState::ABORTED)
       {
-        resultMsg.result = RESULT_ABORTED;
+        resultMsg.result = resultMsg.ABORTED;
         _stateMachinePub.publish(resultMsg);
         currentWaypoint++;
         load_point = true;
@@ -245,7 +245,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
       }
       else if (goal_result == actionlib::SimpleClientGoalState::REJECTED)
       {
-        resultMsg.result = RESULT_FAILED;
+        resultMsg.result = resultMsg.FAILED;
         _stateMachinePub.publish(resultMsg);
         currentWaypoint++;
         load_point = true;
@@ -254,7 +254,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
       }
       else if (goal_result == actionlib::SimpleClientGoalState::RECALLED)
       {
-        resultMsg.result = RESULT_FAILED;
+        resultMsg.result = resultMsg.FAILED;
         _stateMachinePub.publish(resultMsg);
         ROS_INFO_STREAM("[MoveBaseMonitor] The goal was RECALLED!," <<
                         "trying next goal");
@@ -263,7 +263,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
       }
       else if (goal_result == actionlib::SimpleClientGoalState::LOST)
       {
-        resultMsg.result = RESULT_FAILED;
+        resultMsg.result = resultMsg.FAILED;
         _stateMachinePub.publish(resultMsg);
         ROS_INFO_STREAM("[MoveBaseMonitor] The goal was LOST!," <<
                         "trying next goal");
@@ -283,7 +283,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
   }
   else
   {
-    resultMsg.result = RESULT_PATH_COMPLETED;
+    resultMsg.result = resultMsg.PATH_COMPLETED;
     _stateMachinePub.publish(resultMsg);
     ROS_INFO("[MoveBaseMonitor] Path ended");
   }
