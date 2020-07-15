@@ -87,7 +87,6 @@ install(TARGETS
 
 catkin_install_python(PROGRAMS
   scripts/AgribotStateMachine.py
-  scripts/__init__.py
   scripts/pathpointsstuffer.py
   scripts/path_points_stuffer_node.py
   scripts/config_reader.py
