@@ -128,7 +128,7 @@ class MobileAppConnectionRoutine(smach.State):
                     try:
                         switch_to_navigation()
                     except rospy.ServiceException as exc:
-                        print("Service error: " + str(exc))
+                        print("Service error: {}".format(exc))
                 else:
                     # change the cmd vel arbiter to manual
                     rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')

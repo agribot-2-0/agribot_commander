@@ -19,7 +19,7 @@ class TaskCompletionRaport(smach.State):
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
-        self.state_msg = String('')
+        self.state_msg = String()
 
     def execute(self, ud): # pylint: disable=invalid-name, no-self-use
         """Create a report from the task realisation"""

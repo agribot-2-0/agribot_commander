@@ -16,17 +16,16 @@ def wait_for_planners():
     waypoint_planner_inited = False
     simple_planner_inited = False
     while not (rospy.has_param('/agribot/waypoint_global_planer/is_inited') and
-               rospy.has_param('/agribot/simple_local_planer/is_inited')):
+               rospy.has_param('/agribot/agribot_local_planer/is_inited')):
         try:
             rate.sleep()
         except rospy.ROSInterruptException as exc:
-            print("[State Machine]: " + str(exc))
-    while not (waypoint_planner_inited and
-               simple_planner_inited):
+            print("[State Machine]: {}".format(exc))
+    while not (waypoint_planner_inited and simple_planner_inited):
         waypoint_planner_inited = \
         rospy.get_param('/agribot/waypoint_global_planer/is_inited')
         simple_planner_inited = \
-        rospy.get_param('/agribot/simple_local_planer/is_inited')
+        rospy.get_param('/agribot/agribot_local_planer/is_inited')
         try:
             rate.sleep()
         except rospy.ROSInterruptException as exc_choose:

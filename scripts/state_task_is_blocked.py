@@ -32,7 +32,7 @@ class TaskIsBlocked(smach.State):
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
-        self.state_msg = String('')
+        self.state_msg = String()
 
     def callback_app_communication(self, data):
         self.mutex.acquire()
@@ -90,6 +90,6 @@ class TaskIsBlocked(smach.State):
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc:
-                print("[State Machine]: " + str(exc))
+                print("[State Machine]: {}".format(exc))
             # pylint: enable=duplicate-code
         return output_string

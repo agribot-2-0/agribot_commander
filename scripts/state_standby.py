@@ -25,7 +25,7 @@ class Standby(smach.State):
         self.last_task_name = ''
         self.choosed_task_name = ''
         self.standby_com = True
-        self.state_msg = String('')
+        self.state_msg = String()
         rospack = rospkg.RosPack()
         path_to_conf = rospack.get_path('agribot_map') + "/tasks/"
         self.config_reader = ConfigReader(path_to_conf)
@@ -122,5 +122,5 @@ class Standby(smach.State):
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc_standby:
-                print("[State Machine]: " + str(exc_standby))
+                print("[State Machine]: {}".format(exc_standby))
         return output_string

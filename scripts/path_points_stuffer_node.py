@@ -26,7 +26,6 @@ class PathPointsStufferNode(object):
 
     def callback_chosentask(self, msg):
         self.new_task_name = msg.data
-
         if self.points_stuffer.set_path_name(self.new_task_name):
             goal_fix = NavSatFix()
             goal_fix.header.frame_id = "ll"
