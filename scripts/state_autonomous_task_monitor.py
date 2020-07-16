@@ -97,7 +97,7 @@ class AutonomousTaskMonitor(smach.State):
         rospy.loginfo("[State Machine] Executing state AutonomousTaskMonitor ")
         self.state_msg = "AutonomousTaskMonitor"
         self.pub_state.publish(self.state_msg)
-        outcome_name = ''
+        output_string = ''
         self.move_base_result = AgribotMoveBaseMonitorResult.NOACTION
         warn_exception = True
         # Check if the task was suspended by the user during the task blockage
@@ -108,7 +108,7 @@ class AutonomousTaskMonitor(smach.State):
             self.mutex.acquire()
             # check if the task is aborted by manual steering
             if self.received_manual_steering:
-                outcome_name = 'tr_succes'
+                output_string = 'tr_succes'
                 ud.auto_task_monitor_output = 'user_suspend'
                 #send pause current path to move_base_monitor
                 self.received_manual_steering = False
@@ -117,7 +117,7 @@ class AutonomousTaskMonitor(smach.State):
                 self.mutex.release()
                 break
             if self.received_user_abort:
-                outcome_name = 'tr_succes'
+                output_string = 'tr_succes'
                 ud.auto_task_monitor_output = 'user_abort'
                 #send abort current path to move_base_monitor
                 self.received_user_abort = False
@@ -133,7 +133,7 @@ class AutonomousTaskMonitor(smach.State):
                 self.move_base_command_msg.command = AgribotMoveBaseCommand.PAUSE
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
 
-                outcome_name = 'tr_danger'
+                output_string = 'tr_danger'
                 self.mutex.release()
                 break
             else:
@@ -145,7 +145,7 @@ class AutonomousTaskMonitor(smach.State):
                  #if task ended succesfully
                 if self.move_base_result == AgribotMoveBaseMonitorResult.PATH_COMPLETED:
                     ud.auto_task_monitor_output = 'succes'
-                    outcome_name = 'tr_succes'
+                    output_string = 'tr_succes'
                     self.mutex.release()
                     break
                 #task pending for processing or is active
@@ -154,12 +154,12 @@ class AutonomousTaskMonitor(smach.State):
                    self.move_base_result == AgribotMoveBaseMonitorResult.PREEMPTED or \
                    self.move_base_result == AgribotMoveBaseMonitorResult.RECALLED:
                     #goal is pending, active, or being prempted or recalled
-                    outcome_name = ''
+                    output_string = ''
             self.mutex.release()
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc_auto:
                 if warn_exception:
-                    print("[State Machine]: " + str(exc_auto))
+                    print("[State Machine]: {}".format(exc_auto))
                     warn_exception = False
-        return outcome_name
+        return output_string

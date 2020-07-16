@@ -19,36 +19,23 @@ class AutonomousControlTransition(smach.State):
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
-        self.state_msg = String('')
-        self.counter = 0
+        self.state_msg = String()
 
     def execute(self, ud): # pylint: disable=invalid-name
         """Checks if agribot is ready for the autonomous control, all needed hardware is inited,
         configured and apriopriate ROS nodes are functional"""
         output_string = ''
         #Prepare auto control succesful or not
-        #
-        #
-        if self.counter == 0:
-            self.state_msg = "AutonomousControlTransition"
-            self.pub_state.publish(self.state_msg)
+        # TO DO
+        # HB check, catch TTControl answer ready to auto control 
+        self.state_msg = "AutonomousControlTransition"
+        self.pub_state.publish(self.state_msg)
         try:
             rospy.sleep(0.010)
         except rospy.ROSInterruptException as exc:
-            print("[State Machine]: " + str(exc))
-        if self.counter < 20:
-            ud.auto_control_transition_out = 'auto_control_prepared'
-            rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
-            self.counter = 0
-            output_string = 'tr_auto_control_prepared'
-        else:
-            self.counter = self.counter+1
-            output_string = 'tr_in_progress'
-
-        if self.counter == 30:
-            self.counter = 0
-            rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
-            output_string = 'tr_auto_control_prepared'
-
+            print("[State Machine]: {}".format(exc))
+        ud.auto_control_transition_out = 'auto_control_prepared'
+        rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
+        output_string = 'tr_auto_control_prepared'
         return output_string
         

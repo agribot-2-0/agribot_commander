@@ -25,7 +25,7 @@ class AutonomousControlStart(smach.State):
         try:
             switch_to_navigation()
         except rospy.ServiceException as exc:
-            print("Service did not process request: " + str(exc))
+            print("Service did not process request: {}".format(exc))
         if ud.autonomous_control_state_reason == 'auto_control_prepared' or \
            ud.autonomous_control_state_reason == 'autonomous_config_present':
             rospy.loginfo("[State Machine] Executing state AutonomousControlStart ")

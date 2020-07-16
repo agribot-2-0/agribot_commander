@@ -30,7 +30,7 @@ def wait_for_planners():
         try:
             rate.sleep()
         except rospy.ROSInterruptException as exc_choose:
-            print("[State Machine]: " + str(exc_choose))
+            print("[State Machine]: {}".format(exc_choose))
 
 class ChooseTask(smach.State):
     # pylint: disable=too-many-instance-attributes

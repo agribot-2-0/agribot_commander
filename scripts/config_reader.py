@@ -24,9 +24,8 @@ class ConfigReader(object):
             with open(self.task_name) as reader:
                 if os.stat(self.task_name).st_size != 0:
                     self.task_conf = dict(yaml.safe_load(reader))
-                    if 'task' in self.task_conf:
-                        if 'path_name' in self.task_conf['task']:
-                            self.path_name_from_conf = self.task_conf['task']['path_name'][0]
+                    if 'task' in self.task_conf and 'path_name' in self.task_conf['task']:
+                        self.path_name_from_conf = self.task_conf['task']['path_name'][0]
         except IOError:
             reader = open(self.task_name, "w")
         reader.close()
