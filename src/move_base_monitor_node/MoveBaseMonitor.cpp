@@ -5,18 +5,6 @@
 #include <agribot_commander/MoveBaseMonitor.h>
 #include <visualization_msgs/MarkerArray.h>
 
-#define COMMAND_CONTINUE 0
-#define COMMAND_PAUSE 1
-#define COMMAND_ABORT 2
-
-#define RESULT_ACTIVE 1
-#define RESULT_SUCCES 3
-#define RESULT_PREEMPTED 2
-#define RESULT_ABORTED 4
-#define RESULT_FAILED 5
-#define RESULT_PAUSED 10
-#define RESULT_PATH_COMPLETED 100
-
 MoveBaseMonitor::MoveBaseMonitor()
 {
   _waypointsSub = _nh.subscribe("/clicked_point", 1000, &MoveBaseMonitor::waypointCallback, this);

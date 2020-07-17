@@ -94,7 +94,7 @@ class AutonomousTaskMonitor(smach.State):
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
         rate = rospy.Rate(100) # ROS Rate at 100Hz
-        rospy.loginfo("[State Machine] Executing state AutonomousTaskMonitor ")
+        rospy.loginfo("[State Machine] Executing state: AutonomousTaskMonitor INPUT: none")
         self.state_msg = "AutonomousTaskMonitor"
         self.pub_state.publish(self.state_msg)
         output_string = ''
@@ -127,8 +127,6 @@ class AutonomousTaskMonitor(smach.State):
                 break
             # check if the task is not blocked
             if self.task_is_blocked:
-                rospy.loginfo("[State Machine] Leaving AutonomousTaskMonitor state " +\
-                              "because current task is blocked by obstacle")
                 #send pause goal to move_base_monitor
                 self.move_base_command_msg.command = AgribotMoveBaseCommand.PAUSE
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
@@ -162,4 +160,6 @@ class AutonomousTaskMonitor(smach.State):
                 if warn_exception:
                     print("[State Machine]: {}".format(exc_auto))
                     warn_exception = False
+        rospy.loginfo("[State Machine] Leaving state: AutonomousTaskMonitor TRANSITION: " +
+                      output_string)
         return output_string

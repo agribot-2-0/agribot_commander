@@ -28,7 +28,7 @@ class MobileAppConnectionRoutine(smach.State):
         self.command_received_autonomous = False
         self.obstacle_in_move_direction = False
         self.first_enter = True
-        self.state_msg = String('')
+        self.state_msg = String()
         self.subscriber = rospy.Subscriber('/agribot/mobile_app_communication',
                                            AgribotMobileAppFrame,
                                            self.callback_app_frames_communication)
@@ -98,8 +98,8 @@ class MobileAppConnectionRoutine(smach.State):
             self.first_enter = False
             self.state_msg = "MobileAppConnectionRoutine"
             self.pub_state.publish(self.state_msg)
-            rospy.loginfo("[State Machine] Executing MobileAppConnectionRoutine")
-        rate = rospy.Rate(20) # ROS Rate at 100 Hz / 20 Hz
+            rospy.loginfo("[State Machine] Executing state: MobileAppConnectionRoutine INPUT: none")
+        rate = rospy.Rate(20) # ROS Rate at 20 Hz
         while not rospy.is_shutdown():
             self.mutex.acquire()
             if self.connection_failed_received:
@@ -145,4 +145,6 @@ class MobileAppConnectionRoutine(smach.State):
                 rate.sleep()
             except rospy.ROSInterruptException as exc_mob:
                 print("[State Machine]: {}".format(exc_mob))
+        rospy.loginfo("[State Machine] Leaving state: MobileAppConnectionRoutine TRANSITION: " +
+                      str(output_string))
         return output_string

@@ -51,8 +51,7 @@ class TaskIsBlocked(smach.State):
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument
     # pylint: disable=duplicate-code
         """Solving the problem by waiting, loading recovery task or receiving human intervention"""
-        string_msg = "[State Machine] Executing state TaskIsBlocked "
-        rospy.loginfo(string_msg)
+        rospy.loginfo("[State Machine] Executing state: TaskIsBlocked INPUT: none")
         output_string = ''
         self.state_msg = "TaskIsBlocked"
         self.pub_state.publish(self.state_msg)
@@ -81,9 +80,7 @@ class TaskIsBlocked(smach.State):
                 rospy.set_param('/agribot/robot_current_state',
                                 'auto_control_state')
                 output_string = 'tr_continue_task'
-                string_msg = "[State Machine] Task is no longer blocked, leaving the blocked state"
                 self.mutex.release()
-                rospy.loginfo(string_msg)
                 break
             self.mutex.release()
             # pylint: disable=duplicate-code
@@ -92,4 +89,6 @@ class TaskIsBlocked(smach.State):
             except rospy.ROSInterruptException as exc:
                 print("[State Machine]: {}".format(exc))
             # pylint: enable=duplicate-code
+        rospy.loginfo("[State Machine] Leaving state: TaskIsBlocked TRANSITION: " +
+                      output_string)
         return output_string

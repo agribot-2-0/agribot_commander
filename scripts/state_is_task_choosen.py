@@ -19,15 +19,15 @@ class IsTaskChosen(smach.State):
         #Check if task name has been chosen
         #
         #
+        rospy.loginfo("[State Machine] Executing state: IsTaskChosen INPUT: none")
         task_name = rospy.get_param('/agribot/current_task_name')
         if task_name == '':
-            string_msg = "[State Machine] Executing state IsTaskChosen "
-            rospy.loginfo(string_msg)
             output_string = 'tr_no_active_task'
         else:
-            string_msg = "[State Machine] Executing state IsTaskChosen " + \
-                        "tr_task_is_active active_path_name: " + \
-                         str(task_name)
-            rospy.loginfo(string_msg)
+            rospy.loginfo("[State Machine] Task is active: " + \
+                          " active_path_name: " + \
+                          str(task_name))
             output_string = 'tr_task_is_active'
+        rospy.loginfo("[State Machine] Leaving state: IsTaskChosen TRANSITION: " +
+                      output_string)
         return output_string

@@ -83,8 +83,7 @@ class Standby(smach.State):
     # pylint: disable=duplicate-code
         """Awaiting the application input"""
         if self.standby_com:
-            string_msg = "[State Machine] Executing state Standby "
-            rospy.loginfo(string_msg)
+            rospy.loginfo("[State Machine] Executing state: Standby INPUT: none")
             self.state_msg = "Standby"
             self.pub_state.publish(self.state_msg)
             self.standby_com = False
@@ -123,4 +122,6 @@ class Standby(smach.State):
                 rate.sleep()
             except rospy.ROSInterruptException as exc_standby:
                 print("[State Machine]: {}".format(exc_standby))
+        rospy.loginfo("[State Machine] Leaving state: Standby TRANSITION: " +
+                      str(output_string))
         return output_string

@@ -27,7 +27,8 @@ class AutonomousControlTransition(smach.State):
         output_string = ''
         #Prepare auto control succesful or not
         # TO DO
-        # HB check, catch TTControl answer ready to auto control 
+        # HB check, catch TTControl answer ready to auto control
+        rospy.loginfo("[State Machine] Executing state: AutonomousControlTransition INPUT: none")
         self.state_msg = "AutonomousControlTransition"
         self.pub_state.publish(self.state_msg)
         try:
@@ -37,5 +38,7 @@ class AutonomousControlTransition(smach.State):
         ud.auto_control_transition_out = 'auto_control_prepared'
         rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
         output_string = 'tr_auto_control_prepared'
+        rospy.loginfo("[State Machine] Leaving state: AutonomousControlTransition TRANSITION: " +
+                      str(output_string))
         return output_string
         

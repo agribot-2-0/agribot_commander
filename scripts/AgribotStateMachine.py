@@ -54,12 +54,12 @@ def main():
         with sm_safe_state:
             # Add states to the container
             smach.StateMachine.add('SAFE_STATE_START', SafeStateStart(),
-                transitions={'tr_in_system_power_up':
-                    'STANDBY',
-                    'tr_in_return_to_safe_state':
-                    'ENGINE_STOP'},
-                remapping={'safe_state_reason':
-                    'sm_safestate_in'})
+                                   transitions={'tr_in_system_power_up':
+                                                'STANDBY',
+                                                'tr_in_return_to_safe_state':
+                                                'ENGINE_STOP'},
+                                   remapping={'safe_state_reason':
+                                              'sm_safestate_in'})
             smach.StateMachine.add('STANDBY', Standby(),
                                    transitions={'tr_app_input_received_standby':
                                                 'tr_application_input_received',
@@ -74,7 +74,8 @@ def main():
                                                 'STANDBY',
                                                 'tr_engine_stop_failure_reaction':
                                                 'tr_system_power_is_off'},
-                                   remapping={'engine_stop_reason':'sm_safestate_in'})
+                                   remapping={'engine_stop_reason':
+                                              'sm_safestate_in'})
         #Finish state machine transitions and add it to agribot_state_machine
         smach.StateMachine.add('SAFE_STATE', sm_safe_state,
                                transitions={'tr_application_input_received':

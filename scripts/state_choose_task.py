@@ -45,15 +45,14 @@ class ChooseTask(smach.State):
         rospack = rospkg.RosPack()
         pth_location_folder = rospack.get_path('agribot_map') + "/paths/"
         self.points_handler = PathPointsStuffer(pth_location_folder)
-        self.output_string = ''
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
         self.state_msg = String()
 
     def load_the_chosen_path(self):
+        function_output = ["transition", "user_data"]
         path_loaded = False
-        choose_task_output = ''
         while path_loaded or self.new_task_name != '':
             if self.new_task_name != '':
                 if not self.points_handler.set_path_name(str(self.new_task_name)):
@@ -63,10 +62,10 @@ class ChooseTask(smach.State):
                     send_last_msg = False
                     self.new_task_name = ''
                     path_loaded = False
-                    choose_task_output = 'task_config_error'
                     rospy.set_param('/agribot/robot_current_state',
                                     'manual_control_state')
-                    self.output_string = 'tr_task_conf_error'
+                    function_output[0] = 'tr_task_conf_error'
+                    function_output[1] = 'task_config_error'
                 else:
                     self.points_handler.get_path_points_from_yaml()
                     goal_fix = NavSatFix()
@@ -91,15 +90,15 @@ class ChooseTask(smach.State):
                         path_loaded = False
                         self.points_handler.reset_path_point_stuffer()
                         rospy.set_param('/agribot/chosen_task_name', '')
-                        choose_task_output = 'task_is_active'
-                        self.output_string = 'tr_task_is_active'
-        return choose_task_output
+                        function_output[0] = 'tr_task_is_active'
+                        function_output[1] = 'task_is_active'
+        return function_output
 
     def execute(self, ud): # pylint: disable=invalid-name
         """Pick and return the proper transition. Choose the proper the task name picked
         by the user or if it cant be found return to manual or safe state"""
-        self.output_string = ''
-        rospy.loginfo("[State Machine] Executing state ChooseTask ")
+        output_string = ''
+        rospy.loginfo("[State Machine] Executing state: ChooseTask INPUT: none")
         self.state_msg = "ChooseTask"
         self.pub_state.publish(self.state_msg)
         self.mutex.acquire()
@@ -115,10 +114,14 @@ class ChooseTask(smach.State):
             wait_for_planners()
             rospy.loginfo("[State Machine] Planners are ready, now loading the chosen path ")
             #Check if task name is ok and if the task itself is proper
-            ud.choose_task_output = self.load_the_chosen_path()
+            function_output = self.load_the_chosen_path()
+            ud.choose_task_output = function_output[1]
+            output_string = function_output[0]
         else:
             ud.choose_task_output = 'task_config_error'
             rospy.set_param('/agribot/robot_current_state',
                             'manual_control_state')
-            self.output_string = 'tr_task_conf_error'
-        return self.output_string
+            output_string = 'tr_task_conf_error'
+        rospy.loginfo("[State Machine] Leaving state: ChooseTask TRANSITION: " +
+                      str(output_string))
+        return output_string
