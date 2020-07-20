@@ -15,19 +15,19 @@ class IsTaskChosen(smach.State):
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument, no-self-use
         """Returns the proper transition based on the system configuration
         (the task is already chosen and we continue the realisation or it is a new task)"""
-        output_string = ''
+        output_transition = ''
         #Check if task name has been chosen
         #
         #
         rospy.loginfo("[State Machine] Executing state: IsTaskChosen INPUT: none")
         task_name = rospy.get_param('/agribot/current_task_name')
         if task_name == '':
-            output_string = 'tr_no_active_task'
+            output_transition = 'tr_no_active_task'
         else:
             rospy.loginfo("[State Machine] Task is active: " + \
                           " active_path_name: " + \
                           str(task_name))
-            output_string = 'tr_task_is_active'
+            output_transition = 'tr_task_is_active'
         rospy.loginfo("[State Machine] Leaving state: IsTaskChosen TRANSITION: " +
-                      output_string)
-        return output_string
+                      output_transition)
+        return output_transition

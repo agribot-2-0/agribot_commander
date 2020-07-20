@@ -41,7 +41,10 @@ class Standby(smach.State):
 
     def callback_choose_task(self, data):
         self.mutex.acquire()
-        self.choosed_task_name = data.data
+        if rospy.has_param('/agribot/robot_current_state'):
+            current_state = rospy.get_param('/agribot/robot_current_state')
+            if current_state == 'safe_state':
+                self.choosed_task_name = data.data
         self.mutex.release()
 
     def callback_app_communication(self, data):
@@ -52,66 +55,40 @@ class Standby(smach.State):
                 self.connection_received = True
         self.mutex.release()
 
-    def check_config_file(self):
-        if self.choosed_task_name != '':
-            if self.config_reader.set_task_name(self.choosed_task_name):
-                if self.config_reader.get_task_conf_from_yaml():
-                    self.last_task_name = self.choosed_task_name
-                    path_name = self.config_reader.return_tasks_path_name()
-                    rospy.set_param('/agribot/chosen_task_name',
-                                    path_name)
-                    rospy.loginfo("[State Machine] Loaded task configuration: " + \
-                                  "chosen_path_name: '" + \
-                                  path_name + "'")
-                    config_present = True
-                else:
-                    rospy.loginfo("[State Machine] ERROR: Task configuration file '" + \
-                                  self.choosed_task_name + ".yaml' is faulty")
-                    self.choosed_task_name = ''
-                    config_present = False
-            else:
-                rospy.loginfo("[State Machine] ERROR: Task configuration file '" + \
-                              self.choosed_task_name + ".yaml' can't be opened or doesn't exist")
-                self.choosed_task_name = ''
-                config_present = False
-        else:
-            self.choosed_task_name = ''
-            config_present = False
-        return config_present
-
     def execute(self, ud): # pylint: disable=invalid-name
     # pylint: disable=duplicate-code
         """Awaiting the application input"""
-        if self.standby_com:
-            rospy.loginfo("[State Machine] Executing state: Standby INPUT: none")
-            self.state_msg = "Standby"
-            self.pub_state.publish(self.state_msg)
-            self.standby_com = False
-        output_string = ''
+        rospy.loginfo("[State Machine] Executing state: Standby INPUT: none")
+        self.state_msg = "Standby"
+        self.pub_state.publish(self.state_msg)
+        output_transition = ''
         rate = rospy.Rate(100) # ROS Rate at 100Hz
         while not rospy.is_shutdown():
         # pylint: disable=duplicate-code
             self.mutex.acquire()
             if self.connection_received:
                 self.connection_received = False
-                self.standby_com = True
                 ud.safe_state_reason_man_out = 'application_input_received'
                 ud.safe_state_reason_auto_out = ' '
                 rospy.set_param('/agribot/robot_current_state',
                                 'manual_control_state')
-                output_string = 'tr_app_input_received_standby'
+                output_transition = 'tr_app_input_received_standby'
                 self.mutex.release()
                 break
-            elif self.check_config_file():
-                self.standby_com = True
+            #elif self.check_config_file():
+            elif self.choosed_task_name != '':
+                path_name = self.config_reader.check_config_file(self.choosed_task_name)
                 self.choosed_task_name = ''
-                ud.safe_state_reason_man_out = ''
-                ud.safe_state_reason_auto_out = 'autonomous_config_present'
-                rospy.set_param('/agribot/robot_current_state',
-                                'auto_control_state')
-                output_string = 'tr_autonomous_config_standby'
-                self.mutex.release()
-                break
+                if path_name != '':
+                    ud.safe_state_reason_man_out = ''
+                    ud.safe_state_reason_auto_out = 'autonomous_config_present'
+                    rospy.set_param('/agribot/robot_current_state',
+                                    'auto_control_state')
+                    rospy.set_param('/agribot/chosen_task_name',
+                                    path_name)
+                    output_transition = 'tr_autonomous_config_standby'
+                    self.mutex.release()
+                    break
             else:
                 ud.safe_state_reason_man_out = ' '
                 ud.safe_state_reason_auto_out = ' '
@@ -123,5 +100,5 @@ class Standby(smach.State):
             except rospy.ROSInterruptException as exc_standby:
                 print("[State Machine]: {}".format(exc_standby))
         rospy.loginfo("[State Machine] Leaving state: Standby TRANSITION: " +
-                      str(output_string))
-        return output_string
+                      str(output_transition))
+        return output_transition

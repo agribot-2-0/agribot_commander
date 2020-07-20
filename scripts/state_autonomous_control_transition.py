@@ -24,7 +24,7 @@ class AutonomousControlTransition(smach.State):
     def execute(self, ud): # pylint: disable=invalid-name
         """Checks if agribot is ready for the autonomous control, all needed hardware is inited,
         configured and apriopriate ROS nodes are functional"""
-        output_string = ''
+        output_transition = ''
         #Prepare auto control succesful or not
         # TO DO
         # HB check, catch TTControl answer ready to auto control
@@ -37,8 +37,8 @@ class AutonomousControlTransition(smach.State):
             print("[State Machine]: {}".format(exc))
         ud.auto_control_transition_out = 'auto_control_prepared'
         rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
-        output_string = 'tr_auto_control_prepared'
+        output_transition = 'tr_auto_control_prepared'
         rospy.loginfo("[State Machine] Leaving state: AutonomousControlTransition TRANSITION: " +
-                      str(output_string))
-        return output_string
+                      str(output_transition))
+        return output_transition
         

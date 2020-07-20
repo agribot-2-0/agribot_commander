@@ -21,15 +21,15 @@ class ManualControlStart(smach.State):
         #Send data to mobile app
         #
         #
-        output_string = ''
+        output_transition = ''
         rospy.loginfo("[State Machine] Executing state: ManualControlStart INPUT: " +
                       str(ud.manual_control_state_reason))
         if ud.manual_control_state_reason == 'application_input_received':
             ud.manual_control_state_app_reason = 'app_input_received'
-            output_string = 'tr_app_input_received'
+            output_transition = 'tr_app_input_received'
         else:
             ud.manual_control_state_app_reason = 'task_config_error'
-            output_string = 'tr_task_config_error'
+            output_transition = 'tr_task_config_error'
         rospy.loginfo("[State Machine] Leaving state: ManualControlStart TRANSITION: " +
-                      str(output_string))
-        return output_string
+                      str(output_transition))
+        return output_transition

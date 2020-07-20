@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import yaml
 
@@ -32,6 +33,25 @@ class ConfigReader(object):
         if self.path_name_from_conf == '':
             return False
         return True
+
+    def check_config_file(self, choosed_task_name):
+        if choosed_task_name != '':
+            if self.set_task_name(choosed_task_name):
+                if self.get_task_conf_from_yaml():
+                    path_name = self.return_tasks_path_name()
+                    print("[State Machine] Loaded task configuration: " + \
+                                  "chosen_path_name: '{}'".format(path_name))
+                else:
+                    print("[State Machine] ERROR: Task configuration file " + \
+                    "'{}.yaml' is faulty".format(choosed_task_name))
+                    path_name = ''
+            else:
+                print("[State Machine] ERROR: Task configuration file '" + \
+                      "'{}.yaml' can't be opened or doesn't exist".format(choosed_task_name))
+                path_name = ''
+        else:
+            path_name = ''
+        return path_name
 
     def return_tasks_path_name(self):
         return self.path_name_from_conf

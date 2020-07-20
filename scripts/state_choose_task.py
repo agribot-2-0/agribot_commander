@@ -97,7 +97,7 @@ class ChooseTask(smach.State):
     def execute(self, ud): # pylint: disable=invalid-name
         """Pick and return the proper transition. Choose the proper the task name picked
         by the user or if it cant be found return to manual or safe state"""
-        output_string = ''
+        output_transition = ''
         rospy.loginfo("[State Machine] Executing state: ChooseTask INPUT: none")
         self.state_msg = "ChooseTask"
         self.pub_state.publish(self.state_msg)
@@ -116,12 +116,12 @@ class ChooseTask(smach.State):
             #Check if task name is ok and if the task itself is proper
             function_output = self.load_the_chosen_path()
             ud.choose_task_output = function_output[1]
-            output_string = function_output[0]
+            output_transition = function_output[0]
         else:
             ud.choose_task_output = 'task_config_error'
             rospy.set_param('/agribot/robot_current_state',
                             'manual_control_state')
-            output_string = 'tr_task_conf_error'
+            output_transition = 'tr_task_conf_error'
         rospy.loginfo("[State Machine] Leaving state: ChooseTask TRANSITION: " +
-                      str(output_string))
-        return output_string
+                      str(output_transition))
+        return output_transition

@@ -19,7 +19,7 @@ class MobileAppRoutineStart(smach.State):
         #Send data to mobile app
         #
         #
-        output_string = ''
+        output_transition = ''
         rospy.loginfo("[State Machine] Executing state: MobileAppRoutineStart INPUT: " +
                       str(ud.mobile_app_routine_reason_in))
         rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
@@ -30,9 +30,9 @@ class MobileAppRoutineStart(smach.State):
         except rospy.ServiceException as exc:
             print("Service did not process request: {}".format(exc))
         if ud.mobile_app_routine_reason_in == 'app_input_received':
-            output_string = 'tr_app_input_received'
+            output_transition = 'tr_app_input_received'
         else:
-            output_string = 'tr_task_config_error'
+            output_transition = 'tr_task_config_error'
         rospy.loginfo("[State Machine] Leaving state: MobileAppRoutineStart TRANSITION: " +
-                      str(output_string))
-        return  output_string
+                      str(output_transition))
+        return  output_transition

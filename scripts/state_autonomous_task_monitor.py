@@ -44,6 +44,7 @@ class AutonomousTaskMonitor(smach.State):
         self.received_manual_steering = False
         self.received_user_abort = False
         self.task_is_blocked = False
+        self.warn_exception = False
 
     def callback_app_communication(self, data):
         ##TO DO
@@ -90,6 +91,13 @@ class AutonomousTaskMonitor(smach.State):
             self.pub_move_base_comm.publish(self.move_base_command_msg)
         self.mutex.release()
 
+    def pre_execute(self):
+        self.move_base_result = AgribotMoveBaseMonitorResult.NOACTION
+        self.warn_exception = True
+        # Check if the task was suspended by the user during the task blockage
+        # and should we continue the last path
+        self.clear_manual_flag()
+
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument, too-many-statements
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
@@ -97,18 +105,14 @@ class AutonomousTaskMonitor(smach.State):
         rospy.loginfo("[State Machine] Executing state: AutonomousTaskMonitor INPUT: none")
         self.state_msg = "AutonomousTaskMonitor"
         self.pub_state.publish(self.state_msg)
-        output_string = ''
-        self.move_base_result = AgribotMoveBaseMonitorResult.NOACTION
-        warn_exception = True
-        # Check if the task was suspended by the user during the task blockage
-        # and should we continue the last path
-        self.clear_manual_flag()
+        self.pre_execute()
+        output_transition = ''
         #trace the position, wait for safety events or mobile app interruption
         while True:
             self.mutex.acquire()
             # check if the task is aborted by manual steering
             if self.received_manual_steering:
-                output_string = 'tr_succes'
+                output_transition = 'tr_succes'
                 ud.auto_task_monitor_output = 'user_suspend'
                 #send pause current path to move_base_monitor
                 self.received_manual_steering = False
@@ -117,7 +121,7 @@ class AutonomousTaskMonitor(smach.State):
                 self.mutex.release()
                 break
             if self.received_user_abort:
-                output_string = 'tr_succes'
+                output_transition = 'tr_succes'
                 ud.auto_task_monitor_output = 'user_abort'
                 #send abort current path to move_base_monitor
                 self.received_user_abort = False
@@ -131,7 +135,7 @@ class AutonomousTaskMonitor(smach.State):
                 self.move_base_command_msg.command = AgribotMoveBaseCommand.PAUSE
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
 
-                output_string = 'tr_danger'
+                output_transition = 'tr_danger'
                 self.mutex.release()
                 break
             else:
@@ -143,7 +147,7 @@ class AutonomousTaskMonitor(smach.State):
                  #if task ended succesfully
                 if self.move_base_result == AgribotMoveBaseMonitorResult.PATH_COMPLETED:
                     ud.auto_task_monitor_output = 'succes'
-                    output_string = 'tr_succes'
+                    output_transition = 'tr_succes'
                     self.mutex.release()
                     break
                 #task pending for processing or is active
@@ -152,14 +156,14 @@ class AutonomousTaskMonitor(smach.State):
                    self.move_base_result == AgribotMoveBaseMonitorResult.PREEMPTED or \
                    self.move_base_result == AgribotMoveBaseMonitorResult.RECALLED:
                     #goal is pending, active, or being prempted or recalled
-                    output_string = ''
+                    output_transition = ''
             self.mutex.release()
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc_auto:
-                if warn_exception:
+                if self.warn_exception:
                     print("[State Machine]: {}".format(exc_auto))
-                    warn_exception = False
+                    self.warn_exception = False
         rospy.loginfo("[State Machine] Leaving state: AutonomousTaskMonitor TRANSITION: " +
-                      output_string)
-        return output_string
+                      output_transition)
+        return output_transition
