@@ -33,8 +33,8 @@ class AutonomousControlTransition(smach.State):
         self.pub_state.publish(self.state_msg)
         try:
             rospy.sleep(0.010)
-        except rospy.ROSInterruptException as exc:
-            print("[State Machine]: {}".format(exc))
+        except rospy.ROSInterruptException:
+            rospy.logerr("[State Machine]: rospy shutdown exception")
         ud.auto_control_transition_out = 'auto_control_prepared'
         rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
         output_transition = 'tr_auto_control_prepared'

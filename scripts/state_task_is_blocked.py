@@ -89,8 +89,8 @@ class TaskIsBlocked(smach.State):
             # pylint: disable=duplicate-code
             try:
                 rate.sleep()
-            except rospy.ROSInterruptException as exc:
-                print("[State Machine]: {}".format(exc))
+            except rospy.ROSInterruptException:
+                rospy.logerr("[State Machine]: rospy shutdown exception")
             # pylint: enable=duplicate-code
         rospy.loginfo("[State Machine] Leaving state: TaskIsBlocked TRANSITION: " +
                       output_transition)

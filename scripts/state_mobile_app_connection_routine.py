@@ -139,7 +139,7 @@ class MobileAppConnectionRoutine(smach.State):
                     try:
                         switch_to_navigation()
                     except rospy.ServiceException as exc:
-                        print("Service error: {}".format(exc))
+                        rospy.logerr("Service error: " + str(exc))
                 else:
                     # change the cmd vel arbiter to manual
                     rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
@@ -149,7 +149,7 @@ class MobileAppConnectionRoutine(smach.State):
                     try:
                         switch_to_teleop()
                     except rospy.ServiceException as exc:
-                        print("Service did not process request: {}".format(exc))
+                        rospy.logerr("Service did not process request: " + str(exc))
             elif self.choosed_task_name != '':
                 path_name = self.config_reader.check_config_file(self.choosed_task_name)
                 if path_name != '':
@@ -159,8 +159,8 @@ class MobileAppConnectionRoutine(smach.State):
             self.mutex.release()
             try:
                 rate.sleep()
-            except rospy.ROSInterruptException as exc_mob:
-                print("[State Machine]: {}".format(exc_mob))
+            except rospy.ROSInterruptException:
+                rospy.logerr("[State Machine]: rospy shutdown exception")
         rospy.loginfo("[State Machine] Leaving state: MobileAppConnectionRoutine TRANSITION: " +
                       str(output_transition))
         return output_transition

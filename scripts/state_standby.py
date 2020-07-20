@@ -97,8 +97,8 @@ class Standby(smach.State):
             self.mutex.release()
             try:
                 rate.sleep()
-            except rospy.ROSInterruptException as exc_standby:
-                print("[State Machine]: {}".format(exc_standby))
+            except rospy.ROSInterruptException:
+                rospy.logerr("[State Machine]: rospy shutdown exception")
         rospy.loginfo("[State Machine] Leaving state: Standby TRANSITION: " +
                       str(output_transition))
         return output_transition

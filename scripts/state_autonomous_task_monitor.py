@@ -160,9 +160,9 @@ class AutonomousTaskMonitor(smach.State):
             self.mutex.release()
             try:
                 rate.sleep()
-            except rospy.ROSInterruptException as exc_auto:
+            except rospy.ROSInterruptException:
                 if self.warn_exception:
-                    print("[State Machine]: {}".format(exc_auto))
+                    rospy.logerr("[State Machine]: rospy shutdown exception")
                     self.warn_exception = False
         rospy.loginfo("[State Machine] Leaving state: AutonomousTaskMonitor TRANSITION: " +
                       output_transition)

@@ -28,7 +28,7 @@ class MobileAppRoutineStart(smach.State):
         try:
             switch_to_teleop()
         except rospy.ServiceException as exc:
-            print("Service did not process request: {}".format(exc))
+            rospy.logerr("Service did not process request: " + str(exc))
         if ud.mobile_app_routine_reason_in == 'app_input_received':
             output_transition = 'tr_app_input_received'
         else:

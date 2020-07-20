@@ -250,8 +250,8 @@ def main():
     # Execute SMACH plan
     try:
         sm_agribot.execute()
-    except smach.exceptions.InvalidUserCodeError as exc:
-        print("[State Machine] exception: " + str(exc))
+    except smach.exceptions.InvalidUserCodeError:
+        rospy.logerr("[State Machine]: smach shutdown exception")
     # Wait for ctrl-c to stop the application
     rospy.spin()
     sis.stop()
