@@ -18,7 +18,6 @@ class AutonomousControlStart(smach.State):
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument, no-self-use
         """Returns the proper transition based on the input of userdata (ud)"""
         output_transition = ''
-        #Send data to mobile app
         rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
         switch_to_navigation = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation',
                                                   Empty)

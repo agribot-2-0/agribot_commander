@@ -248,6 +248,8 @@ def main():
                                         '/SM_ROOT')
     sis.start()
     # Execute SMACH plan
+    # Authors note: Pleas read the exception msg when adding new features or
+    # debugging the state machine (despite it being ugly when using ctrl-c)
     try:
         sm_agribot.execute()
     except smach.exceptions.InvalidUserCodeError:

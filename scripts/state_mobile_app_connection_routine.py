@@ -8,7 +8,6 @@ import roslib
 from std_srvs.srv import Empty
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
-from agribot_msgs.msg import AgribotMobileAppFrame
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotObstacleDetection
 from config_reader import ConfigReader
@@ -37,9 +36,6 @@ class MobileAppConnectionRoutine(smach.State):
         self.subscriber_choose_task = rospy.Subscriber('/agribot/state_machine/task',
                                                        String,
                                                        self.callback_choose_task)
-        self.subscriber_app_frames = rospy.Subscriber('/agribot/mobile_app_communication',
-                                                      AgribotMobileAppFrame,
-                                                      self.callback_app_frames_communication)
         self.subscriber_robot_mode = rospy.Subscriber('/agribot/state_machine/mode',
                                                       RobotMode,
                                                       self.callback_app_mode_communication)
@@ -68,18 +64,6 @@ class MobileAppConnectionRoutine(smach.State):
             if current_state == 'manual_control_state':
                 self.obstacle_in_move_direction = \
                 bool(data.status != AgribotObstacleDetection.NO_OBSTACLE)
-        self.mutex.release()
-
-    def callback_app_frames_communication(self, data):
-        self.mutex.acquire()
-        if rospy.has_param('/agribot/robot_current_state'):
-            current_state = rospy.get_param('/agribot/robot_current_state')
-            if current_state == 'manual_control_state':
-                if data.can_id == 53:
-                    self.command_received_only_move = True
-                elif data.can_id == 150:
-                    rospy.loginfo('[State Machine] Received configuration command')
-                    self.command_received_configuration = True
         self.mutex.release()
 
     def callback_app_mode_communication(self, data):
@@ -127,29 +111,26 @@ class MobileAppConnectionRoutine(smach.State):
                 output_transition = 'tr_auto_ctrl_command'
                 self.mutex.release()
                 break
-            elif self.command_received_only_move:
-                self.command_received_only_move = False
-                # check for the blocked path
-                if self.obstacle_in_move_direction:
-                    # change the  cmd vel arbiter to safe state
-                    rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
-                    switch_to_navigation =\
-                        rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation',
-                                           Empty)
-                    try:
-                        switch_to_navigation()
-                    except rospy.ServiceException as exc:
-                        rospy.logerr("Service error: " + str(exc))
-                else:
-                    # change the cmd vel arbiter to manual
-                    rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
-                    switch_to_teleop =\
-                        rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop',
-                                           Empty)
-                    try:
-                        switch_to_teleop()
-                    except rospy.ServiceException as exc:
-                        rospy.logerr("Service did not process request: " + str(exc))
+            elif self.obstacle_in_move_direction:
+                # change the  cmd vel arbiter to safe state
+                rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_stop')
+                switch_to_stop =\
+                    rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_stop',
+                                       Empty)
+                try:
+                    switch_to_stop()
+                except rospy.ServiceException as exc:
+                    rospy.logerr("Service error: " + str(exc))
+            elif not self.obstacle_in_move_direction:
+                # change the cmd vel arbiter to manual
+                rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
+                switch_to_teleop =\
+                    rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop',
+                                       Empty)
+                try:
+                    switch_to_teleop()
+                except rospy.ServiceException as exc:
+                    rospy.logerr("Service did not process request: " + str(exc))
             elif self.choosed_task_name != '':
                 path_name = self.config_reader.check_config_file(self.choosed_task_name)
                 if path_name != '':

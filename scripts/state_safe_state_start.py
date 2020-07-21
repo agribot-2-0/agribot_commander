@@ -2,6 +2,7 @@
 import rospy
 import smach
 import roslib
+from std_srvs.srv import Empty
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -18,6 +19,14 @@ class SafeStateStart(smach.State):
         output_transition = ''
         rospy.loginfo("[State Machine] Executing state: SafeStateStart INPUT: " +
                       str(ud.safe_state_reason))
+        rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_stop')
+        switch_to_stop = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_stop',
+                                            Empty)
+        try:
+            switch_to_stop()
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
+
         # we dont have the failure reaction yet, but here is the place to start transition
         # to critical failure state where we will start reboot/relaunch routine etc
         if ud.safe_state_reason == 'return_to_safe_state' or \
