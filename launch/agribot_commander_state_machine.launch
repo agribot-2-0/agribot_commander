@@ -1,0 +1,5 @@
+<launch>
+  <node name="agribot_commander_state_machine" pkg="agribot_commander" type="AgribotStateMachine.py" output="screen"></node>
+  <node name="navsatfix_to_local_node" pkg="agribot_commander" type="navsatfix_to_local_node"></node>
+  <node name="move_base_monitor_node" pkg="agribot_commander" type="move_base_monitor_node" output="screen"/>
+</launch>
