@@ -3,6 +3,7 @@ import rospy
 import rospkg
 from std_msgs.msg import String
 from sensor_msgs.msg import NavSatFix
+from agribot_msgs.msg import NavSatFixOrientation
 from pathpointsstuffer import PathPointsStuffer
 
 
@@ -18,7 +19,7 @@ class PathPointsStufferNode(object):
         self.points_stuffer = PathPointsStuffer(path_location_folder)
 
         self.pub = rospy.Publisher('/agribot/waypoints',
-                                   NavSatFix,
+                                   NavSatFixOrientation,
                                    queue_size=1000)
         self.sub = rospy.Subscriber('/agribot/chosen_task_name',
                                     String,
@@ -28,7 +29,7 @@ class PathPointsStufferNode(object):
         self.new_task_name = msg.data
 
         if self.points_stuffer.set_path_name(self.new_task_name):
-            goal_fix = NavSatFix()
+            goal_fix = NavSatFixOrientation()
             goal_fix.header.frame_id = "ll"
             self.points_stuffer.get_path_points_from_yaml()
 

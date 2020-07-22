@@ -19,7 +19,7 @@
 
 MoveBaseMonitor::MoveBaseMonitor()
 {
-  _waypointsSub = _nh.subscribe("/clicked_point",
+  _waypointsSub = _nh.subscribe("/agribot/path_point",
                                 1000,
                                 &MoveBaseMonitor::waypointCallback,
                                 this);
@@ -91,7 +91,7 @@ void MoveBaseMonitor::isPaused()
 }
 
 void MoveBaseMonitor::waypointCallback(
-          const geometry_msgs::PointStampedConstPtr& waypoint)
+          const geometry_msgs::PoseStampedConstPtr& waypoint)
 {
   if (clear_waypoints_)
   {
@@ -102,8 +102,7 @@ void MoveBaseMonitor::waypointCallback(
   // add waypoint to the waypoint vector
   waypoints_.push_back(geometry_msgs::PoseStamped());
   waypoints_.back().header = waypoint->header;
-  waypoints_.back().pose.position = waypoint->point;
-  waypoints_.back().pose.orientation.w = 1.0;
+  waypoints_.back().pose = waypoint->pose;
 
   if (waypoints_.size() < 2)
     return;
@@ -114,7 +113,6 @@ void MoveBaseMonitor::waypointCallback(
   // calculate orientation of waypoints
   double yaw = atan2(p2->position.y - p1->position.y,
                      p2->position.x - p1->position.x);
-  p1->orientation.w = 1;
 
   // calculate distance between latest two waypoints
   // and check if it surpasses the threshold epsilon
@@ -142,15 +140,15 @@ void MoveBaseMonitor::createAndPublishMarkersFromPath(
   visualization_msgs::Marker marker;
   marker.header = path[0].header;
   marker.ns = "/move_base_monitor/waypoints";
-  marker.type = visualization_msgs::Marker::SPHERE;
+  marker.type = visualization_msgs::Marker::ARROW;
   marker.action = visualization_msgs::Marker::DELETEALL;
-  marker.scale.x = 0.4;
-  marker.scale.y = 0.4;
-  marker.scale.z = 0.4;
+  marker.scale.x = 0.75;
+  marker.scale.y = 0.1;
+  marker.scale.z = 0.01;
   marker.color.a = 1.0;
-  marker.color.r = 0.0;
-  marker.color.g = 0.0;
-  marker.color.b = 1.0;
+  marker.color.r = 0.1;
+  marker.color.g = 0.2;
+  marker.color.b = 0.7;
   marker.id = 0;
   markers.markers.push_back(marker);
   waypoint_marker_pub_.publish(markers);
@@ -161,7 +159,7 @@ void MoveBaseMonitor::createAndPublishMarkersFromPath(
   {
     marker.id = i;
     marker.pose.position = path[i].pose.position;
-    marker.pose.orientation.w = 1;
+    marker.pose.orientation = path[i].pose.orientation;
     markers.markers.push_back(marker);
   }
 

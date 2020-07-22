@@ -10,7 +10,7 @@ NavSatFixToLocalNode::NavSatFixToLocalNode():
   _waypointsSub = _nh.subscribe("agribot/waypoints",
                                 1000,
                                 &NavSatFixToLocalNode::waypointCallback, this);
-  _clickedPointPub = _nh.advertise<geometry_msgs::PointStamped>("clicked_point",
+  _pathPointPub = _nh.advertise<geometry_msgs::PoseStamped>("agribot/path_point",
                                                                 1000);
 
   bool transformStatus = false;
@@ -40,24 +40,24 @@ bool NavSatFixToLocalNode::getMapUTMTransform(void)
     return true;
 }
 
-void NavSatFixToLocalNode::waypointCallback(const sensor_msgs::NavSatFix msg)
+void NavSatFixToLocalNode::waypointCallback(const agribot_msgs::NavSatFixOrientation msg)
 {
   // Convert NavSatFix to UTM
-  geometry_msgs::PointStamped UTM_point = navSatFixToUTM(msg);
+  geometry_msgs::PoseStamped UTM_point = navSatFixToUTM(msg);
 
   // Convert UTM point to map frame
-  geometry_msgs::PointStamped map_point = UTMToMap(UTM_point);
+  geometry_msgs::PoseStamped map_point = UTMToMap(UTM_point);
 
   // Publish converted point
-  _clickedPointPub.publish(map_point);
+  _pathPointPub.publish(map_point);
 }
 
-geometry_msgs::PointStamped NavSatFixToLocalNode::navSatFixToUTM(
-                                              const sensor_msgs::NavSatFix msg)
+geometry_msgs::PoseStamped NavSatFixToLocalNode::navSatFixToUTM(
+                                              const agribot_msgs::NavSatFixOrientation msg)
 {
   double utm_x, utm_y;
   std::string utm_zone;
-  geometry_msgs::PointStamped UTM_point;
+  geometry_msgs::PoseStamped UTM_point;
 
   // Convert Latitude/Longitude from NavSatFix to UTM coordinates
   RobotLocalization::NavsatConversions::LLtoUTM(msg.latitude,
@@ -67,17 +67,18 @@ geometry_msgs::PointStamped NavSatFixToLocalNode::navSatFixToUTM(
   // Fill in UTM_point variable
   UTM_point.header.frame_id = "utm";
   UTM_point.header.stamp = ros::Time::now();
-  UTM_point.point.x = utm_x;
-  UTM_point.point.y = utm_y;
-  UTM_point.point.z = msg.altitude;
+  UTM_point.pose.position.x = utm_x;
+  UTM_point.pose.position.y = utm_y;
+  UTM_point.pose.position.z = msg.altitude;
+  UTM_point.pose.orientation = msg.orientation;
 
   return UTM_point;
 }
 
-geometry_msgs::PointStamped NavSatFixToLocalNode::UTMToMap(
-                                        const geometry_msgs::PointStamped msg)
+geometry_msgs::PoseStamped NavSatFixToLocalNode::UTMToMap(
+                                        const geometry_msgs::PoseStamped msg)
 {
-  geometry_msgs::PointStamped map_point;
+  geometry_msgs::PoseStamped map_point;
 
   // Two alternative ways
   // 1. Get new transform for each new point
@@ -85,7 +86,6 @@ geometry_msgs::PointStamped NavSatFixToLocalNode::UTMToMap(
 
   // 2. Use _startingMapUTMTransform generated in constructor
   tf2::doTransform(msg, map_point, _startingMapUTMTransform);
-
   return map_point;
 }
 
