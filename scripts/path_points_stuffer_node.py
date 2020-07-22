@@ -2,7 +2,6 @@
 import rospy
 import rospkg
 from std_msgs.msg import String
-from sensor_msgs.msg import NavSatFix
 from agribot_msgs.msg import NavSatFixOrientation
 from pathpointsstuffer import PathPointsStuffer
 
