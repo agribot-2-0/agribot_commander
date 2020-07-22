@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import threading
-from agribot_msgs.msg import NavSatFixOrientation
-from std_srvs.srv import Empty
 import rospy
 import smach
 import roslib
 import rospkg
+from std_srvs.srv import Empty
 from std_msgs.msg import String
+from agribot_msgs.msg import NavSatFixOrientation
 from pathpointsstuffer import PathPointsStuffer
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')

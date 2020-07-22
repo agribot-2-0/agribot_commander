@@ -3,7 +3,6 @@ from __future__ import print_function
 import rospy
 import smach
 import roslib
-from std_srvs.srv import Empty
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
