@@ -2,6 +2,7 @@
 from __future__ import print_function
 import threading
 from agribot_msgs.msg import NavSatFixOrientation
+from std_srvs.srv import Empty
 import rospy
 import smach
 import roslib
@@ -124,4 +125,12 @@ class ChooseTask(smach.State):
             output_transition = 'tr_task_conf_error'
         rospy.loginfo("[State Machine] Leaving state: ChooseTask TRANSITION: " +
                       str(output_transition))
+        if output_transition == 'tr_task_is_active':
+            rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
+            switch_to_navigation = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation',
+                                                      Empty)
+            try:
+                switch_to_navigation()
+            except rospy.ServiceException as exc:
+                rospy.logerr("Service did not process request: " + str(exc))
         return output_transition
