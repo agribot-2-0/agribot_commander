@@ -23,6 +23,9 @@ MoveBaseMonitor::MoveBaseMonitor()
                     << "action server to come up");
   }
 
+  _client_navigation = _nh.serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_navigation");
+  _client_stop = _nh.serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_stop");
+
   resultMsg.result = resultMsg.NOACTION;
   resultMsg.current_waypoint = 0;
   resultMsg.total_waypoints = 0;
@@ -37,12 +40,12 @@ void MoveBaseMonitor::stateMachineCallback(const agribot_msgs::AgribotMoveBaseCo
   // if the path is blocked then cancel the current goal and set the pause flag
   if (command_msg.command == command_msg.PAUSE)
   {
-    ac->cancelAllGoals();
-    _pauseGoal = true;
     _pauseGoalLatch = true;
+    _pauseGoal = true;
   }
   else if (command_msg.command == command_msg.CONTINUE)
   {
+
     _pauseGoal = false;
   }
   // if we want to abort the current task by user request
@@ -59,7 +62,8 @@ void MoveBaseMonitor::isPaused()
   {
     if (cancelTrig)
     {
-      ac->cancelAllGoals();
+      ros::service::waitForService("/cmd_vel_arbiter_node/switch_to_stop");
+      _client_stop.call(_reset_srv);
       ROS_INFO_STREAM("[MoveBaseMonitor] Goal PAUSED");
       cancelTrig = false;
     }
@@ -67,6 +71,12 @@ void MoveBaseMonitor::isPaused()
     _stateMachinePub.publish(resultMsg);
     ros::Duration(0.1).sleep();  // sleep for half a second
     ros::spinOnce();
+  }
+  if (_pauseGoalLatch)
+  {
+    ros::service::waitForService("/cmd_vel_arbiter_node/switch_to_navigation");
+    _client_navigation.call(_reset_srv);
+    _pauseGoalLatch = false;
   }
 }
 
@@ -162,7 +172,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
       ac->cancelAllGoals();
       break;
     }
-    // check if the current goal was pause, if so then wait
+    // check if the current goal was paused, if so then wait
     isPaused();
     // check if the next point should be loaded
     if (load_point)
@@ -187,28 +197,19 @@ void MoveBaseMonitor::monitorPathWaypoints()
       {
         resultMsg.result = resultMsg.SUCCES;
         _stateMachinePub.publish(resultMsg);
-        ROS_INFO_STREAM("[MoveBaseMonitor] Goal succeeded");
+        ROS_INFO_STREAM("[MoveBaseMonitor] Goal succeeded, "
+                        <<"taking the next goal");
         currentWaypoint++;
         load_point = true;
       }
       else if (goal_result == actionlib::SimpleClientGoalState::PREEMPTED)
       {
-        // check if the current goal is paused or we should take next goal
-        if (_pauseGoalLatch)
-        {
-          resultMsg.result = resultMsg.PAUSED;
-          _stateMachinePub.publish(resultMsg);
-          load_point = true;
-          _pauseGoalLatch = false;
-        }
-        else
-        {
-          resultMsg.result = resultMsg.PREEMPTED;
-          _stateMachinePub.publish(resultMsg);
-          ROS_INFO_STREAM("[MoveBaseMonitor] Goal PREEMPTED");
-          currentWaypoint++;
-          load_point = true;
-        }
+        resultMsg.result = resultMsg.PREEMPTED;
+        _stateMachinePub.publish(resultMsg);
+        ROS_INFO_STREAM("[MoveBaseMonitor] Goal PREEMPTED, "
+                        <<"trying next goal");
+        currentWaypoint++;
+        load_point = true;
       }
       else if (goal_result == actionlib::SimpleClientGoalState::ABORTED)
       {
@@ -216,7 +217,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
         _stateMachinePub.publish(resultMsg);
         currentWaypoint++;
         load_point = true;
-        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was ABORTED!,"
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was ABORTED!, "
                         << "trying next goal");
       }
       else if (goal_result == actionlib::SimpleClientGoalState::REJECTED)
@@ -225,7 +226,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
         _stateMachinePub.publish(resultMsg);
         currentWaypoint++;
         load_point = true;
-        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was REJECTED!,"
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was REJECTED!, "
                         << "trying next goal");
       }
       else if (goal_result == actionlib::SimpleClientGoalState::RECALLED)

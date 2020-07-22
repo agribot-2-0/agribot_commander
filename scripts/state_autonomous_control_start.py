@@ -3,7 +3,6 @@ from __future__ import print_function
 import rospy
 import smach
 import roslib
-from std_srvs.srv import Empty
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -18,13 +17,6 @@ class AutonomousControlStart(smach.State):
     def execute(self, ud): # pylint: disable=invalid-name, unused-argument, no-self-use
         """Returns the proper transition based on the input of userdata (ud)"""
         output_transition = ''
-        rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
-        switch_to_navigation = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation',
-                                                  Empty)
-        try:
-            switch_to_navigation()
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service did not process request: " + str(exc))
         rospy.loginfo("[State Machine] Executing state: AutonomousControlStart INPUT: " +
                       str(ud.autonomous_control_state_reason))
         if ud.autonomous_control_state_reason == 'auto_control_prepared' or \

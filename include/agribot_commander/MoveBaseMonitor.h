@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Int32.h>
+#include <std_srvs/Empty.h>
 #include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
 #include <agribot_msgs/AgribotMoveBaseCommand.h>
 #include <move_base_msgs/MoveBaseAction.h>
@@ -22,6 +23,9 @@ class MoveBaseMonitor
 {
  private:
   ros::NodeHandle _nh;
+  ros::ServiceClient _client_navigation;
+  ros::ServiceClient _client_stop;
+  std_srvs::Empty _reset_srv;
   ros::Subscriber _waypointsSub;
   ros::Subscriber _stateMachineSub;
   ros::Publisher _stateMachinePub;
