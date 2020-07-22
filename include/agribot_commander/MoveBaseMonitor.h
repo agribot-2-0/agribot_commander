@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2020 Agribot. All rights reserved.
-*/
+ * Copyright (C) 2020 Agribot. All rights reserved.
+ */
 
 #pragma once
 
@@ -16,12 +16,11 @@
 #include <vector>
 #include <string>
 
-typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>
-        MoveBaseClient;
+typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
 class MoveBaseMonitor
 {
- private:
+private:
   ros::NodeHandle _nh;
   ros::ServiceClient _client_navigation;
   ros::ServiceClient _client_stop;
@@ -33,11 +32,11 @@ class MoveBaseMonitor
   ros::Publisher waypoint_marker_pub_;
   ros::Publisher plan_pub_;
 
-  void createAndPublishMarkersFromPath(const std::vector <geometry_msgs::PoseStamped>& path); // NOLINT
+  void createAndPublishMarkersFromPath(const std::vector<geometry_msgs::PoseStamped>& path);  // NOLINT
 
   void waypointCallback(const geometry_msgs::PointStampedConstPtr& waypoint);
 
-  void stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand &command_msg);
+  void stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand& command_msg);
 
   void isPaused();
 
@@ -57,7 +56,7 @@ class MoveBaseMonitor
   bool _userAbort;
   agribot_msgs::AgribotMoveBaseMonitorResult resultMsg;
 
- public:
+public:
   MoveBaseMonitor();
   void run();
 };

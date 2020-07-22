@@ -45,7 +45,6 @@ void MoveBaseMonitor::stateMachineCallback(const agribot_msgs::AgribotMoveBaseCo
   }
   else if (command_msg.command == command_msg.CONTINUE)
   {
-
     _pauseGoal = false;
   }
   // if we want to abort the current task by user request
@@ -198,7 +197,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
         resultMsg.result = resultMsg.SUCCES;
         _stateMachinePub.publish(resultMsg);
         ROS_INFO_STREAM("[MoveBaseMonitor] Goal succeeded, "
-                        <<"taking the next goal");
+                        << "taking the next goal");
         currentWaypoint++;
         load_point = true;
       }
@@ -207,7 +206,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
         resultMsg.result = resultMsg.PREEMPTED;
         _stateMachinePub.publish(resultMsg);
         ROS_INFO_STREAM("[MoveBaseMonitor] Goal PREEMPTED, "
-                        <<"trying next goal");
+                        << "trying next goal");
         currentWaypoint++;
         load_point = true;
       }

@@ -125,7 +125,7 @@ class ChooseTask(smach.State):
             output_transition = 'tr_task_conf_error'
         rospy.loginfo("[State Machine] Leaving state: ChooseTask TRANSITION: " +
                       str(output_transition))
-        if output_transition == 'tr_task_is_active':     
+        if output_transition == 'tr_task_is_active':
             rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
             switch_to_navigation = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation',
                                                       Empty)
