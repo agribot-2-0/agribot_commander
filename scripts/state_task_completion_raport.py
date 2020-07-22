@@ -19,59 +19,57 @@ class TaskCompletionRaport(smach.State):
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
-        self.state_msg = String('')
+        self.state_msg = String()
 
     def execute(self, ud): # pylint: disable=invalid-name, no-self-use
         """Create a report from the task realisation"""
-        #Write raport data and go back to Standby
+        #Write raport data and go back to SafeState or ManualControl
         #
         #
-        string_msg = "[State Machine] Executing state TaskCompletionRaport "
-        rospy.loginfo(string_msg)
         self.state_msg = "TaskCompletionRaport"
         self.pub_state.publish(self.state_msg)
         current_state = rospy.get_param('/agribot/robot_current_state')
-        output_str = ''
+        output_transition = ''
         if current_state == 'auto_control_state':
+            rospy.loginfo("[State Machine] Executing state: TaskCompletionRaport INPUT: " +
+                          str(ud.auto_task_monitor_input))
             if ud.auto_task_monitor_input == 'user_abort':
-                string_msg = "[State Machine] Task aborted by the user"
                 ud.task_completion_safe_out = 'return_to_safe_state'
                 # set current robot state
                 rospy.set_param('/agribot/robot_current_state', 'safe_state')
                 # clear the current task
                 rospy.set_param('/agribot/current_task_name', '')
-                output_str = 'tr_complete_return_to_safe_state'
+                output_transition = 'tr_complete_return_to_safe_state'
 
             if ud.auto_task_monitor_input == 'user_suspend':
-                string_msg = "[State Machine] Task suspended by the user for manual control"
                 ud.task_completion_man_out = 'application_input_received'
                 # set current robot state
                 rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
-                output_str = 'tr_suspended_return_to_manual'
+                output_transition = 'tr_suspended_return_to_manual'
 
             if ud.auto_task_monitor_input == 'succes':
-                string_msg = "[State Machine] Task completed, all went good"
                 ud.task_completion_safe_out = 'return_to_safe_state'
                 # set current robot state
                 rospy.set_param('/agribot/robot_current_state', 'safe_state')
                 # clear the current task
                 rospy.set_param('/agribot/current_task_name', '')
-                output_str = 'tr_complete_return_to_safe_state'
+                output_transition = 'tr_complete_return_to_safe_state'
         else:
             # task aborted during blockage
+            rospy.loginfo("[State Machine] Executing state: TaskCompletionRaport INPUT: " +
+                          str(ud.auto_task_blocked_input))
             if ud.auto_task_blocked_input == 'user_abort':
-                string_msg = "[State Machine] Task ended with human intervention"
                 ud.task_completion_safe_out = 'return_to_safe_state'
                 # set current robot state
                 rospy.set_param('/agribot/robot_current_state', 'safe_state')
                 # clear the current task
                 rospy.set_param('/agribot/current_task_name', '')
-                output_str = 'tr_complete_return_to_safe_state'
+                output_transition = 'tr_complete_return_to_safe_state'
             if ud.auto_task_blocked_input == 'user_suspend':
-                string_msg = "[State Machine] Task suspended by the user for manual control"
                 ud.task_completion_man_out = 'application_input_received'
                 # set current robot state
                 rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
-                output_str = 'tr_suspended_return_to_manual'
-        rospy.loginfo(string_msg)
-        return output_str
+                output_transition = 'tr_suspended_return_to_manual'
+        rospy.loginfo("[State Machine] Leaving state: TaskCompletionRaport TRANSITION: " +
+                      str(output_transition))
+        return output_transition

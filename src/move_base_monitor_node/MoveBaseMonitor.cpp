@@ -1,21 +1,9 @@
 /*
-* Copyright (C) 2020 Agribot. All rights reserved.
-*/
+ * Copyright (C) 2020 Agribot. All rights reserved.
+ */
 
 #include <agribot_commander/MoveBaseMonitor.h>
 #include <visualization_msgs/MarkerArray.h>
-
-#define COMMAND_CONTINUE 0
-#define COMMAND_PAUSE 1
-#define COMMAND_ABORT 2
-
-#define RESULT_ACTIVE 1
-#define RESULT_SUCCES 3
-#define RESULT_PREEMPTED 2
-#define RESULT_ABORTED 4
-#define RESULT_FAILED 5
-#define RESULT_PAUSED 10
-#define RESULT_PATH_COMPLETED 100
 
 MoveBaseMonitor::MoveBaseMonitor()
 {
@@ -30,17 +18,15 @@ MoveBaseMonitor::MoveBaseMonitor()
   _stateMachinePub = _nh.advertise<agribot_msgs::AgribotMoveBaseMonitorResult>
                       ("/agribot/move_base_monitor/result", 10);
 
-  waypoint_marker_pub_ = _nh.advertise<visualization_msgs::MarkerArray>
-                        ("/agribot/move_base_monitor/waypoints", 1);
-  plan_pub_ = _nh.advertise<nav_msgs::Path>("/agribot/move_base_monitor/path",
-                                             1);
+  waypoint_marker_pub_ = _nh.advertise<visualization_msgs::MarkerArray>("/agribot/move_base_monitor/waypoints", 1);
+  plan_pub_ = _nh.advertise<nav_msgs::Path>("/agribot/move_base_monitor/path", 1);
   // tell the action client that we want to spin a thread by default
   ac = new MoveBaseClient("move_base", true);
   // wait for the action server to come up
   while (!ac->waitForServer(ros::Duration(5.0)))
   {
-    ROS_INFO_STREAM("[MoveBaseMonitor]Waiting for the move_base" <<
-                    "action server to come up");
+    ROS_INFO_STREAM("[MoveBaseMonitor]Waiting for the move_base"
+                    << "action server to come up");
   }
 
   resultMsg.result = resultMsg.NOACTION;
@@ -52,7 +38,7 @@ MoveBaseMonitor::MoveBaseMonitor()
   _userAbort = false;
 }
 
-void MoveBaseMonitor::stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand &command_msg)
+void MoveBaseMonitor::stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand& command_msg)
 {
   // if the path is blocked then cancel the current goal and set the pause flag
   if (command_msg.command == command_msg.PAUSE)
@@ -107,8 +93,8 @@ void MoveBaseMonitor::waypointCallback(
   if (waypoints_.size() < 2)
     return;
 
-  geometry_msgs::Pose *p1 = &(waypoints_.end()-2)->pose;
-  geometry_msgs::Pose *p2 = &(waypoints_.end()-1)->pose;
+  geometry_msgs::Pose* p1 = &(waypoints_.end() - 2)->pose;
+  geometry_msgs::Pose* p2 = &(waypoints_.end() - 1)->pose;
 
   // calculate orientation of waypoints
   double yaw = atan2(p2->position.y - p1->position.y,
@@ -116,8 +102,7 @@ void MoveBaseMonitor::waypointCallback(
 
   // calculate distance between latest two waypoints
   // and check if it surpasses the threshold epsilon
-  double dist = hypot(p1->position.x - p2->position.x,
-                      p1->position.y - p2->position.y);
+  double dist = hypot(p1->position.x - p2->position.x, p1->position.y - p2->position.y);
 
   if (dist < 0.01)
   {
@@ -132,8 +117,7 @@ void MoveBaseMonitor::waypointCallback(
   }
 }
 
-void MoveBaseMonitor::createAndPublishMarkersFromPath(
-  const std::vector<geometry_msgs::PoseStamped>& path)
+void MoveBaseMonitor::createAndPublishMarkersFromPath(const std::vector<geometry_msgs::PoseStamped>& path)
 {
   // clear previous markers
   visualization_msgs::MarkerArray markers;
@@ -181,8 +165,8 @@ void MoveBaseMonitor::monitorPathWaypoints()
     resultMsg.total_waypoints = path_.poses.size();
     if (_userAbort)
     {
-       ac->cancelAllGoals();
-       break;
+      ac->cancelAllGoals();
+      break;
     }
     // check if the current goal was pause, if so then wait
     isPaused();
@@ -190,8 +174,8 @@ void MoveBaseMonitor::monitorPathWaypoints()
     if (load_point)
     {
       pose = path_.poses[currentWaypoint];
-      ROS_INFO_STREAM("[MoveBaseMonitor] Point " << pose.pose.position.x
-              << ", " << pose.pose.position.y << " Index " << currentWaypoint);
+      ROS_INFO_STREAM("[MoveBaseMonitor] Point " << pose.pose.position.x << ", " << pose.pose.position.y << " Index "
+                                                 << currentWaypoint);
       goal.target_pose = pose;
       ac->sendGoal(goal);
       load_point = false;
@@ -238,8 +222,8 @@ void MoveBaseMonitor::monitorPathWaypoints()
         _stateMachinePub.publish(resultMsg);
         currentWaypoint++;
         load_point = true;
-        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was ABORTED!," <<
-                        "trying next goal");
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was ABORTED!,"
+                        << "trying next goal");
       }
       else if (goal_result == actionlib::SimpleClientGoalState::REJECTED)
       {
@@ -247,15 +231,15 @@ void MoveBaseMonitor::monitorPathWaypoints()
         _stateMachinePub.publish(resultMsg);
         currentWaypoint++;
         load_point = true;
-        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was REJECTED!," <<
-                        "trying next goal");
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was REJECTED!,"
+                        << "trying next goal");
       }
       else if (goal_result == actionlib::SimpleClientGoalState::RECALLED)
       {
         resultMsg.result = resultMsg.FAILED;
         _stateMachinePub.publish(resultMsg);
-        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was RECALLED!," <<
-                        "trying next goal");
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was RECALLED!,"
+                        << "trying next goal");
         currentWaypoint++;
         load_point = true;
       }
@@ -263,8 +247,8 @@ void MoveBaseMonitor::monitorPathWaypoints()
       {
         resultMsg.result = resultMsg.FAILED;
         _stateMachinePub.publish(resultMsg);
-        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was LOST!," <<
-                        "trying next goal");
+        ROS_INFO_STREAM("[MoveBaseMonitor] The goal was LOST!,"
+                        << "trying next goal");
         currentWaypoint++;
         load_point = true;
       }
@@ -286,7 +270,6 @@ void MoveBaseMonitor::monitorPathWaypoints()
     ROS_INFO("[MoveBaseMonitor] Path ended");
   }
 }
-
 
 void MoveBaseMonitor::run()
 {

@@ -19,13 +19,17 @@ class EngineStop(smach.State):
         """Returns the proper transition based on the system configuration
         (the engine was stopped properly or it was a failure reaction)"""
         rospy.loginfo('[State Machine] Executing state EngineStop')
-        output_string = ''
+        output_transition = ''
         #Send engine stop frames
         #when engine is still, return the outcome
         #normal work, no system failure
         rospy.sleep(0.010)
+        rospy.loginfo("[State Machine] Executing state: EngineStop INPUT: " +
+                      str(ud.engine_stop_reason))
         if ud.engine_stop_reason == 'Normal':
-            output_string = 'tr_engine_stopped_normal'
+            output_transition = 'tr_engine_stopped_normal'
         else:
-            output_string = 'tr_engine_stop_failure_reaction'
-        return output_string
+            output_transition = 'tr_engine_stop_failure_reaction'
+        rospy.loginfo("[State Machine] Leaving state: EngineStop TRANSITION: " +
+                      str(output_transition))
+        return output_transition
