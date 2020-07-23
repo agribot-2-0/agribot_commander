@@ -4,40 +4,39 @@
 
 #include <agribot_commander/NavSatFixToLocalNode.h>
 
-NavSatFixToLocalNode::NavSatFixToLocalNode():
-  _tf2Listener(_tf2Buffer)
+NavSatFixToLocalNode::NavSatFixToLocalNode() : _tf2Listener(_tf2Buffer)
 {
   _waypointsSub = _nh.subscribe("agribot/waypoints",
                                 1000,
                                 &NavSatFixToLocalNode::waypointCallback, this);
   _pathPointPub = _nh.advertise<geometry_msgs::PoseStamped>("agribot/path_point",
-                                                                1000);
+                                                            1000);
 
   bool transformStatus = false;
 
-  while  (!transformStatus)
+  while (!transformStatus)
   {
-      transformStatus = getMapUTMTransform();
-      if (transformStatus == false)
-      {
-          ROS_WARN("UTM -> map transform was not available. Retrying!");
-      }
+    transformStatus = getMapUTMTransform();
+    if (transformStatus == false)
+    {
+      ROS_WARN("UTM -> map transform was not available. Retrying!");
+    }
   }
   ROS_INFO("UTM -> map transform obtained!");
 }
 
 bool NavSatFixToLocalNode::getMapUTMTransform(void)
 {
-    try
-    {
-        _startingMapUTMTransform = _tf2Buffer.lookupTransform("map",
-                                      "utm", ros::Time(0), ros::Duration(1.0));
-    }
-    catch (tf2::TransformException &ex)
-    {
-        return false;
-    }
-    return true;
+  try
+  {
+    _startingMapUTMTransform = _tf2Buffer.lookupTransform("map",
+                                                          "utm", ros::Time(0), ros::Duration(1.0));
+  }
+  catch (tf2::TransformException &ex)
+  {
+    return false;
+  }
+  return true;
 }
 
 void NavSatFixToLocalNode::waypointCallback(const agribot_msgs::NavSatFixOrientation msg)
@@ -53,7 +52,7 @@ void NavSatFixToLocalNode::waypointCallback(const agribot_msgs::NavSatFixOrienta
 }
 
 geometry_msgs::PoseStamped NavSatFixToLocalNode::navSatFixToUTM(
-                                              const agribot_msgs::NavSatFixOrientation msg)
+    const agribot_msgs::NavSatFixOrientation msg)
 {
   double utm_x, utm_y;
   std::string utm_zone;
@@ -76,7 +75,7 @@ geometry_msgs::PoseStamped NavSatFixToLocalNode::navSatFixToUTM(
 }
 
 geometry_msgs::PoseStamped NavSatFixToLocalNode::UTMToMap(
-                                        const geometry_msgs::PoseStamped msg)
+    const geometry_msgs::PoseStamped msg)
 {
   geometry_msgs::PoseStamped map_point;
 
