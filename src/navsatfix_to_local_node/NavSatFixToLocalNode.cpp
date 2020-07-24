@@ -1,16 +1,13 @@
 /*
-* Copyright (C) 2020 Agribot. All rights reserved.
-*/
+ * Copyright (C) 2020 Agribot. All rights reserved.
+ */
 
 #include <agribot_commander/NavSatFixToLocalNode.h>
 
 NavSatFixToLocalNode::NavSatFixToLocalNode() : _tf2Listener(_tf2Buffer)
 {
-  _waypointsSub = _nh.subscribe("agribot/waypoints",
-                                1000,
-                                &NavSatFixToLocalNode::waypointCallback, this);
-  _pathPointPub = _nh.advertise<geometry_msgs::PoseStamped>("agribot/path_point",
-                                                            1000);
+  _waypointsSub = _nh.subscribe("agribot/waypoints", 1000, &NavSatFixToLocalNode::waypointCallback, this);
+  _pathPointPub = _nh.advertise<geometry_msgs::PoseStamped>("agribot/path_point", 1000);
 
   bool transformStatus = false;
 
@@ -29,10 +26,9 @@ bool NavSatFixToLocalNode::getMapUTMTransform(void)
 {
   try
   {
-    _startingMapUTMTransform = _tf2Buffer.lookupTransform("map",
-                                                          "utm", ros::Time(0), ros::Duration(1.0));
+    _startingMapUTMTransform = _tf2Buffer.lookupTransform("map", "utm", ros::Time(0), ros::Duration(1.0));
   }
-  catch (tf2::TransformException &ex)
+  catch (tf2::TransformException& ex)
   {
     return false;
   }
@@ -51,17 +47,14 @@ void NavSatFixToLocalNode::waypointCallback(const agribot_msgs::NavSatFixOrienta
   _pathPointPub.publish(map_point);
 }
 
-geometry_msgs::PoseStamped NavSatFixToLocalNode::navSatFixToUTM(
-    const agribot_msgs::NavSatFixOrientation msg)
+geometry_msgs::PoseStamped NavSatFixToLocalNode::navSatFixToUTM(const agribot_msgs::NavSatFixOrientation msg)
 {
   double utm_x, utm_y;
   std::string utm_zone;
   geometry_msgs::PoseStamped UTM_point;
 
   // Convert Latitude/Longitude from NavSatFix to UTM coordinates
-  RobotLocalization::NavsatConversions::LLtoUTM(msg.latitude,
-                                                msg.longitude,
-                                                utm_y, utm_x, utm_zone);
+  RobotLocalization::NavsatConversions::LLtoUTM(msg.latitude, msg.longitude, utm_y, utm_x, utm_zone);
 
   // Fill in UTM_point variable
   UTM_point.header.frame_id = "utm";
@@ -74,8 +67,7 @@ geometry_msgs::PoseStamped NavSatFixToLocalNode::navSatFixToUTM(
   return UTM_point;
 }
 
-geometry_msgs::PoseStamped NavSatFixToLocalNode::UTMToMap(
-    const geometry_msgs::PoseStamped msg)
+geometry_msgs::PoseStamped NavSatFixToLocalNode::UTMToMap(const geometry_msgs::PoseStamped msg)
 {
   geometry_msgs::PoseStamped map_point;
 

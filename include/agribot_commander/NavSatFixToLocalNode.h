@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2020 Agribot. All rights reserved.
-*/
+ * Copyright (C) 2020 Agribot. All rights reserved.
+ */
 
 #ifndef AGRIBOT_COMMANDER_NAVSATFIXTOLOCALNODE_H_
 #define AGRIBOT_COMMANDER_NAVSATFIXTOLOCALNODE_H_
@@ -16,7 +16,7 @@
 
 class NavSatFixToLocalNode
 {
- private:
+private:
   ros::NodeHandle _nh;
   ros::Subscriber _waypointsSub;
   ros::Publisher _pathPointPub;
@@ -30,8 +30,7 @@ class NavSatFixToLocalNode
   geometry_msgs::PoseStamped navSatFixToUTM(const agribot_msgs::NavSatFixOrientation msg);
   geometry_msgs::PoseStamped UTMToMap(const geometry_msgs::PoseStamped msg);
 
-
- public:
+public:
   NavSatFixToLocalNode();
   void run();
 };
