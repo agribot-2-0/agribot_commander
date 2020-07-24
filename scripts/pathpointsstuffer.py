@@ -33,9 +33,14 @@ class PathPointsStuffer(object):
         if self.point_to_send_index < len(self.path_points.keys()):
             pose_str = "pose"+str(self.point_to_send_index)
             position = self.path_points[pose_str]["position"]
+            orientation = self.path_points[pose_str]["orientation"]
             msg.latitude = position[0]
             msg.longitude = position[1]
             msg.altitude = position[2]
+            msg.orientation.x = orientation[0]
+            msg.orientation.y = orientation[1]
+            msg.orientation.z = orientation[2]
+            msg.orientation.w = orientation[3]
             self.point_to_send_index += 1
             return msg
         return None
