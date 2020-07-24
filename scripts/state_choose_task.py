@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import threading
-from sensor_msgs.msg import NavSatFix
 import rospy
 import smach
 import roslib
 import rospkg
-from std_msgs.msg import String
 from std_srvs.srv import Empty
+from std_msgs.msg import String
+from agribot_msgs.msg import NavSatFixOrientation
 from pathpointsstuffer import PathPointsStuffer
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
@@ -39,7 +39,7 @@ class ChooseTask(smach.State):
         smach.State.__init__(self, outcomes=['tr_task_is_active', 'tr_task_conf_error'],
                              output_keys=['choose_task_output'])
         self.mutex = threading.Lock()
-        self.pub = rospy.Publisher('agribot/waypoints', NavSatFix, queue_size=1000)
+        self.pub = rospy.Publisher('agribot/waypoints', NavSatFixOrientation, queue_size=1000)
         self.choosen_path_name = ''
         self.received_new_task = False
         self.new_task_name = ''
@@ -69,7 +69,7 @@ class ChooseTask(smach.State):
                     function_output[1] = 'task_config_error'
                 else:
                     self.points_handler.get_path_points_from_yaml()
-                    goal_fix = NavSatFix()
+                    goal_fix = NavSatFixOrientation()
                     goal_fix.header.frame_id = "ll"
                     send_last_msg = True
                     rospy.set_param('/agribot/current_task_name',

@@ -5,7 +5,7 @@
 #pragma once
 
 #include <ros/ros.h>
-#include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Int32.h>
 #include <std_srvs/Empty.h>
 #include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
@@ -34,7 +34,7 @@ private:
 
   void createAndPublishMarkersFromPath(const std::vector<geometry_msgs::PoseStamped>& path);  // NOLINT
 
-  void waypointCallback(const geometry_msgs::PointStampedConstPtr& waypoint);
+  void waypointCallback(const geometry_msgs::PoseStampedConstPtr& waypoint);
 
   void stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand& command_msg);
 
