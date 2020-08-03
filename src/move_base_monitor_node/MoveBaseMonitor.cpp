@@ -23,6 +23,8 @@ MoveBaseMonitor::MoveBaseMonitor()
                     << "action server to come up");
   }
 
+  _nh.setParam("/agribot/move_base_monitor/is_ready", true);
+
   _client_navigation = _nh.serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_navigation");
   _client_stop = _nh.serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_stop");
 
@@ -70,8 +72,10 @@ void MoveBaseMonitor::isPaused()
     _stateMachinePub.publish(resultMsg);
     ros::Duration(0.1).sleep();  // sleep for half a second
     ros::spinOnce();
+    if(_userAbort)
+      break;
   }
-  if (_pauseGoalLatch)
+  if (_pauseGoalLatch && !(_userAbort))
   {
     ros::service::waitForService("/cmd_vel_arbiter_node/switch_to_navigation");
     _client_navigation.call(_reset_srv);
@@ -156,6 +160,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
   move_base_msgs::MoveBaseGoal goal;
   actionlib::SimpleClientGoalState::StateEnum goal_result;
   ROS_INFO_STREAM("[MoveBaseMonitor] Start sending goals");
+  _nh.setParam("/agribot/move_base_monitor/is_ready", false);
   int currentWaypoint = 0;
   bool load_point = true;
   auto pose = path_.poses[currentWaypoint];
@@ -164,13 +169,14 @@ void MoveBaseMonitor::monitorPathWaypoints()
   {
     resultMsg.current_waypoint = currentWaypoint;
     resultMsg.total_waypoints = path_.poses.size();
+    // check if the current goal was paused, if so then wait
+    isPaused();
+    // check if the current path is aborted
     if (_userAbort)
     {
       ac->cancelAllGoals();
       break;
     }
-    // check if the current goal was paused, if so then wait
-    isPaused();
     // check if the next point should be loaded
     if (load_point)
     {
@@ -250,6 +256,8 @@ void MoveBaseMonitor::monitorPathWaypoints()
   }
   clear_waypoints_ = true;
   _pathLoaded = false;
+  _pauseGoal = false;
+  _pauseGoalLatch = false;
   if (_userAbort == true)
   {
     _userAbort = false;
@@ -261,6 +269,7 @@ void MoveBaseMonitor::monitorPathWaypoints()
     _stateMachinePub.publish(resultMsg);
     ROS_INFO("[MoveBaseMonitor] Path ended");
   }
+  _nh.setParam("/agribot/move_base_monitor/is_ready", true);
 }
 
 void MoveBaseMonitor::run()
