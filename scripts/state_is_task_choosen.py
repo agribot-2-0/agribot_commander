@@ -30,7 +30,7 @@ class IsTaskChosen(smach.State):
                           " active_path_name: " + \
                           str(task_name))
             task_name = rospy.get_param('/agribot/chosen_task_name')
-            if not (task_name == ''):
+            if task_name != '':
                 rospy.loginfo("[State Machine] Overwriting active task with new " + \
                               " choosed task: " + \
                               str(task_name))

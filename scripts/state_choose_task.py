@@ -47,7 +47,7 @@ class ChooseTask(smach.State):
         self.pub = rospy.Publisher('agribot/waypoints',
                                    NavSatFixOrientation,
                                    queue_size=1000)
-        self.pubMoveBaseCommand = rospy.Publisher(
+        self.pub_move_base_command = rospy.Publisher(
             '/agribot/move_base_monitor/command',
             AgribotMoveBaseCommand,
             queue_size=10)
@@ -67,7 +67,7 @@ class ChooseTask(smach.State):
         # send the ABORT to clear the current task
         move_base_commands_msg = AgribotMoveBaseCommand()
         move_base_commands_msg.command = AgribotMoveBaseCommand.ABORT
-        self.pubMoveBaseCommand.publish(move_base_commands_msg)
+        self.pub_move_base_command.publish(move_base_commands_msg)
         rate = rospy.Rate(10)  # ROS Rate at 10 Hz
         rospy.loginfo(
             "[State Machine] Waiting for the move_base_monitor to clear the previous task"
