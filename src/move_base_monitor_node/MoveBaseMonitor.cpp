@@ -72,7 +72,7 @@ void MoveBaseMonitor::isPaused()
     _stateMachinePub.publish(resultMsg);
     ros::Duration(0.1).sleep();  // sleep for half a second
     ros::spinOnce();
-    if(_userAbort)
+    if (_userAbort)
       break;
   }
   if (_pauseGoalLatch && !(_userAbort))
