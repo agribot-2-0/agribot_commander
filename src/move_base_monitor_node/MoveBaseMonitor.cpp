@@ -115,6 +115,7 @@ void MoveBaseMonitor::waypointCallback(const geometry_msgs::PoseStampedConstPtr&
     path_.header = waypoint->header;
     path_.poses.clear();
     path_.poses.insert(path_.poses.end(), waypoints_.begin(), waypoints_.end());
+    path_.poses.pop_back();
     createAndPublishMarkersFromPath(path_.poses);
     plan_pub_.publish(path_);
     _pathLoaded = true;
