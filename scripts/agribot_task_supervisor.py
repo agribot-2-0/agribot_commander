@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import threading
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+import rospy
+import rospkg
+
+from std_msgs.msg import String
+
+CALLBACK_DONE = threading.Event()
+TASK_PUBLISHER = rospy.Publisher('/agribot/state_machine/task',
+                                 String,
+                                 queue_size=1000)
+RSN = ""
+STATE_PREVIOUS = ""
+DATABASE = None
+
+
+def callback_state(msg):
+    global STATE_PREVIOUS
+    # after finishing task, set actual_task to empty string in Firestore
+    # assume that task is completed when previous state is TaskCompletionRaport from SM
+    # and actual state is Standby
+    if STATE_PREVIOUS == 'TaskCompletionRaport' and msg.data == 'Standby':
+        doc_ref = DATABASE.collection(u'robots').document(RSN)
+        doc_ref.update({u'actual_task': u''})
+
+    STATE_PREVIOUS = msg.data
+
+
+def on_callback(doc_snapshot, changes, read_time):  # pylint: disable=unused-argument
+    for change in changes:
+        if change.type.name == 'ADDED' or change.type.name == 'MODIFIED':
+            actual_task_name = change.document.to_dict()['actual_task']
+            rospy.loginfo("[AgribotTaskSupervisor] Actual task '{}'".format(
+                actual_task_name))
+            if actual_task_name:
+                actual_task_msg = String()
+                actual_task_msg.data = actual_task_name
+                TASK_PUBLISHER.publish(actual_task_msg)
+
+    CALLBACK_DONE.set()
+
+
+def node():
+    global DATABASE, RSN
+    rospy.init_node('path_points_stuffer_node')
+    rospy.Subscriber('/agribot/state_machine/state', String, callback_state)
+    rospy.wait_for_message('/agribot/state_machine/state', String)
+
+    rospy.loginfo("[AgribotTaskSupervisor] Waiting for task")
+
+    RSN = sys.argv[1]
+
+    # init task handling object:
+    rospack = rospkg.RosPack()
+    key_path = rospack.get_path('agribot_commander') + "/key/"
+    if not os.path.exists(key_path):
+        rospy.logerr("[AgribotTaskSupervisor] Key folder not present.")
+        return
+
+    cert_file = key_path + "agribot-cd437-" + "firebase-adminsdk-ypr8o-5e1109055d.json"
+
+    if not firebase_admin._apps:  # pylint: disable=protected-access
+        cred = credentials.Certificate(cert_file)
+        firebase_admin.initialize_app(cred, {
+            'projectID': 'agribot-cd437',
+        })
+        DATABASE = firestore.client()
+
+        doc_ref = DATABASE.collection(u'robots').document(RSN)
+        doc_ref.on_snapshot(on_callback)
+
+    rospy.spin()
+
+
+if __name__ == '__main__':
+    try:
+        node()
+    except rospy.ROSInterruptException:
+        pass
