@@ -14,7 +14,7 @@ from std_msgs.msg import String
 CALLBACK_DONE = threading.Event()
 TASK_PUBLISHER = rospy.Publisher('/agribot/state_machine/task',
                                  String,
-                                 queue_size=1000)
+                                 queue_size=1)
 RSN = ""
 STATE_PREVIOUS = ""
 DATABASE = None
@@ -48,7 +48,7 @@ def on_callback(doc_snapshot, changes, read_time):  # pylint: disable=unused-arg
 
 def node():
     global DATABASE, RSN
-    rospy.init_node('path_points_stuffer_node')
+    rospy.init_node('task_supervisor')
     rospy.Subscriber('/agribot/state_machine/state', String, callback_state)
     rospy.wait_for_message('/agribot/state_machine/state', String)
 
