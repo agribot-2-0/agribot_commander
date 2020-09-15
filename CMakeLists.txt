@@ -86,6 +86,7 @@ install(TARGETS
 )
 
 catkin_install_python(PROGRAMS
+  scripts/agribot_task_supervisor.py
   scripts/AgribotStateMachine.py
   scripts/pathpointsstuffer.py
   scripts/path_points_stuffer_node.py
@@ -106,7 +107,7 @@ catkin_install_python(PROGRAMS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}/scripts
 )
 
-install(DIRECTORY launch
+install(DIRECTORY launch key
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   PATTERN ".svn" EXCLUDE
 )
