@@ -58,12 +58,13 @@ def node():
 
     # init task handling object:
     rospack = rospkg.RosPack()
-    key_path = rospack.get_path('agribot_commander') + "/key/"
+    key_path = os.path.join(rospack.get_path('agribot_commander'), "key")
     if not os.path.exists(key_path):
         rospy.logerr("[AgribotTaskSupervisor] Key folder not present.")
         return
 
-    cert_file = key_path + "agribot-cd437-" + "firebase-adminsdk-ypr8o-5e1109055d.json"
+    cert_file = os.path.join(
+        key_path, "agribot-cd437-firebase-adminsdk-ypr8o-5e1109055d.json")
 
     if not firebase_admin._apps:  # pylint: disable=protected-access
         cred = credentials.Certificate(cert_file)
