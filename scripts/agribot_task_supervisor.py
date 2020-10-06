@@ -17,31 +17,38 @@ TASK_PUBLISHER = rospy.Publisher('/agribot/state_machine/task',
                                  queue_size=1)
 RSN = ""
 STATE_PREVIOUS = ""
+ACTUAL_TASK_NAME = ""
 DATABASE = None
 
 
 def callback_state(msg):
-    global STATE_PREVIOUS
-    # after finishing task, set actual_task to empty string in Firestore
-    # assume that task is completed when previous state is TaskCompletionRaport from SM
-    # and actual state is Standby
+    global STATE_PREVIOUS, ACTUAL_TASK_NAME
+    # after finishing task, delete actual task from tasks list and set actual_task to
+    # empty string in Firestore assume that task is completed when previous state is
+    # TaskCompletionRaport from SM and actual state is Standby
     if STATE_PREVIOUS == 'TaskCompletionRaport' and msg.data == 'Standby':
-        doc_ref = DATABASE.collection(u'robots').document(RSN)
-        doc_ref.update({u'actual_task': u''})
+        if ACTUAL_TASK_NAME:
+            DATABASE.collection(u'robots').document(RSN).collection(
+                u'tasks').document(ACTUAL_TASK_NAME).delete()
+            doc_ref = DATABASE.collection(u'robots').document(RSN)
+            doc_ref.update({u'actual_task': u''})
 
     STATE_PREVIOUS = msg.data
 
 
 def on_callback(doc_snapshot, changes, read_time):  # pylint: disable=unused-argument
+    global ACTUAL_TASK_NAME
     for change in changes:
         if change.type.name == 'ADDED' or change.type.name == 'MODIFIED':
-            actual_task_name = change.document.to_dict()['actual_task']
-            rospy.loginfo("[AgribotTaskSupervisor] Actual task '{}'".format(
-                actual_task_name))
-            if actual_task_name:
-                actual_task_msg = String()
-                actual_task_msg.data = actual_task_name
-                TASK_PUBLISHER.publish(actual_task_msg)
+            if ACTUAL_TASK_NAME != change.document.to_dict()['actual_task']:
+                ACTUAL_TASK_NAME = change.document.to_dict()['actual_task']
+                if ACTUAL_TASK_NAME:
+                    rospy.loginfo(
+                        "[AgribotTaskSupervisor] Actual task '{}'".format(
+                            ACTUAL_TASK_NAME))
+                    actual_task_msg = String()
+                    actual_task_msg.data = ACTUAL_TASK_NAME
+                    TASK_PUBLISHER.publish(actual_task_msg)
 
     CALLBACK_DONE.set()
 
