@@ -66,10 +66,6 @@ link_directories(
  ${PROJECT_SOURCE_DIR}
 )
 
-add_executable(navsatfix_to_local_node src/navsatfix_to_local_node/navsatfix_to_local_node.cpp src/navsatfix_to_local_node/NavSatFixToLocalNode.cpp)
-target_link_libraries(navsatfix_to_local_node ${catkin_LIBRARIES})
-add_dependencies(navsatfix_to_local_node ${catkin_EXPORTED_TARGETS})
-
 add_executable(move_base_monitor_node src/move_base_monitor_node/move_base_monitor_node.cpp src/move_base_monitor_node/MoveBaseMonitor.cpp)
 target_link_libraries(move_base_monitor_node ${catkin_LIBRARIES})
 add_dependencies(move_base_monitor_node ${catkin_EXPORTED_TARGETS})
@@ -79,7 +75,6 @@ add_dependencies(move_base_monitor_node ${catkin_EXPORTED_TARGETS})
 #############
 
 install(TARGETS
-  navsatfix_to_local_node
   move_base_monitor_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
