@@ -111,17 +111,12 @@ void MoveBaseMonitor::waypointCallback(const agribot_msgs::NavSatFixOrientation&
 
   // add waypoint to the waypoint vector
   waypoints_.push_back(map_point);
-  waypoints_.back().header = map_point.header;
-  waypoints_.back().pose = map_point.pose;
 
   if (waypoints_.size() < 2)
     return;
 
   geometry_msgs::Pose* p1 = &(waypoints_.end() - 2)->pose;
   geometry_msgs::Pose* p2 = &(waypoints_.end() - 1)->pose;
-
-  // calculate orientation of waypoints
-  double yaw = atan2(p2->position.y - p1->position.y, p2->position.x - p1->position.x);
 
   // calculate distance between latest two waypoints
   // and check if it surpasses the threshold epsilon
@@ -327,12 +322,7 @@ geometry_msgs::PoseStamped MoveBaseMonitor::navSatFixToUTM(const agribot_msgs::N
 geometry_msgs::PoseStamped MoveBaseMonitor::UTMToMap(const geometry_msgs::PoseStamped& msg)
 {
   geometry_msgs::PoseStamped map_point;
-
-  // Two alternative ways
-  // 1. Get new transform for each new point
-  // _tf2Buffer.transform(msg, map_point, "map", ros::Duration(0.2));
-
-  // 2. Use _startingMapUTMTransform generated in constructor
+  // Use _startingMapUTMTransform generated in constructor
   tf2::doTransform(msg, map_point, _startingMapUTMTransform);
   return map_point;
 }
