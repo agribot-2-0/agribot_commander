@@ -5,9 +5,9 @@
 #include <agribot_commander/MoveBaseMonitor.h>
 #include <visualization_msgs/MarkerArray.h>
 
-MoveBaseMonitor::MoveBaseMonitor()
+MoveBaseMonitor::MoveBaseMonitor() : _tf2Listener(_tf2Buffer)
 {
-  _waypointsSub = _nh.subscribe("/agribot/path_point", 1000, &MoveBaseMonitor::waypointCallback, this);
+  _waypointsSub = _nh.subscribe("agribot/waypoints", 1000, &MoveBaseMonitor::waypointCallback, this);
   _stateMachineSub =
       _nh.subscribe("/agribot/move_base_monitor/command", 10, &MoveBaseMonitor::stateMachineCallback, this);
   _stateMachinePub = _nh.advertise<agribot_msgs::AgribotMoveBaseMonitorResult>("/agribot/move_base_monitor/result", 10);
@@ -35,6 +35,18 @@ MoveBaseMonitor::MoveBaseMonitor()
   _pauseGoalLatch = false;
   _pathLoaded = false;
   _userAbort = false;
+
+  bool transformStatus = false;
+
+  while (!transformStatus)
+  {
+    transformStatus = getMapUTMTransform();
+    if (transformStatus == false)
+    {
+      ROS_WARN("UTM -> map transform was not available. Retrying!");
+    }
+  }
+  ROS_INFO("UTM -> map transform obtained!");
 }
 
 void MoveBaseMonitor::stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand& command_msg)
@@ -83,7 +95,7 @@ void MoveBaseMonitor::isPaused()
   }
 }
 
-void MoveBaseMonitor::waypointCallback(const geometry_msgs::PoseStampedConstPtr& waypoint)
+void MoveBaseMonitor::waypointCallback(const agribot_msgs::NavSatFixOrientation& waypoint)
 {
   if (clear_waypoints_)
   {
@@ -91,19 +103,20 @@ void MoveBaseMonitor::waypointCallback(const geometry_msgs::PoseStampedConstPtr&
     clear_waypoints_ = false;
   }
 
+  // Convert NavSatFix to UTM
+  geometry_msgs::PoseStamped UTM_point = navSatFixToUTM(waypoint);
+
+  // Convert UTM point to map frame
+  geometry_msgs::PoseStamped map_point = UTMToMap(UTM_point);
+
   // add waypoint to the waypoint vector
-  waypoints_.push_back(geometry_msgs::PoseStamped());
-  waypoints_.back().header = waypoint->header;
-  waypoints_.back().pose = waypoint->pose;
+  waypoints_.push_back(map_point);
 
   if (waypoints_.size() < 2)
     return;
 
   geometry_msgs::Pose* p1 = &(waypoints_.end() - 2)->pose;
   geometry_msgs::Pose* p2 = &(waypoints_.end() - 1)->pose;
-
-  // calculate orientation of waypoints
-  double yaw = atan2(p2->position.y - p1->position.y, p2->position.x - p1->position.x);
 
   // calculate distance between latest two waypoints
   // and check if it surpasses the threshold epsilon
@@ -112,12 +125,11 @@ void MoveBaseMonitor::waypointCallback(const geometry_msgs::PoseStampedConstPtr&
   if (dist < 0.01)
   {
     p2->orientation = p1->orientation;
-    path_.header = waypoint->header;
+    path_.header = map_point.header;
     path_.poses.clear();
     path_.poses.insert(path_.poses.end(), waypoints_.begin(), waypoints_.end());
     path_.poses.pop_back();
-    createAndPublishMarkersFromPath(path_.poses);
-    plan_pub_.publish(path_);
+    publishWaypointsVisualization(path_);
     _pathLoaded = true;
     _userAbort = false;
   }
@@ -165,9 +177,10 @@ void MoveBaseMonitor::monitorPathWaypoints()
   int currentWaypoint = 0;
   bool load_point = true;
   auto pose = path_.poses[currentWaypoint];
-  ros::Rate loop_rate(100);
+  ros::Rate loop_rate(10);
   while (currentWaypoint < path_.poses.size())
   {
+    publishWaypointsVisualization(path_);
     resultMsg.current_waypoint = currentWaypoint;
     resultMsg.total_waypoints = path_.poses.size();
     // check if the current goal was paused, if so then wait
@@ -273,9 +286,56 @@ void MoveBaseMonitor::monitorPathWaypoints()
   _nh.setParam("/agribot/move_base_monitor/is_ready", true);
 }
 
+bool MoveBaseMonitor::getMapUTMTransform(void)
+{
+  try
+  {
+    _startingMapUTMTransform = _tf2Buffer.lookupTransform("map", "utm", ros::Time(0), ros::Duration(1.0));
+  }
+  catch (tf2::TransformException& ex)
+  {
+    return false;
+  }
+  return true;
+}
+
+geometry_msgs::PoseStamped MoveBaseMonitor::navSatFixToUTM(const agribot_msgs::NavSatFixOrientation& msg)
+{
+  double utm_x, utm_y;
+  std::string utm_zone;
+  geometry_msgs::PoseStamped UTM_point;
+
+  // Convert Latitude/Longitude from NavSatFix to UTM coordinates
+  RobotLocalization::NavsatConversions::LLtoUTM(msg.latitude, msg.longitude, utm_y, utm_x, utm_zone);
+
+  // Fill in UTM_point variable
+  UTM_point.header.frame_id = "utm";
+  UTM_point.header.stamp = ros::Time::now();
+  UTM_point.pose.position.x = utm_x;
+  UTM_point.pose.position.y = utm_y;
+  UTM_point.pose.position.z = msg.altitude;
+  UTM_point.pose.orientation = msg.orientation;
+
+  return UTM_point;
+}
+
+geometry_msgs::PoseStamped MoveBaseMonitor::UTMToMap(const geometry_msgs::PoseStamped& msg)
+{
+  geometry_msgs::PoseStamped map_point;
+  // Use _startingMapUTMTransform generated in constructor
+  tf2::doTransform(msg, map_point, _startingMapUTMTransform);
+  return map_point;
+}
+
+void MoveBaseMonitor::publishWaypointsVisualization(const nav_msgs::Path& path)
+{
+  createAndPublishMarkersFromPath(path.poses);
+  plan_pub_.publish(path);
+}
+
 void MoveBaseMonitor::run()
 {
-  ros::Rate loop_rate(100);
+  ros::Rate loop_rate(10);
   while (ros::ok())
   {
     if (_pathLoaded)
