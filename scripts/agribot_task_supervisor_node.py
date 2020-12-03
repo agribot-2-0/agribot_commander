@@ -12,7 +12,12 @@ from agribot_task_supervisor import AgribotTaskSupervisor
 
 
 def node():
-    rsn = sys.argv[1]
+    rospy.init_node('agribot_monitoring')
+    if not rospy.has_param('rsn'):
+        rospy.logerr("[AgribotTaskSupervisor] rsn param not set")
+        return
+
+    rsn = rospy.get_param('rsn')
 
     # init task handling object:
     rospack = rospkg.RosPack()
