@@ -5,7 +5,6 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import rospy
-import rospkg
 
 from agribot_task_supervisor import AgribotTaskSupervisor
 
@@ -30,8 +29,8 @@ def node():
     else:
         return
 
-    if if_param_exists('certificate_repo'):
-        certificate_repo = rospy.get_param('certificate_repo')
+    if if_param_exists('certificate_path'):
+        certificate_path = rospy.get_param('certificate_path')
     else:
         return
 
@@ -41,10 +40,11 @@ def node():
         return
 
     # init task handling object:
-    rospack = rospkg.RosPack()
-    key_path = os.path.join(rospack.get_path(certificate_repo), "key")
+    key_path = os.path.join(os.environ.get('AGRIBOT_HOME'), certificate_path)
     if not os.path.exists(key_path):
-        rospy.logerr("[AgribotTaskSupervisor] Key folder not present.")
+        rospy.logerr(
+            "[AgribotTaskSupervisor] Key folder {} not present".format(
+                key_path))
         return
 
     cert_file = os.path.join(key_path, certificate_file)
