@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   tf2
   tf2_ros
+  tf
   std_msgs
   sensor_msgs
   actionlib_msgs
