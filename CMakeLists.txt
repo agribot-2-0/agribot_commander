@@ -104,7 +104,7 @@ catkin_install_python(PROGRAMS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}/scripts
 )
 
-install(DIRECTORY launch key
+install(DIRECTORY launch key param
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   PATTERN ".svn" EXCLUDE
 )
