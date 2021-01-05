@@ -18,6 +18,7 @@
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_listener.h>
+#include <tf/tf.h>
 
 #include <string>
 #include <vector>
@@ -40,6 +41,7 @@ private:
   geometry_msgs::TransformStamped _startingMapUTMTransform;
   tf2_ros::Buffer _tf2Buffer;
   tf2_ros::TransformListener _tf2Listener;
+  double ray_width_;
 
   void createAndPublishMarkersFromPath(const std::vector<geometry_msgs::PoseStamped>& path);  // NOLINT
   void publishWaypointsVisualization(const nav_msgs::Path& path);
@@ -50,6 +52,13 @@ private:
   void stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand& command_msg);
   void isPaused();
   void monitorPathWaypoints();
+  void updateOrientations(nav_msgs::Path&, const double ray_width) const;
+  double distanceBetweenPoses(const geometry_msgs::Pose& targetPose, const geometry_msgs::Pose& currentPose) const;
+  double angleBetweenPoses(const geometry_msgs::Pose& targetPose, const geometry_msgs::Pose& currentPose) const;
+  double limitAngle(double angle) const;
+  double calculateLinesSpan(const double target_line_angle, const double base_line_angle) const;
+  double yawFromQuaternion(const geometry_msgs::Quaternion& quat) const;
+  geometry_msgs::Quaternion quaternionFromYaw(double yaw) const;
 
   // containers
   //!< container for the manually inserted waypoints
