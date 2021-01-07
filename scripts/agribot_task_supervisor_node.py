@@ -24,11 +24,6 @@ def node():
     else:
         return
 
-    if if_param_exists('rsn'):
-        rsn = rospy.get_param('rsn')
-    else:
-        return
-
     if if_param_exists('certificate_path'):
         certificate_path = rospy.get_param('certificate_path')
     else:
