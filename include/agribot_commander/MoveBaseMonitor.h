@@ -52,13 +52,11 @@ private:
   void stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand& command_msg);
   void isPaused();
   void monitorPathWaypoints();
-  void updateOrientations(nav_msgs::Path&, const double ray_width) const;
-  double distanceBetweenPoses(const geometry_msgs::Pose& targetPose, const geometry_msgs::Pose& currentPose) const;
-  double angleBetweenPoses(const geometry_msgs::Pose& targetPose, const geometry_msgs::Pose& currentPose) const;
+  void updateOrientations(nav_msgs::Path& path, const double ray_width) const;
+  double distanceBetweenPoses(const geometry_msgs::Pose& target_pose, const geometry_msgs::Pose& current_pose) const;
+  double angleBetweenPoses(const geometry_msgs::Pose& target_pose, const geometry_msgs::Pose& current_pose) const;
   double limitAngle(double angle) const;
   double calculateLinesSpan(const double target_line_angle, const double base_line_angle) const;
-  double yawFromQuaternion(const geometry_msgs::Quaternion& quat) const;
-  geometry_msgs::Quaternion quaternionFromYaw(double yaw) const;
 
   // containers
   //!< container for the manually inserted waypoints

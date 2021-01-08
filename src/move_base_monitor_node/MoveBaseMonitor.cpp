@@ -143,44 +143,27 @@ void MoveBaseMonitor::waypointCallback(const agribot_msgs::NavSatFixOrientation&
 
 double MoveBaseMonitor::limitAngle(double angle) const
 {
-  if (angle > M_PI)
+  while (angle > M_PI)
   {
     angle -= M_PI * 2.0;
   }
-  if (angle < M_PI)
+  while (angle < M_PI)
   {
     angle += M_PI * 2.0;
   }
   return angle;
 }
 
-double MoveBaseMonitor::angleBetweenPoses(const geometry_msgs::Pose& targetPose,
-                                          const geometry_msgs::Pose& currentPose) const
+double MoveBaseMonitor::angleBetweenPoses(const geometry_msgs::Pose& target_pose,
+                                          const geometry_msgs::Pose& current_pose) const
 {
-  return std::atan2(targetPose.position.y - currentPose.position.y, targetPose.position.x - currentPose.position.x);
+  return std::atan2(target_pose.position.y - current_pose.position.y, target_pose.position.x - current_pose.position.x);
 }
 
-double MoveBaseMonitor::distanceBetweenPoses(const geometry_msgs::Pose& targetPose,
-                                             const geometry_msgs::Pose& currentPose) const
+double MoveBaseMonitor::distanceBetweenPoses(const geometry_msgs::Pose& target_pose,
+                                             const geometry_msgs::Pose& current_pose) const
 {
-  return hypot(targetPose.position.y - currentPose.position.y, targetPose.position.x - currentPose.position.x);
-}
-
-geometry_msgs::Quaternion MoveBaseMonitor::quaternionFromYaw(double yaw) const
-{
-  geometry_msgs::Quaternion q;
-  q.z = std::sin(yaw / 2.0);
-  q.w = std::cos(yaw / 2.0);
-  return q;
-}
-
-double MoveBaseMonitor::yawFromQuaternion(const geometry_msgs::Quaternion& quat) const
-{
-  tf::Quaternion q(quat.x, quat.y, quat.z, quat.w);
-  tf::Matrix3x3 m(q);
-  double roll, pitch, yaw;
-  m.getRPY(roll, pitch, yaw);
-  return yaw;
+  return hypot(target_pose.position.y - current_pose.position.y, target_pose.position.x - current_pose.position.x);
 }
 
 double MoveBaseMonitor::calculateLinesSpan(const double target_line_angle, const double base_line_angle) const
@@ -190,25 +173,28 @@ double MoveBaseMonitor::calculateLinesSpan(const double target_line_angle, const
 
 void MoveBaseMonitor::updateOrientations(nav_msgs::Path& path, const double ray_width) const
 {
-  path.poses[0].pose.orientation = quaternionFromYaw(angleBetweenPoses(path.poses[1].pose, path.poses[0].pose));
+  path.poses[0].pose.orientation =
+      tf::createQuaternionMsgFromYaw(angleBetweenPoses(path.poses[1].pose, path.poses[0].pose));
   for (std::size_t i = 1; i < path.poses.size() - 1; i++)
   {
-    double last_yaw = yawFromQuaternion(path.poses[i - 1].pose.orientation);
+    double last_yaw = tf::getYaw(path.poses[i - 1].pose.orientation);
     double left_ray_angle = limitAngle(last_yaw + M_PI_2);
     double right_ray_angle = limitAngle(last_yaw - M_PI_2);
     double waypoint_orientation = angleBetweenPoses(path.poses[i - 1].pose, path.poses[i].pose);
     if ((calculateLinesSpan(waypoint_orientation, left_ray_angle) <= ray_width / 2.0) ||
         (calculateLinesSpan(waypoint_orientation, right_ray_angle) <= ray_width / 2.0))
     {
-      path.poses[i].pose.orientation = quaternionFromYaw(angleBetweenPoses(path.poses[i + 1].pose, path.poses[i].pose));
+      path.poses[i].pose.orientation =
+          tf::createQuaternionMsgFromYaw(angleBetweenPoses(path.poses[i + 1].pose, path.poses[i].pose));
     }
     else
     {
-      path.poses[i].pose.orientation = quaternionFromYaw(angleBetweenPoses(path.poses[i].pose, path.poses[i - 1].pose));
+      path.poses[i].pose.orientation =
+          tf::createQuaternionMsgFromYaw(angleBetweenPoses(path.poses[i].pose, path.poses[i - 1].pose));
     }
-    path.poses[path.poses.size() - 1].pose.orientation = quaternionFromYaw(
-        angleBetweenPoses(path.poses[path.poses.size() - 1].pose, path.poses[path.poses.size() - 2].pose));
   }
+  path.poses[path.poses.size() - 1].pose.orientation = tf::createQuaternionMsgFromYaw(
+      angleBetweenPoses(path.poses[path.poses.size() - 1].pose, path.poses[path.poses.size() - 2].pose));
   return;
 }
 
