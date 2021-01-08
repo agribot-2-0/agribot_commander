@@ -147,7 +147,7 @@ double MoveBaseMonitor::limitAngle(double angle) const
   {
     angle -= M_PI * 2.0;
   }
-  while (angle < M_PI)
+  while (angle < -M_PI)
   {
     angle += M_PI * 2.0;
   }
@@ -180,7 +180,7 @@ void MoveBaseMonitor::updateOrientations(nav_msgs::Path& path, const double ray_
     double last_yaw = tf::getYaw(path.poses[i - 1].pose.orientation);
     double left_ray_angle = limitAngle(last_yaw + M_PI_2);
     double right_ray_angle = limitAngle(last_yaw - M_PI_2);
-    double waypoint_orientation = angleBetweenPoses(path.poses[i - 1].pose, path.poses[i].pose);
+    double waypoint_orientation = angleBetweenPoses(path.poses[i].pose, path.poses[i - 1].pose);
     if ((calculateLinesSpan(waypoint_orientation, left_ray_angle) <= ray_width / 2.0) ||
         (calculateLinesSpan(waypoint_orientation, right_ray_angle) <= ray_width / 2.0))
     {
