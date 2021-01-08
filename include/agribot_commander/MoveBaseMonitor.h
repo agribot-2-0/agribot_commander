@@ -52,7 +52,7 @@ private:
   void stateMachineCallback(const agribot_msgs::AgribotMoveBaseCommand& command_msg);
   void isPaused();
   void monitorPathWaypoints();
-  void updateOrientations(nav_msgs::Path& path, const double ray_width) const;
+  void updateOrientations(nav_msgs::Path& path, const double ray_width) const;  // NOLINT(runtime/references)
   double distanceBetweenPoses(const geometry_msgs::Pose& target_pose, const geometry_msgs::Pose& current_pose) const;
   double angleBetweenPoses(const geometry_msgs::Pose& target_pose, const geometry_msgs::Pose& current_pose) const;
   double limitAngle(double angle) const;
