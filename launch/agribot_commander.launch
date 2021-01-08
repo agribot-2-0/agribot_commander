@@ -1,7 +1,10 @@
 <launch>
-  <arg name="rsn" default="ADI75R1" />
+  <rosparam command="load" file="$(env AGRIBOT_HOME)/agribot/configs/base/robot.yaml" />
+  <rosparam command="load" file="$(env AGRIBOT_HOME)/agribot/configs/base/firebase.yaml" />
 
-  <node name="agribot_task_supervisor_node" pkg="agribot_commander" type="agribot_task_supervisor_node.py" output="screen" args="$(arg rsn)"/>
+  <group if="$(env AGRIBOT_TASK_SUPERVISOR)">
+    <node name="agribot_task_supervisor_node" pkg="agribot_commander" type="agribot_task_supervisor_node.py" output="screen"/>
+  </group>
   <node name="agribot_commander_state_machine" pkg="agribot_commander" type="AgribotStateMachine.py" output="screen" />
   <node name="move_base_monitor_node" pkg="agribot_commander" type="move_base_monitor_node" output="screen" />
 </launch>
