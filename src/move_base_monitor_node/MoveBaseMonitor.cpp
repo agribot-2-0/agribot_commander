@@ -14,6 +14,9 @@ MoveBaseMonitor::MoveBaseMonitor() : _tf2Listener(_tf2Buffer)
 
   waypoint_marker_pub_ = _nh.advertise<visualization_msgs::MarkerArray>("/agribot/move_base_monitor/waypoints", 1);
   plan_pub_ = _nh.advertise<nav_msgs::Path>("/agribot/move_base_monitor/path", 1);
+
+  _nh.param("ray_width", ray_width_, M_PI_2);
+
   // tell the action client that we want to spin a thread by default
   ac = new MoveBaseClient("move_base", true);
   // wait for the action server to come up
@@ -129,10 +132,70 @@ void MoveBaseMonitor::waypointCallback(const agribot_msgs::NavSatFixOrientation&
     path_.poses.clear();
     path_.poses.insert(path_.poses.end(), waypoints_.begin(), waypoints_.end());
     path_.poses.pop_back();
+
+    updateOrientations(path_, ray_width_);
+
     publishWaypointsVisualization(path_);
     _pathLoaded = true;
     _userAbort = false;
   }
+}
+
+double MoveBaseMonitor::limitAngle(double angle) const
+{
+  while (angle > M_PI)
+  {
+    angle -= M_PI * 2.0;
+  }
+  while (angle < -M_PI)
+  {
+    angle += M_PI * 2.0;
+  }
+  return angle;
+}
+
+double MoveBaseMonitor::angleBetweenPoses(const geometry_msgs::Pose& target_pose,
+                                          const geometry_msgs::Pose& current_pose) const
+{
+  return std::atan2(target_pose.position.y - current_pose.position.y, target_pose.position.x - current_pose.position.x);
+}
+
+double MoveBaseMonitor::distanceBetweenPoses(const geometry_msgs::Pose& target_pose,
+                                             const geometry_msgs::Pose& current_pose) const
+{
+  return hypot(target_pose.position.y - current_pose.position.y, target_pose.position.x - current_pose.position.x);
+}
+
+double MoveBaseMonitor::calculateLinesSpan(const double target_line_angle, const double base_line_angle) const
+{
+  return abs(limitAngle(target_line_angle - base_line_angle));
+}
+
+void MoveBaseMonitor::updateOrientations(nav_msgs::Path& path, const double ray_width) const
+{
+  path.poses[0].pose.orientation =
+      tf::createQuaternionMsgFromYaw(angleBetweenPoses(path.poses[1].pose, path.poses[0].pose));
+  for (std::size_t i = 1; i < path.poses.size() - 1; i++)
+  {
+    double last_yaw = tf::getYaw(path.poses[i - 1].pose.orientation);
+    double left_ray_angle = limitAngle(last_yaw + M_PI_2);
+    double right_ray_angle = limitAngle(last_yaw - M_PI_2);
+    double waypoint_orientation = angleBetweenPoses(path.poses[i].pose, path.poses[i - 1].pose);
+    if ((calculateLinesSpan(waypoint_orientation, left_ray_angle) <= ray_width / 2.0) ||
+        (calculateLinesSpan(waypoint_orientation, right_ray_angle) <= ray_width / 2.0))
+    {
+      path.poses[i].pose.orientation =
+          tf::createQuaternionMsgFromYaw(angleBetweenPoses(path.poses[i + 1].pose, path.poses[i].pose));
+    }
+    else
+    {
+      path.poses[i].pose.orientation =
+          tf::createQuaternionMsgFromYaw(angleBetweenPoses(path.poses[i].pose, path.poses[i - 1].pose));
+    }
+  }
+  path.poses[path.poses.size() - 1].pose.orientation = tf::createQuaternionMsgFromYaw(
+      angleBetweenPoses(path.poses[path.poses.size() - 1].pose, path.poses[path.poses.size() - 2].pose));
+  return;
 }
 
 void MoveBaseMonitor::createAndPublishMarkersFromPath(const std::vector<geometry_msgs::PoseStamped>& path)
