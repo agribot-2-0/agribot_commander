@@ -1,17 +1,20 @@
 #!/usr/bin/env python
-from __future__ import print_function
 import threading
 import rospy
 import smach
 import roslib
 import rospkg
+import os
 from std_srvs.srv import Empty
 from std_msgs.msg import String
 from agribot_msgs.msg import NavSatFixOrientation
 from agribot_msgs.msg import AgribotMoveBaseCommand
 from pathpointsstuffer import PathPointsStuffer
+from agribot_common.agribot_parameters import get_parameter
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
+
+LOG_TAG = "StateMachine"
 
 
 def wait_for_planners():
@@ -23,7 +26,7 @@ def wait_for_planners():
         try:
             rate.sleep()
         except rospy.ROSInterruptException as exc:
-            print("[State Machine]: {}".format(exc))
+            rospy.logerr("[{}]: {}".format(LOG_TAG, exc))
     while not (waypoint_planner_inited and simple_planner_inited):
         waypoint_planner_inited = \
         rospy.get_param('/agribot/waypoint_global_planer/is_inited')
@@ -32,7 +35,7 @@ def wait_for_planners():
         try:
             rate.sleep()
         except rospy.ROSInterruptException as exc_choose:
-            print("[State Machine]: {}".format(exc_choose))
+            rospy.logerr("[{}]: {}".format(LOG_TAG, exc_choose))
 
 
 class ChooseTask(smach.State):
@@ -54,8 +57,13 @@ class ChooseTask(smach.State):
         self.choosen_path_name = ''
         self.received_new_task = False
         self.new_task_name = ''
-        rospack = rospkg.RosPack()
-        pth_location_folder = rospack.get_path('agribot_map') + "/paths/"
+        try:
+            pth_location_folder = os.path.join(
+                os.environ.get('AGRIBOT_HOME'),
+                get_parameter('/agribot_map/paths_path'))
+        except ValueError as exception_msg:
+            rospy.logerr("[{}] {}".format(LOG_TAG, exception_msg))
+            return
         self.points_handler = PathPointsStuffer(pth_location_folder)
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
@@ -70,7 +78,7 @@ class ChooseTask(smach.State):
         self.pub_move_base_command.publish(move_base_commands_msg)
         rate = rospy.Rate(10)  # ROS Rate at 10 Hz
         rospy.loginfo(
-            "[State Machine] Waiting for the move_base_monitor to clear the previous task"
+            "[StateMachine] Waiting for the move_base_monitor to clear the previous task"
         )
         while not move_base_monitor_ready:
             if rospy.has_param('/agribot/move_base_monitor/is_ready'):
@@ -79,9 +87,9 @@ class ChooseTask(smach.State):
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc_choose:
-                rospy.logerr("[State Machine]: " + str(exc_choose))
+                rospy.logerr("[StateMachine]: " + str(exc_choose))
         rospy.loginfo(
-            "[State Machine] Previous path cleared from move_base_monitor")
+            "[StateMachine] Previous path cleared from move_base_monitor")
 
     def load_the_chosen_path(self):
         function_output = ["transition", "user_data"]
@@ -90,9 +98,9 @@ class ChooseTask(smach.State):
             if self.new_task_name != '':
                 if not self.points_handler.set_path_name(
                         str(self.new_task_name)):
-                    rospy.logerr("[State Machine] Path " + \
-                                 str(self.new_task_name) + \
-                                 "does not exists.")
+                    rospy.logerr(
+                        "[StateMachine] Path {} does not exists.".format(
+                            self.new_task_name))
                     send_last_msg = False
                     self.new_task_name = ''
                     path_loaded = False
@@ -116,7 +124,7 @@ class ChooseTask(smach.State):
                     self.pub.publish(goal_fix)
                 else:
                     if send_last_msg:
-                        rospy.loginfo("[State Machine] Path name: " + \
+                        rospy.loginfo("[StateMachine] Path name: " + \
                                       rospy.get_param('/agribot/chosen_task_name') + \
                                       " loaded succesfully")
                         self.pub.publish(goal_fix)
@@ -132,8 +140,7 @@ class ChooseTask(smach.State):
         """Pick and return the proper transition. Choose the proper the task name picked
         by the user or if it cant be found return to manual or safe state"""
         output_transition = ''
-        rospy.loginfo(
-            "[State Machine] Executing state: ChooseTask INPUT: none")
+        rospy.loginfo("[StateMachine] Executing state: ChooseTask INPUT: none")
         self.state_msg = "ChooseTask"
         self.pub_state.publish(self.state_msg)
         self.mutex.acquire()
@@ -145,10 +152,10 @@ class ChooseTask(smach.State):
         #Check if we received any task name
         if self.new_task_name != '':
             #Check if move_base planner nodes are ready, else wait
-            rospy.loginfo("[State Machine] Waiting for planners ")
+            rospy.loginfo("[StateMachine] Waiting for planners ")
             wait_for_planners()
             rospy.loginfo(
-                "[State Machine] Planners are ready, now loading the chosen path "
+                "[StateMachine] Planners are ready, now loading the chosen path "
             )
             self.clear_previous_path()
             #Check if task name is ok and if the task itself is proper
@@ -160,9 +167,8 @@ class ChooseTask(smach.State):
             rospy.set_param('/agribot/robot_current_state',
                             'manual_control_state')
             output_transition = 'tr_task_conf_error'
-        rospy.loginfo(
-            "[State Machine] Leaving state: ChooseTask TRANSITION: " +
-            str(output_transition))
+        rospy.loginfo("[StateMachine] Leaving state: ChooseTask TRANSITION: " +
+                      str(output_transition))
         if output_transition == 'tr_task_is_active':
             rospy.wait_for_service(
                 '/cmd_vel_arbiter_node/switch_to_navigation')
@@ -171,5 +177,6 @@ class ChooseTask(smach.State):
             try:
                 switch_to_navigation()
             except rospy.ServiceException as exc:
-                rospy.logerr("Service did not process request: " + str(exc))
+                rospy.logerr("[{}] Service did not process request: {}".format(
+                    LOG_TAG, exc))
         return output_transition

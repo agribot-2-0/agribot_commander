@@ -21,23 +21,23 @@ class IsTaskChosen(smach.State):
         #
         #
         rospy.loginfo(
-            "[State Machine] Executing state: IsTaskChosen INPUT: none")
+            "[StateMachine] Executing state: IsTaskChosen INPUT: none")
         task_name = rospy.get_param('/agribot/current_task_name')
         if task_name == '':
             output_transition = 'tr_no_active_task'
         else:
-            rospy.loginfo("[State Machine] Task is active: " + \
+            rospy.loginfo("[StateMachine] Task is active: " + \
                           " active_path_name: " + \
                           str(task_name))
             task_name = rospy.get_param('/agribot/chosen_task_name')
             if task_name != '':
-                rospy.loginfo("[State Machine] Overwriting active task with new " + \
+                rospy.loginfo("[StateMachine] Overwriting active task with new " + \
                               " choosed task: " + \
                               str(task_name))
                 output_transition = 'tr_no_active_task'
             else:
                 output_transition = 'tr_task_is_active'
         rospy.loginfo(
-            "[State Machine] Leaving state: IsTaskChosen TRANSITION: " +
+            "[StateMachine] Leaving state: IsTaskChosen TRANSITION: " +
             output_transition)
         return output_transition

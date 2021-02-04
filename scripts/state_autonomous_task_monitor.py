@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 import threading
 import rospy
 import smach
@@ -12,27 +11,30 @@ from agribot_msgs.msg import AgribotMoveBaseMonitorResult
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
+
 class AutonomousTaskMonitor(smach.State):
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """State is used to monitore the task progression, safety,
      internal health of the system, weather conditions, create logs"""
     def __init__(self):
-        smach.State.__init__(self, outcomes=['tr_succes', 'tr_danger'],
+        smach.State.__init__(self,
+                             outcomes=['tr_succes', 'tr_danger'],
                              output_keys=['auto_task_monitor_output'])
         self.mutex = threading.Lock()
         self.command_received_only_move = False
         self.subscriber = rospy.Subscriber('/agribot/state_machine/mode',
                                            RobotMode,
                                            self.callback_app_communication)
-        self.sub_move_base_result = rospy.Subscriber('/agribot/move_base_monitor/result',
-                                                     AgribotMoveBaseMonitorResult,
-                                                     self.callback_move_base_result)
-        self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
-                                                    AgribotObstacleDetection,
-                                                    self.callback_obstacle_detected)
-        self.pub_move_base_comm = rospy.Publisher('/agribot/move_base_monitor/command',
-                                                  AgribotMoveBaseCommand,
-                                                  queue_size=10)
+        self.sub_move_base_result = rospy.Subscriber(
+            '/agribot/move_base_monitor/result', AgribotMoveBaseMonitorResult,
+            self.callback_move_base_result)
+        self.obstacle_subscriber = rospy.Subscriber(
+            '/agribot/obstacle_detected', AgribotObstacleDetection,
+            self.callback_obstacle_detected)
+        self.pub_move_base_comm = rospy.Publisher(
+            '/agribot/move_base_monitor/command',
+            AgribotMoveBaseCommand,
+            queue_size=10)
         self.pub_state = rospy.Publisher('/agribot/state_machine/state',
                                          String,
                                          queue_size=10)
@@ -54,7 +56,8 @@ class AutonomousTaskMonitor(smach.State):
         if rospy.has_param('/agribot/robot_current_state'):
             current_state = rospy.get_param('/agribot/robot_current_state')
             if current_state == 'auto_control_state':
-                self.received_manual_steering = bool(data.val == RobotMode.MANUAL)
+                self.received_manual_steering = bool(
+                    data.val == RobotMode.MANUAL)
                 self.received_user_abort = bool(data.val == RobotMode.UNKNOWN)
         self.mutex.release()
 
@@ -98,11 +101,13 @@ class AutonomousTaskMonitor(smach.State):
         # and should we continue the last path
         self.clear_manual_flag()
 
-    def execute(self, ud): # pylint: disable=invalid-name, unused-argument, too-many-statements
+    def execute(self, ud):  # pylint: disable=invalid-name, unused-argument, too-many-statements
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
-        rate = rospy.Rate(100) # ROS Rate at 100Hz
-        rospy.loginfo("[State Machine] Executing state: AutonomousTaskMonitor INPUT: none")
+        rate = rospy.Rate(100)  # ROS Rate at 100Hz
+        rospy.loginfo(
+            "[StateMachine] Executing state: AutonomousTaskMonitor INPUT: none"
+        )
         self.state_msg = "AutonomousTaskMonitor"
         self.pub_state.publish(self.state_msg)
         self.pre_execute()
@@ -144,7 +149,7 @@ class AutonomousTaskMonitor(smach.State):
                 self.pub_move_base_comm.publish(self.move_base_command_msg)
             # if task is loaded
             if self.move_base_result != AgribotMoveBaseMonitorResult.PAUSED:
-                 #if task ended succesfully
+                #if task ended succesfully
                 if self.move_base_result == AgribotMoveBaseMonitorResult.PATH_COMPLETED:
                     ud.auto_task_monitor_output = 'succes'
                     output_transition = 'tr_succes'
@@ -162,8 +167,9 @@ class AutonomousTaskMonitor(smach.State):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 if self.warn_exception:
-                    rospy.logerr("[State Machine]: rospy shutdown exception")
+                    rospy.logerr("[StateMachine]: rospy shutdown exception")
                     self.warn_exception = False
-        rospy.loginfo("[State Machine] Leaving state: AutonomousTaskMonitor TRANSITION: " +
-                      output_transition)
+        rospy.loginfo(
+            "[StateMachine] Leaving state: AutonomousTaskMonitor TRANSITION: "
+            + output_transition)
         return output_transition

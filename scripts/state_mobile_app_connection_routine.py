@@ -1,18 +1,22 @@
 #!/usr/bin/env python
-from __future__ import print_function
+
 import threading
 import rospy
 import rospkg
 import smach
 import roslib
+import os
 from std_srvs.srv import Empty
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotObstacleDetection
 from config_reader import ConfigReader
+from agribot_common.agribot_parameters import get_parameter
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
+
+LOG_TAG = "StateMachine"
 
 
 class MobileAppConnectionRoutine(smach.State):
@@ -31,8 +35,13 @@ class MobileAppConnectionRoutine(smach.State):
         self.obstacle_in_move_direction = False
         self.choosed_task_name = ''
         self.state_msg = String()
-        rospack = rospkg.RosPack()
-        path_to_conf = rospack.get_path('agribot_map') + "/tasks/"
+        try:
+            path_to_conf = os.path.join(
+                os.environ.get('AGRIBOT_HOME'),
+                get_parameter('/agribot_map/tasks_path'))
+        except ValueError as exception_msg:
+            rospy.logerr("[{}] {}".format(LOG_TAG, exception_msg))
+            return
         self.config_reader = ConfigReader(path_to_conf)
         self.subscriber_choose_task = rospy.Subscriber(
             '/agribot/state_machine/task', String, self.callback_choose_task)
@@ -74,7 +83,9 @@ class MobileAppConnectionRoutine(smach.State):
                     try:
                         switch_to_stop()
                     except rospy.ServiceException as exc:
-                        rospy.logerr("Service error: " + str(exc))
+                        rospy.logerr("[{}] Service error:  {}".format(
+                            LOG_TAG, exc))
+
                 else:
                     # change the cmd vel arbiter to manual
                     rospy.wait_for_service(
@@ -85,8 +96,9 @@ class MobileAppConnectionRoutine(smach.State):
                     try:
                         switch_to_teleop()
                     except rospy.ServiceException as exc:
-                        rospy.logerr("Service did not process request: " +
-                                     str(exc))
+                        rospy.logerr("[{}] Service error:  {}".format(
+                            LOG_TAG, exc))
+
         self.mutex.release()
 
     def callback_app_mode_communication(self, data):
@@ -96,7 +108,7 @@ class MobileAppConnectionRoutine(smach.State):
             if current_state == 'manual_control_state':
                 if data.val == RobotMode.AUTO:
                     rospy.loginfo(
-                        '[State Machine] Received autonomous control command')
+                        '[StateMachine] Received autonomous control command')
                     self.command_received_autonomous = True
         self.mutex.release()
 
@@ -110,7 +122,7 @@ class MobileAppConnectionRoutine(smach.State):
                 current_state == 'manual_control_state':
                 #heartbeat failed or manual steering error
                 rospy.loginfo(
-                    '[State Machine] Received  failed connection frame')
+                    '[StateMachine] Received  failed connection frame')
                 self.connection_failed_received = True
         self.mutex.release()
 
@@ -121,7 +133,7 @@ class MobileAppConnectionRoutine(smach.State):
         self.state_msg = "MobileAppConnectionRoutine"
         self.pub_state.publish(self.state_msg)
         rospy.loginfo(
-            "[State Machine] Executing state: MobileAppConnectionRoutine INPUT: none"
+            "[StateMachine] Executing state: MobileAppConnectionRoutine INPUT: none"
         )
         rate = rospy.Rate(20)  # ROS Rate at 20 Hz
         while not rospy.is_shutdown():
@@ -148,8 +160,8 @@ class MobileAppConnectionRoutine(smach.State):
             try:
                 rate.sleep()
             except rospy.ROSInterruptException:
-                rospy.logerr("[State Machine]: rospy shutdown exception")
+                rospy.logerr("[StateMachine]: rospy shutdown exception")
         rospy.loginfo(
-            "[State Machine] Leaving state: MobileAppConnectionRoutine TRANSITION: "
+            "[StateMachine] Leaving state: MobileAppConnectionRoutine TRANSITION: "
             + str(output_transition))
         return output_transition

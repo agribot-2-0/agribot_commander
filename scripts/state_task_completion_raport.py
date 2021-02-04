@@ -31,7 +31,7 @@ class TaskCompletionRaport(smach.State):
         current_state = rospy.get_param('/agribot/robot_current_state')
         output_transition = ''
         if current_state == 'auto_control_state':
-            rospy.loginfo("[State Machine] Executing state: TaskCompletionRaport INPUT: " +
+            rospy.loginfo("[StateMachine] Executing state: TaskCompletionRaport INPUT: " +
                           str(ud.auto_task_monitor_input))
             if ud.auto_task_monitor_input == 'user_abort':
                 ud.task_completion_safe_out = 'return_to_safe_state'
@@ -56,7 +56,7 @@ class TaskCompletionRaport(smach.State):
                 output_transition = 'tr_complete_return_to_safe_state'
         else:
             # task aborted during blockage
-            rospy.loginfo("[State Machine] Executing state: TaskCompletionRaport INPUT: " +
+            rospy.loginfo("[StateMachine] Executing state: TaskCompletionRaport INPUT: " +
                           str(ud.auto_task_blocked_input))
             if ud.auto_task_blocked_input == 'user_abort':
                 ud.task_completion_safe_out = 'return_to_safe_state'
@@ -70,6 +70,6 @@ class TaskCompletionRaport(smach.State):
                 # set current robot state
                 rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
                 output_transition = 'tr_suspended_return_to_manual'
-        rospy.loginfo("[State Machine] Leaving state: TaskCompletionRaport TRANSITION: " +
+        rospy.loginfo("[StateMachine] Leaving state: TaskCompletionRaport TRANSITION: " +
                       str(output_transition))
         return output_transition

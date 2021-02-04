@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 import rospy
 import smach
 import roslib
@@ -22,7 +21,7 @@ class ManualControlStart(smach.State):
         #
         #
         output_transition = ''
-        rospy.loginfo("[State Machine] Executing state: ManualControlStart INPUT: " +
+        rospy.loginfo("[StateMachine] Executing state: ManualControlStart INPUT: " +
                       str(ud.manual_control_state_reason))
         if ud.manual_control_state_reason == 'application_input_received':
             ud.manual_control_state_app_reason = 'app_input_received'
@@ -30,6 +29,6 @@ class ManualControlStart(smach.State):
         else:
             ud.manual_control_state_app_reason = 'task_config_error'
             output_transition = 'tr_task_config_error'
-        rospy.loginfo("[State Machine] Leaving state: ManualControlStart TRANSITION: " +
+        rospy.loginfo("[StateMachine] Leaving state: ManualControlStart TRANSITION: " +
                       str(output_transition))
         return output_transition

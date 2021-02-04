@@ -1,17 +1,20 @@
 import os
 import yaml
+import rospy
 
 
 class PathPointsStuffer(object):
     def __init__(self, paths_loc):
-        self.folder_w_paths_location = paths_loc
+        self.folder_w_paths_location = os.path.join(paths_loc, "paths")
         self.path_name = ""
         self.point_to_send_index = 0
         self.path_points = ""
 
     def get_path_location(self, path_nam):
-        if os.path.isfile(self.folder_w_paths_location + path_nam + ".yaml"):
-            return self.folder_w_paths_location + path_nam + ".yaml"
+        paths_path = os.path.join(self.folder_w_paths_location,
+                                  path_nam + ".yaml")
+        if os.path.isfile(paths_path):
+            return paths_path
         return ""
 
     def set_path_name(self, path_nam):
@@ -31,7 +34,7 @@ class PathPointsStuffer(object):
 
     def fill_new_msg_fix(self, msg):
         if self.point_to_send_index < len(self.path_points.keys()):
-            pose_str = "pose"+str(self.point_to_send_index)
+            pose_str = "pose" + str(self.point_to_send_index)
             position = self.path_points[pose_str]["position"]
             orientation = self.path_points[pose_str]["orientation"]
             msg.latitude = position[0]
