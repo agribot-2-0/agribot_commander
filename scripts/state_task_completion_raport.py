@@ -6,22 +6,21 @@ from std_msgs.msg import String
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
+
 class TaskCompletionRaport(smach.State):
     # pylint: disable=too-few-public-methods
     """State is used to create a summary report from from the Agribots work"""
+
     def __init__(self):
-        smach.State.__init__(self, outcomes=['tr_complete_return_to_safe_state',
-                                             'tr_suspended_return_to_manual'],
-                             output_keys=['task_completion_safe_out',
-                                          'task_completion_man_out'],
-                             input_keys=['auto_task_monitor_input',
-                                         'auto_task_blocked_input'])
-        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
-                                         String,
-                                         queue_size=10)
+        smach.State.__init__(
+            self,
+            outcomes=['tr_complete_return_to_safe_state', 'tr_suspended_return_to_manual'],
+            output_keys=['task_completion_safe_out', 'task_completion_man_out'],
+            input_keys=['auto_task_monitor_input', 'auto_task_blocked_input'])
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state', String, queue_size=10)
         self.state_msg = String()
 
-    def execute(self, ud): # pylint: disable=invalid-name, no-self-use
+    def execute(self, ud):  # pylint: disable=invalid-name, no-self-use
         """Create a report from the task realisation"""
         #Write raport data and go back to SafeState or ManualControl
         #

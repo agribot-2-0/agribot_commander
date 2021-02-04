@@ -4,6 +4,7 @@ import rospy
 
 
 class PathPointsStuffer(object):
+
     def __init__(self, paths_loc):
         self.folder_w_paths_location = os.path.join(paths_loc, "paths")
         self.path_name = ""
@@ -11,8 +12,7 @@ class PathPointsStuffer(object):
         self.path_points = ""
 
     def get_path_location(self, path_nam):
-        paths_path = os.path.join(self.folder_w_paths_location,
-                                  path_nam + ".yaml")
+        paths_path = os.path.join(self.folder_w_paths_location, path_nam + ".yaml")
         if os.path.isfile(paths_path):
             return paths_path
         return ""

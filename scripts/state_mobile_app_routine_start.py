@@ -12,11 +12,11 @@ LOG_TAG = "StateMachine"
 class MobileAppRoutineStart(smach.State):
     # pylint: disable=too-few-public-methods
     """This state decides to which branch of state machine we should transit"""
+
     def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['tr_task_config_error', 'tr_app_input_received'],
-            input_keys=['mobile_app_routine_reason_in'])
+        smach.State.__init__(self,
+                             outcomes=['tr_task_config_error', 'tr_app_input_received'],
+                             input_keys=['mobile_app_routine_reason_in'])
 
     def execute(self, ud):  # pylint: disable=invalid-name, no-self-use
         """Returns the proper transition based on the system configuration"""
@@ -24,12 +24,10 @@ class MobileAppRoutineStart(smach.State):
         #
         #
         output_transition = ''
-        rospy.loginfo(
-            "[StateMachine] Executing state: MobileAppRoutineStart INPUT: " +
-            str(ud.mobile_app_routine_reason_in))
+        rospy.loginfo("[StateMachine] Executing state: MobileAppRoutineStart INPUT: " +
+                      str(ud.mobile_app_routine_reason_in))
         rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
-        switch_to_teleop = rospy.ServiceProxy(
-            '/cmd_vel_arbiter_node/switch_to_teleop', Empty)
+        switch_to_teleop = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop', Empty)
         try:
             switch_to_teleop()
         except rospy.ServiceException as exc:
@@ -38,7 +36,6 @@ class MobileAppRoutineStart(smach.State):
             output_transition = 'tr_app_input_received'
         else:
             output_transition = 'tr_task_config_error'
-        rospy.loginfo(
-            "[StateMachine] Leaving state: MobileAppRoutineStart TRANSITION: "
-            + str(output_transition))
+        rospy.loginfo("[StateMachine] Leaving state: MobileAppRoutineStart TRANSITION: " +
+                      str(output_transition))
         return output_transition

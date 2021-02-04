@@ -18,16 +18,12 @@ LOG_TAG = "StateMachine"
 class Standby(smach.State):
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """This is a default robot state in which it awaits the input from application"""
+
     def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=[
-                                 'tr_app_input_received_standby',
-                                 'tr_autonomous_config_standby'
-                             ],
-                             output_keys=[
-                                 'safe_state_reason_man_out',
-                                 'safe_state_reason_auto_out'
-                             ])
+        smach.State.__init__(
+            self,
+            outcomes=['tr_app_input_received_standby', 'tr_autonomous_config_standby'],
+            output_keys=['safe_state_reason_man_out', 'safe_state_reason_auto_out'])
         self.mutex = threading.Lock()
         self.connection_received = False
         self.last_task_name = ''
@@ -35,21 +31,17 @@ class Standby(smach.State):
         self.standby_com = True
         self.state_msg = String()
         try:
-            path_to_conf = os.path.join(
-                os.environ.get('AGRIBOT_HOME'),
-                get_parameter('/agribot_map/tasks_path'))
+            path_to_conf = os.path.join(os.environ.get('AGRIBOT_HOME'),
+                                        get_parameter('/agribot_map/tasks_path'))
         except ValueError as exception_msg:
             rospy.logerr("[{}] {}".format(LOG_TAG, exception_msg))
             return
         self.config_reader = ConfigReader(path_to_conf)
-        self.subscriber = rospy.Subscriber('/agribot/state_machine/mode',
-                                           RobotMode,
+        self.subscriber = rospy.Subscriber('/agribot/state_machine/mode', RobotMode,
                                            self.callback_app_communication)
-        self.subscriber_choose_task = rospy.Subscriber(
-            '/agribot/state_machine/task', String, self.callback_choose_task)
-        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
-                                         String,
-                                         queue_size=10)
+        self.subscriber_choose_task = rospy.Subscriber('/agribot/state_machine/task', String,
+                                                       self.callback_choose_task)
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state', String, queue_size=10)
 
     def callback_choose_task(self, data):
         self.mutex.acquire()
@@ -82,20 +74,17 @@ class Standby(smach.State):
                 self.connection_received = False
                 ud.safe_state_reason_man_out = 'application_input_received'
                 ud.safe_state_reason_auto_out = ' '
-                rospy.set_param('/agribot/robot_current_state',
-                                'manual_control_state')
+                rospy.set_param('/agribot/robot_current_state', 'manual_control_state')
                 output_transition = 'tr_app_input_received_standby'
                 self.mutex.release()
                 break
             elif self.choosed_task_name != '':
-                path_name = self.config_reader.check_config_file(
-                    self.choosed_task_name)
+                path_name = self.config_reader.check_config_file(self.choosed_task_name)
                 self.choosed_task_name = ''
                 if path_name != '':
                     ud.safe_state_reason_man_out = ''
                     ud.safe_state_reason_auto_out = 'autonomous_config_present'
-                    rospy.set_param('/agribot/robot_current_state',
-                                    'auto_control_state')
+                    rospy.set_param('/agribot/robot_current_state', 'auto_control_state')
                     rospy.set_param('/agribot/chosen_task_name', path_name)
                     output_transition = 'tr_autonomous_config_standby'
                     self.mutex.release()
@@ -109,6 +98,5 @@ class Standby(smach.State):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 rospy.logerr("[StateMachine]: rospy shutdown exception")
-        rospy.loginfo("[StateMachine] Leaving state: Standby TRANSITION: " +
-                      str(output_transition))
+        rospy.loginfo("[StateMachine] Leaving state: Standby TRANSITION: " + str(output_transition))
         return output_transition

@@ -16,28 +16,25 @@ class AutonomousTaskMonitor(smach.State):
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """State is used to monitore the task progression, safety,
      internal health of the system, weather conditions, create logs"""
+
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['tr_succes', 'tr_danger'],
                              output_keys=['auto_task_monitor_output'])
         self.mutex = threading.Lock()
         self.command_received_only_move = False
-        self.subscriber = rospy.Subscriber('/agribot/state_machine/mode',
-                                           RobotMode,
+        self.subscriber = rospy.Subscriber('/agribot/state_machine/mode', RobotMode,
                                            self.callback_app_communication)
-        self.sub_move_base_result = rospy.Subscriber(
-            '/agribot/move_base_monitor/result', AgribotMoveBaseMonitorResult,
-            self.callback_move_base_result)
-        self.obstacle_subscriber = rospy.Subscriber(
-            '/agribot/obstacle_detected', AgribotObstacleDetection,
-            self.callback_obstacle_detected)
-        self.pub_move_base_comm = rospy.Publisher(
-            '/agribot/move_base_monitor/command',
-            AgribotMoveBaseCommand,
-            queue_size=10)
-        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
-                                         String,
-                                         queue_size=10)
+        self.sub_move_base_result = rospy.Subscriber('/agribot/move_base_monitor/result',
+                                                     AgribotMoveBaseMonitorResult,
+                                                     self.callback_move_base_result)
+        self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
+                                                    AgribotObstacleDetection,
+                                                    self.callback_obstacle_detected)
+        self.pub_move_base_comm = rospy.Publisher('/agribot/move_base_monitor/command',
+                                                  AgribotMoveBaseCommand,
+                                                  queue_size=10)
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state', String, queue_size=10)
         self.state_msg = String()
         self.move_base_command_msg = AgribotMoveBaseCommand()
         self.move_base_result = AgribotMoveBaseMonitorResult.PAUSED
@@ -56,8 +53,7 @@ class AutonomousTaskMonitor(smach.State):
         if rospy.has_param('/agribot/robot_current_state'):
             current_state = rospy.get_param('/agribot/robot_current_state')
             if current_state == 'auto_control_state':
-                self.received_manual_steering = bool(
-                    data.val == RobotMode.MANUAL)
+                self.received_manual_steering = bool(data.val == RobotMode.MANUAL)
                 self.received_user_abort = bool(data.val == RobotMode.UNKNOWN)
         self.mutex.release()
 
@@ -105,9 +101,7 @@ class AutonomousTaskMonitor(smach.State):
         """Monitore the task progression, safety,
          internal health of the system, weather conditions, create logs"""
         rate = rospy.Rate(100)  # ROS Rate at 100Hz
-        rospy.loginfo(
-            "[StateMachine] Executing state: AutonomousTaskMonitor INPUT: none"
-        )
+        rospy.loginfo("[StateMachine] Executing state: AutonomousTaskMonitor INPUT: none")
         self.state_msg = "AutonomousTaskMonitor"
         self.pub_state.publish(self.state_msg)
         self.pre_execute()
@@ -169,7 +163,6 @@ class AutonomousTaskMonitor(smach.State):
                 if self.warn_exception:
                     rospy.logerr("[StateMachine]: rospy shutdown exception")
                     self.warn_exception = False
-        rospy.loginfo(
-            "[StateMachine] Leaving state: AutonomousTaskMonitor TRANSITION: "
-            + output_transition)
+        rospy.loginfo("[StateMachine] Leaving state: AutonomousTaskMonitor TRANSITION: " +
+                      output_transition)
         return output_transition

@@ -5,16 +5,19 @@ import roslib
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
+
 class ManualControlStart(smach.State):
     # pylint: disable=too-few-public-methods
     """This state is an entry state of state machine and decides which branch to pick depdending
     on the data input received"""
+
     def __init__(self):
-        smach.State.__init__(self, outcomes=['tr_task_config_error', 'tr_app_input_received'],
+        smach.State.__init__(self,
+                             outcomes=['tr_task_config_error', 'tr_app_input_received'],
                              input_keys=['manual_control_state_reason'],
                              output_keys=['manual_control_state_app_reason'])
 
-    def execute(self, ud): # pylint: disable=invalid-name, no-self-use
+    def execute(self, ud):  # pylint: disable=invalid-name, no-self-use
         """Returns the proper transition depending on the system situation during entry to the
         statemachine, described by userdata (ud)"""
         #Send data to mobile app
