@@ -1,6 +1,5 @@
 import os
 import yaml
-import rospy
 
 
 class PathPointsStuffer(object):

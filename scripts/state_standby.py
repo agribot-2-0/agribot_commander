@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 import threading
+import os
 import rospy
-import rospkg
 import roslib
 import smach
-import os
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
-from config_reader import ConfigReader
 from agribot_common.agribot_parameters import get_parameter
+from config_reader import ConfigReader
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -28,14 +27,15 @@ class Standby(smach.State):
         self.connection_received = False
         self.last_task_name = ''
         self.choosed_task_name = ''
-        self.standby_com = True
         self.state_msg = String()
+        self.standby_com = True
         try:
             path_to_conf = os.path.join(os.environ.get('AGRIBOT_HOME'),
                                         get_parameter('/agribot_map/tasks_path'))
         except ValueError as exception_msg:
             rospy.logerr("[{}] {}".format(LOG_TAG, exception_msg))
             return
+
         self.config_reader = ConfigReader(path_to_conf)
         self.subscriber = rospy.Subscriber('/agribot/state_machine/mode', RobotMode,
                                            self.callback_app_communication)

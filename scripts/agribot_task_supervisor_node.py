@@ -11,8 +11,7 @@ from agribot_task_supervisor import AgribotTaskSupervisor
 
 def if_param_exists(param_name):
     if not rospy.has_param(param_name):
-        rospy.logerr(
-            "[AgribotTaskSupervisor] '{}' param not set".format(param_name))
+        rospy.logerr("[AgribotTaskSupervisor] '{}' param not set".format(param_name))
         return False
     return True
 
@@ -37,9 +36,7 @@ def node():
     # init task handling object:
     key_path = os.path.join(os.environ.get('AGRIBOT_HOME'), certificate_path)
     if not os.path.exists(key_path):
-        rospy.logerr(
-            "[AgribotTaskSupervisor] Key folder {} not present".format(
-                key_path))
+        rospy.logerr("[AgribotTaskSupervisor] Key folder {} not present".format(key_path))
         return
 
     cert_file = os.path.join(key_path, certificate_file)

@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 
 import threading
+import os
 import rospy
-import rospkg
 import smach
 import roslib
-import os
 from std_srvs.srv import Empty
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotObstacleDetection
-from config_reader import ConfigReader
 from agribot_common.agribot_parameters import get_parameter
+from config_reader import ConfigReader
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -36,12 +35,12 @@ class MobileAppConnectionRoutine(smach.State):
         self.choosed_task_name = ''
         self.state_msg = String()
         try:
-            path_to_conf = os.path.join(os.environ.get('AGRIBOT_HOME'),
-                                        get_parameter('/agribot_map/tasks_path'))
+            conf_path = os.path.join(os.environ.get('AGRIBOT_HOME'),
+                                     get_parameter('/agribot_map/tasks_path'))
         except ValueError as exception_msg:
             rospy.logerr("[{}] {}".format(LOG_TAG, exception_msg))
             return
-        self.config_reader = ConfigReader(path_to_conf)
+        self.config_reader = ConfigReader(conf_path)
         self.subscriber_choose_task = rospy.Subscriber('/agribot/state_machine/task', String,
                                                        self.callback_choose_task)
         self.subscriber_robot_mode = rospy.Subscriber('/agribot/state_machine/mode', RobotMode,
