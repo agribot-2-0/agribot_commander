@@ -10,7 +10,8 @@ class PathPointsStuffer(object):
         self.path_points = ""
 
     def get_path_location(self, path_nam):
-        paths_path = os.path.join(self.folder_w_paths_location, path_nam + ".yaml")
+        paths_path = os.path.join(self.folder_w_paths_location,
+                                  path_nam + ".yaml")
         if os.path.isfile(paths_path):
             return paths_path
         return ""
@@ -32,7 +33,7 @@ class PathPointsStuffer(object):
 
     def fill_new_msg_fix(self, msg):
         if self.point_to_send_index < len(self.path_points.keys()):
-            pose_str = "pose" + str(self.point_to_send_index)
+            pose_str = "pose{}".format(self.point_to_send_index)
             position = self.path_points[pose_str]["position"]
             orientation = self.path_points[pose_str]["orientation"]
             msg.latitude = position[0]
