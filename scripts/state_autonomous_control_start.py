@@ -10,7 +10,6 @@ class AutonomousControlStart(smach.State):
     # pylint: disable=too-few-public-methods
     """This state is an entry state and its purpose is to decide which branch of state machine
      should be picked based on the conditions of entry, described by userdata"""
-
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['tr_auto_control_prepared', 'tr_sys_repaired'],

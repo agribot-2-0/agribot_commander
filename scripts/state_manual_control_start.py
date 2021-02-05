@@ -10,7 +10,6 @@ class ManualControlStart(smach.State):
     # pylint: disable=too-few-public-methods
     """This state is an entry state of state machine and decides which branch to pick depdending
     on the data input received"""
-
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['tr_task_config_error', 'tr_app_input_received'],

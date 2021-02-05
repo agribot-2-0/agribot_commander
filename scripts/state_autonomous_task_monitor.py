@@ -16,7 +16,6 @@ class AutonomousTaskMonitor(smach.State):
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """State is used to monitore the task progression, safety,
      internal health of the system, weather conditions, create logs"""
-
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['tr_succes', 'tr_danger'],

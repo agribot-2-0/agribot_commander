@@ -14,7 +14,6 @@ class TaskIsBlocked(smach.State):
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """This is a danger responding robot state, the danger can be a blocked
     path or the enviroment is no longer favorable for the task"""
-
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['tr_human_intervention', 'tr_continue_task'],

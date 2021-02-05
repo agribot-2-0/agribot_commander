@@ -3,7 +3,6 @@ import yaml
 
 
 class PathPointsStuffer(object):
-
     def __init__(self, paths_loc):
         self.folder_w_paths_location = os.path.join(paths_loc, "paths")
         self.path_name = ""

@@ -20,8 +20,8 @@ def wait_for_planners():
     rate = rospy.Rate(10)  # ROS Rate at 10Hz
     waypoint_planner_inited = False
     simple_planner_inited = False
-    while not (rospy.has_param('/agribot/waypoint_global_planer/is_inited') and
-               rospy.has_param('/agribot/agribot_local_planer/is_inited')):
+    while not (rospy.has_param('/agribot/waypoint_global_planer/is_inited')
+               and rospy.has_param('/agribot/agribot_local_planer/is_inited')):
         try:
             rate.sleep()
         except rospy.ROSInterruptException as exc:
@@ -40,7 +40,6 @@ def wait_for_planners():
 class ChooseTask(smach.State):
     # pylint: disable=too-many-instance-attributes
     """State used to search the tasks database to pick the task for realisation"""
-
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['tr_task_is_active', 'tr_task_conf_error'],

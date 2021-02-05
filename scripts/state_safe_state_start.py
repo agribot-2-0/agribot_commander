@@ -11,7 +11,6 @@ roslib.load_manifest("smach_ros")
 class SafeStateStart(smach.State):
     # pylint: disable=too-few-public-methods
     """This is an entrance state used to decide which branch of state machine should be picked"""
-
     def __init__(self):
         smach.State.__init__(
             self,
@@ -33,8 +32,8 @@ class SafeStateStart(smach.State):
 
         # we dont have the failure reaction yet, but here is the place to start transition
         # to critical failure state where we will start reboot/relaunch routine etc
-        if (ud.safe_state_reason == "return_to_safe_state" or
-                ud.safe_state_reason == "return_to_safe_state_failure"):
+        if (ud.safe_state_reason == "return_to_safe_state"
+                or ud.safe_state_reason == "return_to_safe_state_failure"):
             output_transition = "tr_in_return_to_safe_state"
             rospy.set_param("/agribot/robot_current_state", "safe_state")
         else:

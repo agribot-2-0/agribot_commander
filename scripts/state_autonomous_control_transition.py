@@ -12,7 +12,6 @@ class AutonomousControlTransition(smach.State):
     # pylint: disable=too-few-public-methods
     """This states is responsible for preparations to entry autonomous control and ensure
     the safe transition between manual and automatic control"""
-
     def __init__(self):
         smach.State.__init__(
             self,

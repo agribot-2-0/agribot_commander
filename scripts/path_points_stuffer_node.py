@@ -10,7 +10,6 @@ LOG_TAG = "PathPointsStuffer"
 
 
 class PathPointsStufferNode(object):
-
     def __init__(self):
         self.received_new_task = False
         self.new_task_name = ""

@@ -9,7 +9,6 @@ roslib.load_manifest('smach_ros')
 class IsTaskChosen(smach.State):
     # pylint: disable=too-few-public-methods
     """This state decides if we continue the partially executed task or we start a new one"""
-
     def __init__(self):
         smach.State.__init__(self, outcomes=['tr_task_is_active', 'tr_no_active_task'])
 

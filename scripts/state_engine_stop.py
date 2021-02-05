@@ -10,7 +10,6 @@ class EngineStop(smach.State):
     # pylint: disable=too-few-public-methods
     """This state decides if we the engine was stopped because of system failure
     or because the task was complited and we should go back to Standby"""
-
     def __init__(self):
         smach.State.__init__(
             self,

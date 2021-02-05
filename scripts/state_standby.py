@@ -17,7 +17,6 @@ LOG_TAG = "StateMachine"
 class Standby(smach.State):
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """This is a default robot state in which it awaits the input from application"""
-
     def __init__(self):
         smach.State.__init__(
             self,

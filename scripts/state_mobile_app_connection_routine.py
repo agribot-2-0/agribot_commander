@@ -21,7 +21,6 @@ LOG_TAG = "StateMachine"
 class MobileAppConnectionRoutine(smach.State):
     # pylint: disable=too-many-instance-attributes
     """This state is used to check the connection state, if we doesnt received hearbeat error etc"""
-
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['tr_connection_is_unstable', 'tr_auto_ctrl_command'],

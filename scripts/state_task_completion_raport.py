@@ -10,7 +10,6 @@ roslib.load_manifest('smach_ros')
 class TaskCompletionRaport(smach.State):
     # pylint: disable=too-few-public-methods
     """State is used to create a summary report from from the Agribots work"""
-
     def __init__(self):
         smach.State.__init__(
             self,

@@ -6,7 +6,6 @@ LOG_TAG = "StateMachine"
 
 
 class ConfigReader(object):
-
     def __init__(self, tasks_path):
         self.task_name = ''
         self.tasks_directory_location = tasks_path
