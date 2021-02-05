@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+import os
 import rospy
-import rospkg
 from std_msgs.msg import String
 from agribot_msgs.msg import NavSatFixOrientation
+from agribot_common.agribot_parameters import get_parameter
 from pathpointsstuffer import PathPointsStuffer
+
+LOG_TAG = "PathPointsStuffer"
 
 
 class PathPointsStufferNode(object):
@@ -13,16 +16,17 @@ class PathPointsStufferNode(object):
 
         rospy.init_node('path_points_stuffer_node')
 
-        rospack = rospkg.RosPack()
-        path_location_folder = rospack.get_path('agribot_map') + "/paths/"
+        try:
+            path_location_folder = os.path.join(os.environ.get('AGRIBOT_HOME'),
+                                                get_parameter('/agribot_map/paths_path'))
+        except ValueError as exception_msg:
+            rospy.logerr("[{}] {}".format(LOG_TAG, exception_msg))
+            return
+
         self.points_stuffer = PathPointsStuffer(path_location_folder)
 
-        self.pub = rospy.Publisher('/agribot/waypoints',
-                                   NavSatFixOrientation,
-                                   queue_size=1000)
-        self.sub = rospy.Subscriber('/agribot/chosen_task_name',
-                                    String,
-                                    self.callback_chosentask)
+        self.pub = rospy.Publisher('/agribot/waypoints', NavSatFixOrientation, queue_size=1000)
+        self.sub = rospy.Subscriber('/agribot/chosen_task_name', String, self.callback_chosentask)
 
     def callback_chosentask(self, msg):
         self.new_task_name = msg.data
@@ -39,11 +43,9 @@ class PathPointsStufferNode(object):
 
             # Path finished - repeat last waypoint
             self.pub.publish(goal_fix)
-            rospy.loginfo("[PathPointsStuffer] Path {} loaded succesfully"
-                          .format(self.new_task_name))
+            rospy.loginfo("[{}] Path {} loaded succesfully".format(LOG_TAG, self.new_task_name))
         else:
-            rospy.logerr("[PathPointsStuffer] Path {} does not exist"
-                         .format(self.new_task_name))
+            rospy.logerr("[{}] Path {} does not exist".format(LOG_TAG, self.new_task_name))
 
     @staticmethod
     def run():

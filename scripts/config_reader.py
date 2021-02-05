@@ -1,6 +1,9 @@
-from __future__ import print_function
 import os
+import rospy
 import yaml
+
+LOG_TAG = "StateMachine"
+
 
 class ConfigReader(object):
     def __init__(self, tasks_path):
@@ -10,8 +13,9 @@ class ConfigReader(object):
         self.path_name_from_conf = ''
 
     def get_task_location(self, task_name):
-        if os.path.isfile(self.tasks_directory_location + task_name + ".yaml"):
-            return self.tasks_directory_location + task_name + ".yaml"
+        task_path = os.path.join(self.tasks_directory_location, task_name + ".yaml")
+        if os.path.isfile(task_path):
+            return task_path
         return ""
 
     def set_task_name(self, task_name):
@@ -39,15 +43,16 @@ class ConfigReader(object):
             if self.set_task_name(choosed_task_name):
                 if self.get_task_conf_from_yaml():
                     path_name = self.return_tasks_path_name()
-                    print("[State Machine] Loaded task configuration: " + \
-                                  "chosen_path_name: '{}'".format(path_name))
+                    rospy.loginfo("[{}] Loaded task configuration: chosen_path_name: '{}'".format(
+                        LOG_TAG, path_name))
                 else:
-                    print("[State Machine] ERROR: Task configuration file " + \
-                    "'{}.yaml' is faulty".format(choosed_task_name))
+                    rospy.logerr("[{}] Task configuration file '{}.yaml' is faulty".format(
+                        LOG_TAG, choosed_task_name))
                     path_name = ''
             else:
-                print("[State Machine] ERROR: Task configuration file '" + \
-                      "'{}.yaml' can't be opened or doesn't exist".format(choosed_task_name))
+                rospy.logerr(
+                    "[{}] Task configuration file '{}.yaml' can't be opened or doesn't exist".
+                    format(LOG_TAG, choosed_task_name))
                 path_name = ''
         else:
             path_name = ''

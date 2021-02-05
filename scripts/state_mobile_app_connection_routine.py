@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-from __future__ import print_function
+
 import threading
+import os
 import rospy
-import rospkg
 import smach
 import roslib
 from std_srvs.srv import Empty
@@ -10,19 +10,21 @@ from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotObstacleDetection
+from agribot_common.agribot_parameters import get_parameter
 from config_reader import ConfigReader
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
+
+LOG_TAG = "StateMachine"
 
 
 class MobileAppConnectionRoutine(smach.State):
     # pylint: disable=too-many-instance-attributes
     """This state is used to check the connection state, if we doesnt received hearbeat error etc"""
     def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['tr_connection_is_unstable', 'tr_auto_ctrl_command'],
-            output_keys=['connection_check_out', 'read_data_command_out'])
+        smach.State.__init__(self,
+                             outcomes=['tr_connection_is_unstable', 'tr_auto_ctrl_command'],
+                             output_keys=['connection_check_out', 'read_data_command_out'])
         self.mutex = threading.Lock()
         self.connection_failed_received = False
         self.command_received_only_move = False
@@ -31,23 +33,24 @@ class MobileAppConnectionRoutine(smach.State):
         self.obstacle_in_move_direction = False
         self.choosed_task_name = ''
         self.state_msg = String()
-        rospack = rospkg.RosPack()
-        path_to_conf = rospack.get_path('agribot_map') + "/tasks/"
-        self.config_reader = ConfigReader(path_to_conf)
-        self.subscriber_choose_task = rospy.Subscriber(
-            '/agribot/state_machine/task', String, self.callback_choose_task)
-        self.subscriber_robot_mode = rospy.Subscriber(
-            '/agribot/state_machine/mode', RobotMode,
-            self.callback_app_mode_communication)
-        self.subscriber_errors = rospy.Subscriber(
-            '/agribot/state_machine/error', AgribotAppErrorFlag,
-            self.callback_app_error_communication)
-        self.pub_state = rospy.Publisher('/agribot/state_machine/state',
-                                         String,
-                                         queue_size=10)
-        self.obstacle_subscriber = rospy.Subscriber(
-            '/agribot/obstacle_detected', AgribotObstacleDetection,
-            self.callback_obstacle_detected)
+        try:
+            conf_path = os.path.join(os.environ.get('AGRIBOT_HOME'),
+                                     get_parameter('/agribot_map/tasks_path'))
+        except ValueError as exception_msg:
+            rospy.logerr("[{}] {}".format(LOG_TAG, exception_msg))
+            return
+        self.config_reader = ConfigReader(conf_path)
+        self.subscriber_choose_task = rospy.Subscriber('/agribot/state_machine/task', String,
+                                                       self.callback_choose_task)
+        self.subscriber_robot_mode = rospy.Subscriber('/agribot/state_machine/mode', RobotMode,
+                                                      self.callback_app_mode_communication)
+        self.subscriber_errors = rospy.Subscriber('/agribot/state_machine/error',
+                                                  AgribotAppErrorFlag,
+                                                  self.callback_app_error_communication)
+        self.pub_state = rospy.Publisher('/agribot/state_machine/state', String, queue_size=10)
+        self.obstacle_subscriber = rospy.Subscriber('/agribot/obstacle_detected',
+                                                    AgribotObstacleDetection,
+                                                    self.callback_obstacle_detected)
 
     def callback_choose_task(self, data):
         self.mutex.acquire()
@@ -66,27 +69,26 @@ class MobileAppConnectionRoutine(smach.State):
                 bool(data.status != AgribotObstacleDetection.NO_OBSTACLE)
                 if self.obstacle_in_move_direction:
                     # change the  cmd vel arbiter to safe state
-                    rospy.wait_for_service(
-                        '/cmd_vel_arbiter_node/switch_to_stop')
+                    rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_stop')
                     switch_to_stop =\
                         rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_stop',
                                            Empty)
                     try:
                         switch_to_stop()
                     except rospy.ServiceException as exc:
-                        rospy.logerr("Service error: " + str(exc))
+                        rospy.logerr("[{}] Service error:  {}".format(LOG_TAG, exc))
+
                 else:
                     # change the cmd vel arbiter to manual
-                    rospy.wait_for_service(
-                        '/cmd_vel_arbiter_node/switch_to_teleop')
+                    rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
                     switch_to_teleop =\
                     rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop',
                                        Empty)
                     try:
                         switch_to_teleop()
                     except rospy.ServiceException as exc:
-                        rospy.logerr("Service did not process request: " +
-                                     str(exc))
+                        rospy.logerr("[{}] Service error:  {}".format(LOG_TAG, exc))
+
         self.mutex.release()
 
     def callback_app_mode_communication(self, data):
@@ -95,8 +97,7 @@ class MobileAppConnectionRoutine(smach.State):
             current_state = rospy.get_param('/agribot/robot_current_state')
             if current_state == 'manual_control_state':
                 if data.val == RobotMode.AUTO:
-                    rospy.loginfo(
-                        '[State Machine] Received autonomous control command')
+                    rospy.loginfo('[StateMachine] Received autonomous control command')
                     self.command_received_autonomous = True
         self.mutex.release()
 
@@ -109,8 +110,7 @@ class MobileAppConnectionRoutine(smach.State):
                 data.error_flag == AgribotAppErrorFlag.APP_MANUAL_ERROR) and\
                 current_state == 'manual_control_state':
                 #heartbeat failed or manual steering error
-                rospy.loginfo(
-                    '[State Machine] Received  failed connection frame')
+                rospy.loginfo('[StateMachine] Received  failed connection frame')
                 self.connection_failed_received = True
         self.mutex.release()
 
@@ -120,9 +120,7 @@ class MobileAppConnectionRoutine(smach.State):
         output_transition = ''
         self.state_msg = "MobileAppConnectionRoutine"
         self.pub_state.publish(self.state_msg)
-        rospy.loginfo(
-            "[State Machine] Executing state: MobileAppConnectionRoutine INPUT: none"
-        )
+        rospy.loginfo("[StateMachine] Executing state: MobileAppConnectionRoutine INPUT: none")
         rate = rospy.Rate(20)  # ROS Rate at 20 Hz
         while not rospy.is_shutdown():
             self.mutex.acquire()
@@ -139,8 +137,7 @@ class MobileAppConnectionRoutine(smach.State):
                 self.mutex.release()
                 break
             elif self.choosed_task_name != '':
-                path_name = self.config_reader.check_config_file(
-                    self.choosed_task_name)
+                path_name = self.config_reader.check_config_file(self.choosed_task_name)
                 if path_name != '':
                     rospy.set_param('/agribot/chosen_task_name', path_name)
                 self.choosed_task_name = ''
@@ -148,8 +145,7 @@ class MobileAppConnectionRoutine(smach.State):
             try:
                 rate.sleep()
             except rospy.ROSInterruptException:
-                rospy.logerr("[State Machine]: rospy shutdown exception")
-        rospy.loginfo(
-            "[State Machine] Leaving state: MobileAppConnectionRoutine TRANSITION: "
-            + str(output_transition))
+                rospy.logerr("[StateMachine]: rospy shutdown exception")
+        rospy.loginfo("[StateMachine] Leaving state: MobileAppConnectionRoutine TRANSITION: " +
+                      str(output_transition))
         return output_transition

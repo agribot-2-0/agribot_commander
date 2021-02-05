@@ -10,8 +10,7 @@ class IsTaskChosen(smach.State):
     # pylint: disable=too-few-public-methods
     """This state decides if we continue the partially executed task or we start a new one"""
     def __init__(self):
-        smach.State.__init__(
-            self, outcomes=['tr_task_is_active', 'tr_no_active_task'])
+        smach.State.__init__(self, outcomes=['tr_task_is_active', 'tr_no_active_task'])
 
     def execute(self, ud):  # pylint: disable=invalid-name, unused-argument, no-self-use
         """Returns the proper transition based on the system configuration
@@ -20,24 +19,21 @@ class IsTaskChosen(smach.State):
         #Check if task name has been chosen
         #
         #
-        rospy.loginfo(
-            "[State Machine] Executing state: IsTaskChosen INPUT: none")
+        rospy.loginfo("[StateMachine] Executing state: IsTaskChosen INPUT: none")
         task_name = rospy.get_param('/agribot/current_task_name')
         if task_name == '':
             output_transition = 'tr_no_active_task'
         else:
-            rospy.loginfo("[State Machine] Task is active: " + \
+            rospy.loginfo("[StateMachine] Task is active: " + \
                           " active_path_name: " + \
                           str(task_name))
             task_name = rospy.get_param('/agribot/chosen_task_name')
             if task_name != '':
-                rospy.loginfo("[State Machine] Overwriting active task with new " + \
+                rospy.loginfo("[StateMachine] Overwriting active task with new " + \
                               " choosed task: " + \
                               str(task_name))
                 output_transition = 'tr_no_active_task'
             else:
                 output_transition = 'tr_task_is_active'
-        rospy.loginfo(
-            "[State Machine] Leaving state: IsTaskChosen TRANSITION: " +
-            output_transition)
+        rospy.loginfo("[StateMachine] Leaving state: IsTaskChosen TRANSITION: " + output_transition)
         return output_transition
