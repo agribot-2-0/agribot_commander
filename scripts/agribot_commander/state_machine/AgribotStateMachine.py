@@ -3,19 +3,31 @@ import rospy
 import smach
 import smach_ros
 import roslib
-from state_standby import Standby
-from state_engine_stop import EngineStop
-from state_safe_state_start import SafeStateStart
-from state_mobile_app_connection_routine import MobileAppConnectionRoutine
-from state_autonomous_control_transition import AutonomousControlTransition
-from state_manual_control_start import ManualControlStart
-from state_mobile_app_routine_start import MobileAppRoutineStart
-from state_is_task_choosen import IsTaskChosen
-from state_choose_task import ChooseTask
-from state_autonomous_task_monitor import AutonomousTaskMonitor
-from state_task_completion_raport import TaskCompletionRaport
-from state_task_is_blocked import TaskIsBlocked
-from state_autonomous_control_start import AutonomousControlStart
+from agribot_commander.state_machine.state_safe.state_standby import (
+    Standby)
+from agribot_commander.state_machine.state_safe.state_engine_stop import (
+    EngineStop)
+from agribot_commander.state_machine.state_safe.state_safe_state_start import (
+    SafeStateStart)
+from agribot_commander.state_machine.state_manual.state_mobile_app_connection_routine import (
+    MobileAppConnectionRoutine)
+from agribot_commander.state_machine.state_autonomous.state_autonomous_control_transition import (
+    AutonomousControlTransition)
+from agribot_commander.state_machine.state_manual.state_manual_control_start import (
+    ManualControlStart)
+from agribot_commander.state_machine.state_manual.state_mobile_app_routine_start import (
+    MobileAppRoutineStart)
+from agribot_commander.state_machine.state_autonomous.state_is_task_choosen import (IsTaskChosen)
+from agribot_commander.state_machine.state_autonomous.state_choose_task import (
+    ChooseTask)
+from agribot_commander.state_machine.state_autonomous.state_autonomous_task_monitor import (
+    AutonomousTaskMonitor)
+from agribot_commander.state_machine.state_autonomous.state_task_completion_raport import (
+    TaskCompletionRaport)
+from agribot_commander.state_machine.state_autonomous.state_task_is_blocked import (
+    TaskIsBlocked)
+from agribot_commander.state_machine.state_autonomous.state_autonomous_control_start import (
+    AutonomousControlStart)
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 

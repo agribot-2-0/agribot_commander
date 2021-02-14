@@ -9,7 +9,8 @@ from std_msgs.msg import String
 from agribot_msgs.msg import NavSatFixOrientation
 from agribot_msgs.msg import AgribotMoveBaseCommand
 from agribot_common.agribot_parameters import get_parameter
-from pathpointsstuffer import PathPointsStuffer
+from agribot_commander.state_machine.state_autonomous.pathpointsstuffer import (
+    PathPointsStuffer)
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 

@@ -29,6 +29,8 @@ find_package(catkin REQUIRED COMPONENTS
   robot_localization
 )
 
+catkin_python_setup()
+
 ################################################
 ## Declare ROS messages, services and actions ##
 ################################################
@@ -82,25 +84,9 @@ install(TARGETS
 )
 
 catkin_install_python(PROGRAMS
-  scripts/agribot_task_supervisor.py
-  scripts/agribot_task_supervisor_node.py
-  scripts/AgribotStateMachine.py
-  scripts/pathpointsstuffer.py
-  scripts/path_points_stuffer_node.py
-  scripts/config_reader.py
-  scripts/state_standby.py
-	scripts/state_safe_state_start.py
-	scripts/state_engine_stop.py
-  scripts/state_manual_control_start.py
-  scripts/state_autonomous_control_transition.py
-  scripts/state_mobile_app_connection_routine.py
-  scripts/state_mobile_app_routine_start.py
-  scripts/state_autonomous_control_start.py
-	scripts/state_autonomous_task_monitor.py
-  scripts/state_task_is_blocked.py
-  scripts/state_is_task_choosen.py
-  scripts/state_choose_task.py
-  scripts/state_task_completion_raport.py
+  scripts/agribot_commander/task_supervisor/agribot_task_supervisor_node.py
+  scripts/agribot_commander/state_machine/AgribotStateMachine.py
+
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}/scripts
 )
 

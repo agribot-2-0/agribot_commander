@@ -6,7 +6,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import rospy
 
-from agribot_task_supervisor import AgribotTaskSupervisor
+from agribot_commander.task_supervisor.agribot_task_supervisor import AgribotTaskSupervisor
 
 
 def if_param_exists(param_name):
