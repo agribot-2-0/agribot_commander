@@ -1,0 +1,40 @@
+@startuml
+hide empty description
+
+
+state SafeState {
+  [*] --> Standby
+  state choice1 <<choice>>
+  state choice2 <<choice>>
+  Standby --> choice1 : Mobile application is connected
+  choice1 --> choice2 : [False]
+  choice2 --> Standby
+
+  ' Standby --> StopEngine 
+  ' StopEngine --> ShutdownSystem
+  ' ShutdownSystem --> [*]
+}
+
+state AutonomousState {
+  [*] --> ReadTask
+  ReadTask --> AutonomousStateMonitor
+  AutonomousStateMonitor --> TaskCompleteRaport
+  TaskCompleteRaport --> [*]
+}
+
+state ManualState {
+  [*] --> MobileApplicationConnectionRoutine
+  MobileApplicationConnectionRoutine --> [*]
+}
+
+[*] --> SafeState
+
+ManualState -> Standby : Mobile application is not connected
+choice1 -> ManualState : [True]
+
+choice2 -> AutonomousState : Task is set
+AutonomousState -> Standby : Task is done
+
+SafeState --> [*]
+
+@enduml
