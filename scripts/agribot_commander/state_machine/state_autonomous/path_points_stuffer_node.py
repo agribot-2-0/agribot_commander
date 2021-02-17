@@ -4,8 +4,8 @@ import rospy
 from std_msgs.msg import String
 from agribot_msgs.msg import NavSatFixOrientation
 from agribot_common.agribot_parameters import get_parameter
-from pathpointsstuffer import PathPointsStuffer
-
+from agribot_commander.state_machine.state_autonomous.pathpointsstuffer import (
+    PathPointsStuffer)
 LOG_TAG = "PathPointsStuffer"
 
 

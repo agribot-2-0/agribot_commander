@@ -11,7 +11,7 @@ from industrial_msgs.msg import RobotMode
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotObstacleDetection
 from agribot_common.agribot_parameters import get_parameter
-from config_reader import ConfigReader
+from agribot_commander.state_machine.config_reader import ConfigReader
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
