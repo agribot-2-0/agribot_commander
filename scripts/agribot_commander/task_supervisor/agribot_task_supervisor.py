@@ -21,12 +21,13 @@ class AgribotTaskSupervisor(object):
 
         rospy.init_node('task_supervisor')
         rospy.Subscriber('/agribot/state_machine/state', String, self.callback_state)
+
+        rospy.logwarn("[AgribotTaskSupervisor] Waiting for state machine state")
         rospy.wait_for_message('/agribot/state_machine/state', String)
 
         rospy.logwarn("[AgribotTaskSupervisor] Waiting for task")
 
-        doc_ref = self.database.collection(u'robots').document(self.rsn)
-        doc_ref.on_snapshot(self.on_callback)
+        self.database.collection(u'robots').document(self.rsn).on_snapshot(self.on_callback)
 
     def callback_state(self, msg):
         # after finishing task, delete actual task from tasks list and set actual_task to
@@ -52,6 +53,7 @@ class AgribotTaskSupervisor(object):
     def on_callback(self, doc_snapshot, changes, read_time):  # pylint: disable=unused-argument
         for change in changes:
             if change.type.name == 'ADDED' or change.type.name == 'MODIFIED':
+                rospy.logwarn(change.document.to_dict()['actual_task'])
                 if self.actual_task_name != change.document.to_dict()['actual_task']:
                     self.actual_task_name = change.document.to_dict()['actual_task']
                     if self.actual_task_name:

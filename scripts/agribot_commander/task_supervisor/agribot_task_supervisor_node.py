@@ -7,30 +7,18 @@ from firebase_admin import firestore
 import rospy
 
 from agribot_commander.task_supervisor.agribot_task_supervisor import AgribotTaskSupervisor
-
-
-def if_param_exists(param_name):
-    if not rospy.has_param(param_name):
-        rospy.logerr("[AgribotTaskSupervisor] '{}' param not set".format(param_name))
-        return False
-    return True
+from agribot_common.agribot_parameters import get_parameter
 
 
 def node():
     rospy.init_node('task_supervisor')
-    if if_param_exists('rsn'):
-        rsn = rospy.get_param('rsn')
-    else:
-        return
 
-    if if_param_exists('certificate_path'):
-        certificate_path = rospy.get_param('certificate_path')
-    else:
-        return
-
-    if if_param_exists('certificate_file'):
-        certificate_file = rospy.get_param('certificate_file')
-    else:
+    try:
+        robot_serial_number = get_parameter('rsn')
+        certificate_file = get_parameter('certificate_file')
+        certificate_path = get_parameter('certificate_path')
+    except ValueError as exception_msg:
+        rospy.logerr("[AgribotTaskSupervisor] {}".format(exception_msg))
         return
 
     # init task handling object:
@@ -46,7 +34,7 @@ def node():
         firebase_admin.initialize_app(cred)
         database = firestore.client()
 
-    agribot_task_supervisor = AgribotTaskSupervisor(rsn, database)
+    agribot_task_supervisor = AgribotTaskSupervisor(robot_serial_number, database)
     agribot_task_supervisor.run()
 
 
