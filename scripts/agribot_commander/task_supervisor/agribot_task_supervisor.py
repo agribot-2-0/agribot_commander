@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import threading
+import time
 import rospy
 
 from std_msgs.msg import String
@@ -53,21 +54,28 @@ class AgribotTaskSupervisor(object):
     def on_callback(self, doc_snapshot, changes, read_time):  # pylint: disable=unused-argument
         for change in changes:
             if change.type.name == 'ADDED' or change.type.name == 'MODIFIED':
-                rospy.logwarn(change.document.to_dict()['actual_task'])
                 if self.actual_task_name != change.document.to_dict()['actual_task']:
                     self.actual_task_name = change.document.to_dict()['actual_task']
                     if self.actual_task_name:
                         rospy.logwarn("[AgribotTaskSupervisor] Actual task '{}'".format(
                             self.actual_task_name))
-                        actual_task_msg = String()
-                        actual_task_msg.data = self.actual_task_name
-                        self.task_publisher.publish(actual_task_msg)
+                        self.publish_task(self.actual_task_name)
+                        time.sleep(0.1)
+                        self.publish_robot_mode(RobotMode.AUTO)
                     else:
-                        robot_mode_msg = RobotMode()
-                        robot_mode_msg.val = RobotMode.UNKNOWN
-                        self.robot_mode_publisher.publish(robot_mode_msg)
+                        self.publish_robot_mode(RobotMode.UNKNOWN)
 
         self.callback_done.set()
+
+    def publish_robot_mode(self, robot_mode):
+        robot_mode_msg = RobotMode()
+        robot_mode_msg.val = robot_mode
+        self.robot_mode_publisher.publish(robot_mode_msg)
+
+    def publish_task(self, task_name):
+        actual_task_msg = String()
+        actual_task_msg.data = task_name
+        self.task_publisher.publish(actual_task_msg)
 
     @staticmethod
     def run():
