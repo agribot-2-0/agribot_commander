@@ -37,14 +37,14 @@ class AgribotTaskSupervisor(object):
         if self.state_previous == 'TaskCompletionRaport' and msg.data == 'Standby':
             if self.actual_task_name:
                 # TODO for testing purposes do not delete completed task.
-                # self.detele_task(self.actual_task_name)
+                # self.delete_task(self.actual_task_name)
                 self.update_actual_task(u'')
                 rospy.logwarn("[AgribotTaskSupervisor] Task '{}' completed".format(
                     self.actual_task_name))
 
         self.state_previous = msg.data
 
-    def detele_task(self, task_name):
+    def delete_task(self, task_name):
         self.database.collection(u'robots').document(self.rsn).collection(u'tasks').document(
             task_name).delete()
 
