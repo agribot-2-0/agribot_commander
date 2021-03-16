@@ -3,6 +3,7 @@
 import threading
 import time
 import rospy
+import can
 
 from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
@@ -19,6 +20,15 @@ class AgribotTaskSupervisor(object):
         self.state_previous = ""
         self.actual_task_name = ""
         self.database = database
+
+        # TODO: remove self.bus after refactoring state machine on
+        # ttcontrol, channel is hardcoded only for workaround purposes
+        self.bus = None
+        try:
+            self.bus = can.interface.Bus(bustype='socketcan', channel='can1')
+        except can.CanError as exception_msg:
+            rospy.logerr("[AgribotTaskSupervisor] {}".format(exception_msg))
+
 
         rospy.init_node('task_supervisor')
         rospy.Subscriber('/agribot/state_machine/state', String, self.callback_state)
@@ -59,6 +69,10 @@ class AgribotTaskSupervisor(object):
                     if self.actual_task_name:
                         rospy.logwarn("[AgribotTaskSupervisor] Actual task '{}'".format(
                             self.actual_task_name))
+                        # TODO: remove send_can_auto_message() after refactoring state machine on
+                        # ttcontrol
+                        self.send_can_auto_message()
+                        time.sleep(0.1)
                         self.publish_task(self.actual_task_name)
                         time.sleep(0.1)
                         self.publish_robot_mode(RobotMode.AUTO)
@@ -66,6 +80,15 @@ class AgribotTaskSupervisor(object):
                         self.publish_robot_mode(RobotMode.UNKNOWN)
 
         self.callback_done.set()
+
+    def send_can_auto_message(self):
+        if self.bus != None:
+            msg = can.Message(arbitration_id=0x01e, data=[0x1e], extended_id=False)
+
+            try:
+                self.bus.send(msg)
+            except can.CanError as exception_msg:
+                rospy.logerr("[AgribotTaskSupervisor] {}".format(exception_msg))
 
     def publish_robot_mode(self, robot_mode):
         robot_mode_msg = RobotMode()
