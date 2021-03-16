@@ -9,7 +9,7 @@ from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
 
 
-class AgribotTaskSupervisor(object):
+class AgribotTaskSupervisor(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, rsn, database):
         self.callback_done = threading.Event()
         self.task_publisher = rospy.Publisher('/agribot/state_machine/task', String, queue_size=1)
