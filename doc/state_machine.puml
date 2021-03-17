@@ -1,0 +1,16 @@
+@startuml
+hide empty description
+
+[*] --> SafeState
+
+AutonomousState -> SafeState
+AutonomousState -> ManualState
+
+ManualState -> SafeState
+ManualState -> AutonomousState
+SafeState -left-> ManualState
+
+SafeState --> [*]
+
+
+@enduml
