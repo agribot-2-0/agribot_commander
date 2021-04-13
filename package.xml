@@ -7,7 +7,8 @@
   <maintainer email="a.mendaluk@agribot.eu">Adam Mendaluk</maintainer>
   <maintainer email="m.wiadomski@agribot.eu">Michal Wiadomski</maintainer>
 
-  <license>BSD</license>
+  <license>Proprietary</license>
+  
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>smach_ros</buildtool_depend>
 
@@ -15,17 +16,13 @@
   <build_depend>roscpp</build_depend>
   <build_depend>smach</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>message_generation</build_depend>
   <build_depend>agribot_map</build_depend>
-  <build_depend>std_msgs</build_depend>
   <build_depend>industrial_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
-  <build_depend>move_base_msgs</build_depend>
   <build_depend>geometry2</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>agribot_msgs</build_depend>
   <build_depend>agribot_common</build_depend>
-  <build_depend>robot_localization</build_depend>
   <build_depend>tf</build_depend>
 
   <build_export_depend>agribot_map</build_export_depend>
@@ -34,7 +31,6 @@
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
   <build_export_depend>industrial_msgs</build_export_depend>
-  <build_export_depend>robot_localization</build_export_depend>
   <build_export_depend>tf</build_export_depend>
 
   <exec_depend>rospy</exec_depend>
@@ -44,13 +40,11 @@
   <exec_depend>smach_msgs</exec_depend>
   <exec_depend>smach_viewer</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <exec_depend>message_runtime</exec_depend>
   <exec_depend>agribot_map</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>industrial_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>geometry2</exec_depend>
-  <exec_depend>robot_localization</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>python-can</exec_depend>
 

@@ -13,20 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   smach
   smach_ros
   std_msgs
-  message_generation
   agribot_common
   agribot_msgs
-  roscpp
-  rospy
-  tf2
-  tf2_ros
-  tf
-  std_msgs
-  sensor_msgs
-  actionlib_msgs
-  move_base_msgs
-  visualization_msgs
-  robot_localization
 )
 
 catkin_python_setup()
@@ -69,16 +57,11 @@ link_directories(
  ${PROJECT_SOURCE_DIR}
 )
 
-add_executable(move_base_monitor_node src/move_base_monitor_node/move_base_monitor_node.cpp src/move_base_monitor_node/MoveBaseMonitor.cpp)
-target_link_libraries(move_base_monitor_node ${catkin_LIBRARIES})
-add_dependencies(move_base_monitor_node ${catkin_EXPORTED_TARGETS})
-
 #############
 ## Install ##
 #############
 
 install(TARGETS
-  move_base_monitor_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
@@ -90,7 +73,7 @@ catkin_install_python(PROGRAMS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}/scripts
 )
 
-install(DIRECTORY launch param
+install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   PATTERN ".svn" EXCLUDE
 )
