@@ -8,9 +8,9 @@ from std_srvs.srv import Empty
 from std_msgs.msg import String
 from agribot_msgs.msg import NavSatFixOrientation
 from agribot_msgs.msg import AgribotMoveBaseCommand
+from agribot_msgs.srv import ToolManagerControlSource, ToolManagerControlSourceRequest
 from agribot_common.agribot_parameters import get_parameter
-from agribot_commander.state_machine.state_autonomous.pathpointsstuffer import (
-    PathPointsStuffer)
+from agribot_commander.state_machine.state_autonomous.pathpointsstuffer import (PathPointsStuffer)
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -155,8 +155,11 @@ class ChooseTask(smach.State):
             rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_navigation')
             switch_to_navigation = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_navigation',
                                                       Empty)
+            tool_arbiter = rospy.ServiceProxy('/agribot/tool_management/control_source',
+                                              ToolManagerControlSource)
             try:
                 switch_to_navigation()
+                tool_arbiter(ToolManagerControlSourceRequest.NAVIGATION)
             except rospy.ServiceException as exc:
                 rospy.logerr("[{}] Service did not process request: {}".format(LOG_TAG, exc))
         return output_transition

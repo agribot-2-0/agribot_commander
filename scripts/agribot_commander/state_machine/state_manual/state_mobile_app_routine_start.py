@@ -3,6 +3,7 @@ import rospy
 import smach
 import roslib
 from std_srvs.srv import Empty
+from agribot_msgs.srv import ToolManagerControlSource, ToolManagerControlSourceRequest
 roslib.load_manifest('smach')
 roslib.load_manifest('smach_ros')
 
@@ -27,8 +28,11 @@ class MobileAppRoutineStart(smach.State):
                       str(ud.mobile_app_routine_reason_in))
         rospy.wait_for_service('/cmd_vel_arbiter_node/switch_to_teleop')
         switch_to_teleop = rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop', Empty)
+        tool_arbiter = rospy.ServiceProxy('/agribot/tool_management/control_source',
+                                          ToolManagerControlSource)
         try:
             switch_to_teleop()
+            tool_arbiter(ToolManagerControlSourceRequest.MANUAL)
         except rospy.ServiceException as exc:
             rospy.logerr("[{}] Service error:  {}".format(LOG_TAG, exc))
         if ud.mobile_app_routine_reason_in == 'app_input_received':

@@ -10,6 +10,7 @@ from std_msgs.msg import String
 from industrial_msgs.msg import RobotMode
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotObstacleDetection
+from agribot_msgs.srv import ToolManagerControlSource, ToolManagerControlSourceRequest
 from agribot_common.agribot_parameters import get_parameter
 from agribot_commander.state_machine.config_reader import ConfigReader
 roslib.load_manifest('smach')
@@ -84,8 +85,11 @@ class MobileAppConnectionRoutine(smach.State):
                     switch_to_teleop =\
                     rospy.ServiceProxy('/cmd_vel_arbiter_node/switch_to_teleop',
                                        Empty)
+                    tool_arbiter = rospy.ServiceProxy('/agribot/tool_management/control_source',
+                                                      ToolManagerControlSource)
                     try:
                         switch_to_teleop()
+                        tool_arbiter(ToolManagerControlSourceRequest.MANUAL)
                     except rospy.ServiceException as exc:
                         rospy.logerr("[{}] Service error:  {}".format(LOG_TAG, exc))
 
