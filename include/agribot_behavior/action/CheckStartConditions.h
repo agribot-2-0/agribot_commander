@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2021 Agribot. All rights reserved.
+ */
+
 #pragma once
 
 #include <behaviortree_cpp_v3/action_node.h>
