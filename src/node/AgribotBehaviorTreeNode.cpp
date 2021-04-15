@@ -7,6 +7,8 @@ namespace agribot_behavior
 void AgribotBehaviorTreeNode::registerAllNodes()
 {
   factory.registerNodeType<agribot_behavior::CheckStartConditions>("CheckStartConditions");
+  factory.registerNodeType<agribot_behavior::SwitchControlArbiters>("SwitchControlArbiters");
+  factory.registerNodeType<agribot_behavior::Handle>("Handle");
   // factory.registerSimpleCondition("CheckBattery", std::bind(CheckBattery));
   // GripperInterface gripper;
   // factory.registerSimpleAction("OpenGripper", std::bind(&GripperInterface::open, &gripper));
@@ -21,7 +23,6 @@ std::string AgribotBehaviorTreeNode::getTreeLocation() const
 AgribotBehaviorTreeNode::AgribotBehaviorTreeNode()
 {
   registerAllNodes();
-  std::cerr << getTreeLocation();
   tree = factory.createTreeFromFile(getTreeLocation());
 }
 

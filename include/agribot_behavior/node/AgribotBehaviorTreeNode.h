@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <behaviortree_cpp_v3/bt_factory.h>
 #include <agribot_behavior/action/CheckStartConditions.h>
+#include <agribot_behavior/action/SwitchControlArbiters.h>
+#include <agribot_behavior/action/Handle.h>
 
 #include <ros/package.h>
 

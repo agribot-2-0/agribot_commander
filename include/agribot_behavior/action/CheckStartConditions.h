@@ -11,7 +11,8 @@ namespace agribot_behavior
 class CheckStartConditions : public BT::SyncActionNode
 {
 public:
-  CheckStartConditions(const std::string& name);
+  CheckStartConditions(const std::string& name, const BT::NodeConfiguration& config);
+  static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
 };
 }  // namespace agribot_behavior

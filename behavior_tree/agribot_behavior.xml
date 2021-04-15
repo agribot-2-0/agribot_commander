@@ -4,12 +4,12 @@
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
             <Fallback>
-                <Sequence>
+                <Sequence name="manual control squence">
                     <Condition ID="CheckStartConditions" action_to_be_started="autonomous_driving" name="check conditions for auto drive"/>
                     <Action ID="SwitchControlArbiters" control_source="navigation" name="change arbiter source to nav"/>
                     <Action ID="Handle" action_to_handle="autonomous_driving" name="handle auto drive"/>
                 </Sequence>
-                <Sequence>
+                <Sequence name="auto drive squence">
                     <Condition ID="CheckStartConditions" action_to_be_started="manual_control" name="check conditions for manual control"/>
                     <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
                     <Action ID="Handle" action_to_handle="manual_control" name="handle manual control"/>
