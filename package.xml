@@ -7,8 +7,8 @@
   <maintainer email="a.mendaluk@agribot.eu">Adam Mendaluk</maintainer>
   <maintainer email="m.wiadomski@agribot.eu">Michal Wiadomski</maintainer>
 
-  <license>Proprietary</license>
-  
+  <license>PROPRIETARY</license>
+
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>smach_ros</buildtool_depend>
 
@@ -48,4 +48,7 @@
   <exec_depend>tf</exec_depend>
   <exec_depend>python-can</exec_depend>
 
+  <build_depend>behaviortree_cpp_v3</build_depend>
+  <build_export_depend>behaviortree_cpp_v3</build_export_depend>
+  <exec_depend>behaviortree_cpp_v3</exec_depend>
 </package>

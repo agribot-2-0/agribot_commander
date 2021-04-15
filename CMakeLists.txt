@@ -4,10 +4,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(agribot_commander)
 
+## Compilation options
+#add_compile_options(-std=c++17 -Wall -Wextra -pedantic -Werror)
+add_compile_options(-std=c++17 -Wall -Wextra -pedantic)
+
 #############################################################################
 ## Find catkin packages and libraries for catkin and system dependencies   ##
 #############################################################################
 find_package(catkin REQUIRED COMPONENTS
+  behaviortree_cpp_v3
   rospy
   roscpp
   smach
@@ -61,6 +66,7 @@ link_directories(
 ## Install ##
 #############
 
+# -------------------SMACH----------------------------------------------------------------------------------
 install(TARGETS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -72,8 +78,17 @@ catkin_install_python(PROGRAMS
 
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}/scripts
 )
+# ---------------------------------------------------------------------------------------------------------
 
-install(DIRECTORY launch
+# -------------------BT------------------------------------------------------------------------------------
+link_directories("${PROJECT_SOURCE_DIR}")
+list(APPEND agribot_behavior_sources src/action/CheckStartConditions.cpp)
+add_executable(agribot_behavior_node src/node/agribot_behavior_node.cpp src/node/AgribotBehaviorTreeNode.cpp ${agribot_behavior_sources})
+target_link_libraries(agribot_behavior_node ${catkin_LIBRARIES} ${behaviortree_cpp_v3_LIBRARIES})
+add_dependencies(agribot_behavior_node ${catkin_EXPORTED_TARGETS})
+# ---------------------------------------------------------------------------------------------------------
+
+install(DIRECTORY launch behavior_tree
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   PATTERN ".svn" EXCLUDE
 )
@@ -81,3 +96,11 @@ install(DIRECTORY launch
 #############
 ## Testing ##
 #############
+
+include_directories(
+  test/include
+)
+
+## Add gtest based cpp test target and link libraries
+catkin_add_gtest(${PROJECT_NAME}-test test/utest.cpp ${agribot_behavior_sources})
+target_link_libraries(${PROJECT_NAME}-test ${agribot_common_LIBRARIES} ${behaviortree_cpp_v3_LIBRARIES} gmock gtest)
