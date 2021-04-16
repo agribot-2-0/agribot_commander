@@ -5,6 +5,7 @@
 #pragma once
 
 #include <behaviortree_cpp_v3/bt_factory.h>
+#include <behaviortree_cpp_v3/loggers/bt_zmq_publisher.h>
 #include <agribot_behavior/action/CheckStartConditions.h>
 #include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/action/Handle.h>
@@ -21,10 +22,11 @@ namespace agribot_behavior
 class AgribotBehaviorTreeNode
 {
 private:
-  BT::BehaviorTreeFactory factory;
-  BT::Tree tree;
+  std::unique_ptr<BT::BehaviorTreeFactory> factory_;
+  std::unique_ptr<BT::Tree> tree_;
 
   std::shared_ptr<ros::NodeHandle> node_handle_;
+  std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_; //used by Groot
 
 public:
   void registerAllNodes();

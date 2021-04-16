@@ -24,6 +24,7 @@ BT::NodeStatus Handle::tick()
   {
     throw BT::RuntimeError("missing required input [action_to_handle]: ", msg.error());
   }
-  return BT::NodeStatus::SUCCESS;
+  std::cout << "Handle msg: " << (*msg) << std::endl;
+  return BT::NodeStatus::FAILURE;
 }
 }  // namespace agribot_behavior

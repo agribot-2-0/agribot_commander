@@ -24,6 +24,7 @@ BT::NodeStatus CheckStartConditions::CheckStartConditions::tick()
   {
     throw BT::RuntimeError("missing required input [action_to_be_started]: ", msg.error());
   }
+  std::cout << "CheckStartConditions msg: " << (*msg) << std::endl;
   return BT::NodeStatus::SUCCESS;
 }
 }  // namespace agribot_behavior
