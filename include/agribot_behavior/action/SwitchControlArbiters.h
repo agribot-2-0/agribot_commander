@@ -5,6 +5,7 @@
 #pragma once
 
 #include <behaviortree_cpp_v3/action_node.h>
+#include <string>
 
 namespace agribot_behavior
 {
