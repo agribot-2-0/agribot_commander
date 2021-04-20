@@ -26,29 +26,77 @@ BT::NodeStatus SwitchControlArbiters::tick()
   }
   else
   {
-    if (!changeToolControlSource(msg.value()))
+    if (changeToolControlSource(msg.value()))
     {
-      ROS_ERROR_STREAM("[BehaviorTree][SwitchControlArbiter] Failed to change state");
+      ROS_INFO_STREAM("[BehaviorTree][SwitchControlArbiter] Successfuly chagned tools control source");
+    }
+    else
+    {
+      ROS_ERROR_STREAM("[BehaviorTree][SwitchControlArbiter] Failed to change tool control source");
+      return BT::NodeStatus::FAILURE;
+    }
+    if (changeCmdVelControlSource(msg.value()))
+    {
+      ROS_INFO_STREAM("[BehaviorTree][SwitchControlArbiter] Successfuly chagned cmd_vel control source");
+    }
+    else
+    {
+      changeToolControlSource(tool_manager::ControlSource::None);
+      ROS_ERROR_STREAM("[BehaviorTree][SwitchControlArbiter] Failed to change cmd_vel control source");
       return BT::NodeStatus::FAILURE;
     }
   }
   return BT::NodeStatus::SUCCESS;
 }
 
-void SwitchControlArbiters::init(std::shared_ptr<ros::ServiceClient> tool_service_client)
+void SwitchControlArbiters::init_tool_arbiter_client(std::shared_ptr<ros::ServiceClient> tool_service_client)
 {
-  tool_manager_srv_ = tool_service_client;
+  tool_arbiter_client_ = tool_service_client;
+}
+
+void SwitchControlArbiters::init_cmd_vel_arbiter_clients(std::shared_ptr<ros::ServiceClient> cmd_vel_manual,
+                                                         std::shared_ptr<ros::ServiceClient> cmd_vel_navigation,
+                                                         std::shared_ptr<ros::ServiceClient> cmd_vel_stop)
+{
+  cmd_vel_manual_client_ = cmd_vel_manual;
+  cmd_vel_navigation_client_ = cmd_vel_navigation;
+  cmd_vel_stop_client_ = cmd_vel_stop;
 }
 
 bool SwitchControlArbiters::changeToolControlSource(const tool_manager::ControlSource selected_source)
 {
   agribot_msgs::ToolManagerControlSource srv;
   srv.request.source = static_cast<std::uint8_t>(selected_source);
-  if (!tool_manager_srv_->call(srv))
+  if (!tool_arbiter_client_->call(srv))
   {
-    ROS_ERROR("Failed to call service");
+    ROS_ERROR_STREAM("[BehaviorTree][SwitchControlArbiter] Failed to call tool control service");
+    return false;
   }
-  return srv.response.result == srv.response.SUCCESS ? true : false;
+  return (srv.response.result == srv.response.SUCCESS ? true : false);
+}
+
+bool SwitchControlArbiters::changeCmdVelControlSource(const tool_manager::ControlSource selected_source)
+{
+  std_srvs::Empty srv;
+  bool success = false;
+  switch (selected_source)
+  {
+    case tool_manager::ControlSource::Manual:
+      success = cmd_vel_manual_client_->call(srv);
+      break;
+    case tool_manager::ControlSource::Navigation:
+      success = cmd_vel_navigation_client_->call(srv);
+      break;
+    case tool_manager::ControlSource::None:
+      success = cmd_vel_stop_client_->call(srv);
+    default:
+      break;
+  }
+  if (!success)
+  {
+    ROS_ERROR_STREAM("[BehaviorTree][SwitchControlArbiter] Failed to call cmd_vel control service");
+  }
+  return success;
 }
 
 }  // namespace agribot_behavior

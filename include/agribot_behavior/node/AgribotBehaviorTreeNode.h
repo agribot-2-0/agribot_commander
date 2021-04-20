@@ -10,6 +10,7 @@
 #include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/action/Handle.h>
 
+#include <std_srvs/Empty.h>
 #include <agribot_msgs/ToolManagerControlSource.h>
 
 #include <ros/ros.h>
@@ -34,6 +35,9 @@ private:
   // Parameters
   // Services
   std::shared_ptr<ros::ServiceClient> tool_arbiter_client_;
+  std::shared_ptr<ros::ServiceClient> cmd_vel_manual_client_;
+  std::shared_ptr<ros::ServiceClient> cmd_vel_navigation_client_;
+  std::shared_ptr<ros::ServiceClient> cmd_vel_stop_client_;
 
 public:
   AgribotBehaviorTreeNode(int argc, char** argv);

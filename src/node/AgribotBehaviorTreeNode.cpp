@@ -27,7 +27,9 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto switch_control_arbiter = dynamic_cast<SwitchControlArbiters*>(node.get());
         switch_control_arbiter != nullptr)
     {
-      switch_control_arbiter->init(tool_arbiter_client_);
+      switch_control_arbiter->init_tool_arbiter_client(tool_arbiter_client_);
+      switch_control_arbiter->init_cmd_vel_arbiter_clients(cmd_vel_manual_client_, cmd_vel_navigation_client_,
+                                                           cmd_vel_stop_client_);
     }
   }
 }
@@ -53,14 +55,17 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   // Parameters
 
   // Services
-  tool_arbiter_client_ =
-      std::make_shared<ros::ServiceClient>(node_handle_->serviceClient<agribot_msgs::ToolManagerControlSource>("agribot"
-                                                                                                               "/tool_"
-                                                                                                               "managem"
-                                                                                                               "ent/"
-                                                                                                               "control"
-                                                                                                               "_sourc"
-                                                                                                               "e"));
+  tool_arbiter_client_ = std::make_shared<ros::ServiceClient>(  // NOLINT
+      node_handle_->serviceClient<agribot_msgs::ToolManagerControlSource>("agribot/tool_management/control_source"));
+  cmd_vel_manual_client_ =
+    std::make_shared<ros::ServiceClient>(
+      node_handle_->serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_teleop"));
+  cmd_vel_navigation_client_ =
+    std::make_shared<ros::ServiceClient>(
+      node_handle_->serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_navigation"));
+  cmd_vel_stop_client_ =
+    std::make_shared<ros::ServiceClient>(
+      node_handle_->serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_stop"));
 
   initTreeNodesWithRosDependencies();
 }

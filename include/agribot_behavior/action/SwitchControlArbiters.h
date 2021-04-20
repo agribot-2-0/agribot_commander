@@ -12,6 +12,7 @@
 
 #include <ros/ros.h>
 #include <ros/package.h>
+#include <std_srvs/Empty.h>
 
 #include <memory>
 #include <string>
@@ -20,13 +21,21 @@ namespace agribot_behavior
 {
 class SwitchControlArbiters : public BT::SyncActionNode
 {
- std::shared_ptr<ros::ServiceClient> tool_manager_srv_;
+  std::shared_ptr<ros::ServiceClient> tool_arbiter_client_;
+  std::shared_ptr<ros::ServiceClient> cmd_vel_manual_client_;
+  std::shared_ptr<ros::ServiceClient> cmd_vel_navigation_client_;
+  std::shared_ptr<ros::ServiceClient> cmd_vel_stop_client_;
+
 public:
   SwitchControlArbiters(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
-  void init(std::shared_ptr<ros::ServiceClient> tool_service_client);
+  void init_tool_arbiter_client(std::shared_ptr<ros::ServiceClient> tool_service_client);
+  void init_cmd_vel_arbiter_clients(std::shared_ptr<ros::ServiceClient> cmd_vel_manual,
+                                    std::shared_ptr<ros::ServiceClient> cmd_vel_navigation,
+                                    std::shared_ptr<ros::ServiceClient> cmd_vel_stop);
   bool changeToolControlSource(const tool_manager::ControlSource selected_source);
+  bool changeCmdVelControlSource(const tool_manager::ControlSource selected_source);
 };
 
 }  // namespace agribot_behavior
