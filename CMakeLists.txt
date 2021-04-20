@@ -64,7 +64,6 @@ link_directories(
 
 
 # -------------------BT------------------------------------------------------------------------------------
-link_directories("${PROJECT_SOURCE_DIR}")
 list(APPEND agribot_behavior_sources src/action/CheckStartConditions.cpp src/action/SwitchControlArbiters.cpp src/action/Handle.cpp)
 
 add_executable(agribot_behavior_node src/node/agribot_behavior_node.cpp src/node/AgribotBehaviorTreeNode.cpp ${agribot_behavior_sources})
@@ -112,5 +111,5 @@ include_directories(
 )
 
 ## Add gtest based cpp test target and link libraries
-catkin_add_gtest(${PROJECT_NAME}-test test/utest.cpp ${agribot_behavior_sources})
-target_link_libraries(${PROJECT_NAME}-test ${agribot_common_LIBRARIES} ${behaviortree_cpp_v3_LIBRARIES} gmock gtest)
+#catkin_add_gtest(${PROJECT_NAME}-test test/utest.cpp ${agribot_behavior_sources})
+#target_link_libraries(${PROJECT_NAME}-test ${agribot_common_LIBRARIES} ${behaviortree_cpp_v3_LIBRARIES} gmock gtest)

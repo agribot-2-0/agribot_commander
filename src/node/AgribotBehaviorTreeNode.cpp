@@ -10,18 +10,26 @@ namespace agribot_behavior
 {
 void AgribotBehaviorTreeNode::registerAllNodes()
 {
-  factory_->registerNodeType<agribot_behavior::CheckStartConditions>("CheckStartConditions");
-  factory_->registerNodeType<agribot_behavior::SwitchControlArbiters>("SwitchControlArbiters");
-  factory_->registerNodeType<agribot_behavior::Handle>("Handle");
-  // factory.registerSimpleCondition("CheckBattery", std::bind(CheckBattery));
-  // GripperInterface gripper;
-  // factory.registerSimpleAction("OpenGripper", std::bind(&GripperInterface::open, &gripper));
-  // factory.registerSimpleAction("CloseGripper", std::bind(&GripperInterface::close, &gripper));
+  factory_->registerNodeType<CheckStartConditions>("CheckStartConditions");
+  factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
+  factory_->registerNodeType<Handle>("Handle");
 }
 
 std::string AgribotBehaviorTreeNode::getTreeLocation() const
 {
   return ros::package::getPath("agribot_commander") + "/behavior_tree/agribot_behavior.xml";
+}
+
+void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
+{
+  for (auto& node : tree_->nodes)
+  {
+    if (auto switch_control_arbiter = dynamic_cast<SwitchControlArbiters*>(node.get());
+        switch_control_arbiter != nullptr)
+    {
+      switch_control_arbiter->init(tool_arbiter_client_);
+    }
+  }
 }
 
 AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
@@ -37,6 +45,24 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
 
   // Register ZeroMQ publisher for Groot tree view:
   tree_state_publisher_ = std::make_unique<BT::PublisherZMQ>(*tree_);
+
+  // Publishers
+
+  // Subscribers
+
+  // Parameters
+
+  // Services
+  tool_arbiter_client_ =
+      std::make_shared<ros::ServiceClient>(node_handle_->serviceClient<agribot_msgs::ToolManagerControlSource>("agribot"
+                                                                                                               "/tool_"
+                                                                                                               "managem"
+                                                                                                               "ent/"
+                                                                                                               "control"
+                                                                                                               "_sourc"
+                                                                                                               "e"));
+
+  initTreeNodesWithRosDependencies();
 }
 
 void AgribotBehaviorTreeNode::run()

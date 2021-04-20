@@ -10,12 +10,13 @@
 #include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/action/Handle.h>
 
+#include <agribot_msgs/ToolManagerControlSource.h>
+
 #include <ros/ros.h>
 #include <ros/package.h>
 
 #include <string>
 #include <memory>
-
 
 namespace agribot_behavior
 {
@@ -26,12 +27,19 @@ private:
   std::unique_ptr<BT::Tree> tree_;
 
   std::shared_ptr<ros::NodeHandle> node_handle_;
-  std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_; //used by Groot
+  std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot
+
+  // Publishers
+  // Subscribers
+  // Parameters
+  // Services
+  std::shared_ptr<ros::ServiceClient> tool_arbiter_client_;
 
 public:
+  AgribotBehaviorTreeNode(int argc, char** argv);
   void registerAllNodes();
   std::string getTreeLocation() const;
-  AgribotBehaviorTreeNode(int argc, char** argv);
+  void initTreeNodesWithRosDependencies();
   void run();
 };
 }  // namespace agribot_behavior
