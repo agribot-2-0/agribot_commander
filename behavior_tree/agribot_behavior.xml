@@ -4,15 +4,15 @@
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
             <Fallback>
-                <Sequence name="manual control squence">
-                    <Condition ID="CheckStartConditions" action_to_be_started="autonomous_driving" name="check conditions for auto drive"/>
-                    <Action ID="SwitchControlArbiters" control_source="navigation" name="change arbiter source to nav"/>
-                    <Action ID="Handle" action_to_handle="autonomous_driving" name="handle auto drive"/>
-                </Sequence>
                 <Sequence name="auto drive squence">
-                    <Condition ID="CheckStartConditions" action_to_be_started="manual_control" name="check conditions for manual control"/>
+                    <Condition ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
                     <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
-                    <Action ID="Handle" action_to_handle="manual_control" name="handle manual control"/>
+                    <Action ID="Handle" action_to_handle="manual" name="handle manual control"/>
+                </Sequence>
+                <Sequence name="manual control squence">
+                    <Condition ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
+                    <Action ID="SwitchControlArbiters" control_source="navigation" name="change arbiter source to nav"/>
+                    <Action ID="Handle" action_to_handle="navigation" name="handle auto drive"/>
                 </Sequence>
             </Fallback>
             <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
@@ -21,7 +21,7 @@
     <!-- ////////// -->
     <TreeNodesModel>
         <Condition ID="CheckStartConditions">
-            <input_port name="action_to_be_started"/>
+            <input_port name="condition_to_check"/>
         </Condition>
         <Action ID="Handle">
             <input_port name="action_to_handle"/>

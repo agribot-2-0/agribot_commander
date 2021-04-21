@@ -9,8 +9,11 @@
 #include <agribot_behavior/action/CheckStartConditions.h>
 #include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/action/Handle.h>
+#include <agribot_behavior/common/Shared.h>
 
 #include <std_srvs/Empty.h>
+#include <std_msgs/String.h>
+#include <industrial_msgs/RobotMode.h>
 #include <agribot_msgs/ToolManagerControlSource.h>
 
 #include <ros/ros.h>
@@ -32,6 +35,8 @@ private:
 
   // Publishers
   // Subscribers
+  ros::Subscriber task_name_subscriber_;
+  ros::Subscriber robot_mode_subscriber_;
   // Parameters
   // Services
   std::shared_ptr<ros::ServiceClient> tool_arbiter_client_;
@@ -39,11 +44,18 @@ private:
   std::shared_ptr<ros::ServiceClient> cmd_vel_navigation_client_;
   std::shared_ptr<ros::ServiceClient> cmd_vel_stop_client_;
 
+  // Variables shared between tree nodes, which are changed in callbacks
+  std::shared_ptr<Shared<std::string>> task_name_;
+  std::shared_ptr<Shared<industrial_msgs::RobotMode>> robot_mode_;
+
 public:
   AgribotBehaviorTreeNode(int argc, char** argv);
   void registerAllNodes();
   std::string getTreeLocation() const;
   void initTreeNodesWithRosDependencies();
+  void initSharedData();
   void run();
+  void taskNameCallback(const std_msgs::String::ConstPtr& msg);
+  void robotModeCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
 };
 }  // namespace agribot_behavior

@@ -11,7 +11,6 @@
 #include <agribot_msgs/ToolManagerControlSource.h>
 
 #include <ros/ros.h>
-#include <ros/package.h>
 #include <std_srvs/Empty.h>
 
 #include <memory>
@@ -30,10 +29,10 @@ public:
   SwitchControlArbiters(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
-  void init_tool_arbiter_client(std::shared_ptr<ros::ServiceClient> tool_service_client);
-  void init_cmd_vel_arbiter_clients(std::shared_ptr<ros::ServiceClient> cmd_vel_manual,
-                                    std::shared_ptr<ros::ServiceClient> cmd_vel_navigation,
-                                    std::shared_ptr<ros::ServiceClient> cmd_vel_stop);
+  void initToolArbiterClient(std::shared_ptr<ros::ServiceClient> tool_service_client);
+  void initCmdVelArbiterClients(std::shared_ptr<ros::ServiceClient> cmd_vel_manual,
+                                std::shared_ptr<ros::ServiceClient> cmd_vel_navigation,
+                                std::shared_ptr<ros::ServiceClient> cmd_vel_stop);
   bool changeToolControlSource(const tool_manager::ControlSource selected_source);
   bool changeCmdVelControlSource(const tool_manager::ControlSource selected_source);
 };
