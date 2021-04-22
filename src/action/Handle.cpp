@@ -4,7 +4,6 @@
 
 #include <agribot_behavior/action/Handle.h>
 
-
 namespace agribot_behavior
 {
 Handle::Handle(const std::string& name, const BT::NodeConfiguration& config) : AsyncActionNode(name, config)
@@ -27,10 +26,18 @@ BT::NodeStatus Handle::tick()
   }
   else
   {
-    while (!halt_requested_)
+    switch (msg.value())
     {
-      ROS_WARN_STREAM("[BehaviorTree][Handle] Running ");
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      case tool_manager::ControlSource::Manual:
+        ROS_WARN_STREAM("[BehaviorTree][Handle] Running manual action");
+        handleManualControl();
+        break;
+      case tool_manager::ControlSource::Navigation:
+        ROS_WARN_STREAM("[BehaviorTree][Handle] Running autonomous action");
+        handleAutonomousControl();
+        break;
+      default:
+        break;
     }
     halt_requested_.store(false);
     return BT::NodeStatus::FAILURE;
@@ -40,6 +47,23 @@ BT::NodeStatus Handle::tick()
 void Handle::halt()
 {
   halt_requested_.store(true);
+}
+
+// Manual control is idle action since another ROS nodes are handling it
+void Handle::handleManualControl()
+{
+  while (!halt_requested_)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  }
+}
+
+void Handle::handleAutonomousControl()
+{
+  while (!halt_requested_)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  }
 }
 
 }  // namespace agribot_behavior

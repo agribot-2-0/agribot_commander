@@ -11,7 +11,8 @@
 
 #include <atomic>
 #include <string>
-#include <chrono>  // todo(mwiadoms): remove header
+#include <chrono>  // NOLINT
+// todo(mwiadoms): remove chrono header
 
 namespace agribot_behavior
 {
@@ -25,5 +26,7 @@ public:
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
   void halt() override;
+  void handleManualControl();
+  void handleAutonomousControl();
 };
 }  // namespace agribot_behavior

@@ -54,7 +54,7 @@ inline BT::NodeStatus CheckStartConditions::checkManualCondition()
 
 inline BT::NodeStatus CheckStartConditions::checkNavigationCondition()
 {
-  return (task_name_->getData() != "" && robot_mode_->getData().val != industrial_msgs::RobotMode::MANUAL) ?
+  return (task_name_->getData() != "" && robot_mode_->getData().val == industrial_msgs::RobotMode::AUTO) ?
              BT::NodeStatus::SUCCESS :
              BT::NodeStatus::FAILURE;
 }

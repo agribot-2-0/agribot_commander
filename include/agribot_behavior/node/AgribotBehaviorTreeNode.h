@@ -15,6 +15,9 @@
 #include <std_msgs/String.h>
 #include <industrial_msgs/RobotMode.h>
 #include <agribot_msgs/ToolManagerControlSource.h>
+#include <agribot_msgs/AgribotMoveBaseCommand.h>
+#include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
+#include <agribot_msgs/AgribotObstacleDetection.h>
 
 #include <ros/ros.h>
 #include <ros/package.h>
@@ -34,9 +37,12 @@ private:
   std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot
 
   // Publishers
+  ros::Publisher move_base_command_publisher_;
   // Subscribers
   ros::Subscriber task_name_subscriber_;
   ros::Subscriber robot_mode_subscriber_;
+  ros::Subscriber move_base_result_subscriber_;
+  ros::Subscriber obstacle_detected_subscriber_;
   // Parameters
   // Services
   std::shared_ptr<ros::ServiceClient> tool_arbiter_client_;
@@ -57,5 +63,8 @@ public:
   void run();
   void taskNameCallback(const std_msgs::String::ConstPtr& msg);
   void robotModeCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
+  void AgribotBehaviorTreeNode::moveBaseMonitorResultCallback(
+      const agribot_msgs::AgribotMoveBaseMonitorResult::ConstPtr& msg);
+  void AgribotBehaviorTreeNode::obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
 };
 }  // namespace agribot_behavior

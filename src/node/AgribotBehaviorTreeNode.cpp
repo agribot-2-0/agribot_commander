@@ -57,13 +57,17 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   initSharedData();
 
   // Publishers
-
+  move_base_command_publisher_ =
+      node_handle_->advertise<agribot_msgs::AgribotMoveBaseCommand>("/agribot/move_base_monitor/command", 1);
   // Subscribers
   task_name_subscriber_ =
       node_handle_->subscribe("/agribot/state_machine/task", 1, &AgribotBehaviorTreeNode::taskNameCallback, this);
-
   robot_mode_subscriber_ =
       node_handle_->subscribe("/agribot/state_machine/mode", 1, &AgribotBehaviorTreeNode::robotModeCallback, this);
+  move_base_result_subscriber_ = node_handle_->subscribe("/agribot/move_base_monitor/result", 1,
+                                                         &AgribotBehaviorTreeNode::moveBaseMonitorResultCallback, this);
+  obstacle_detected_subscriber_ = node_handle_->subscribe("/agribot/obstacle_detected", 1,
+                                                          &AgribotBehaviorTreeNode::obstacleDetectedCallback, this);
 
   // Parameters
 
@@ -108,6 +112,15 @@ void AgribotBehaviorTreeNode::taskNameCallback(const std_msgs::String::ConstPtr&
 void AgribotBehaviorTreeNode::robotModeCallback(const industrial_msgs::RobotMode::ConstPtr& msg)
 {
   robot_mode_->writeData(*msg);
+}
+
+void AgribotBehaviorTreeNode::moveBaseMonitorResultCallback(
+    const agribot_msgs::AgribotMoveBaseMonitorResult::ConstPtr& msg)
+{
+}
+
+void AgribotBehaviorTreeNode::obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg)
+{
 }
 
 }  // namespace agribot_behavior
