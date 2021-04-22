@@ -4,27 +4,42 @@
 
 #include <agribot_behavior/action/Handle.h>
 
+
 namespace agribot_behavior
 {
-Handle::Handle(const std::string& name, const BT::NodeConfiguration& config)
-  : SyncActionNode(name, config)
+Handle::Handle(const std::string& name, const BT::NodeConfiguration& config) : AsyncActionNode(name, config)
 {
+  halt_requested_.store(false);
 }
 
 BT::PortsList Handle::providedPorts()
 {
-  return { BT::InputPort<std::string>("action_to_handle") };
+  return { BT::InputPort<tool_manager::ControlSource>("action_to_handle") };
 }
 
 BT::NodeStatus Handle::tick()
 {
-  BT::Optional<std::string> msg = TreeNode::getInput<std::string>("action_to_handle");
-  // Check if optional is valid. If not, throw its error
+  BT::Optional<tool_manager::ControlSource> msg = TreeNode::getInput<tool_manager::ControlSource>("action_to_handle");
   if (!msg)
   {
-    throw BT::RuntimeError("missing required input [action_to_handle]: ", msg.error());
+    ROS_ERROR_STREAM("[BehaviorTree][Handle] Missing required input [action_to_handle]: " << msg.error());
+    return BT::NodeStatus::FAILURE;
   }
-  std::cout << "Handle msg: " << (*msg) << std::endl;
-  return BT::NodeStatus::FAILURE;
+  else
+  {
+    while (!halt_requested_)
+    {
+      ROS_WARN_STREAM("[BehaviorTree][Handle] Running ");
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+    halt_requested_.store(false);
+    return BT::NodeStatus::FAILURE;
+  }
 }
+
+void Handle::halt()
+{
+  halt_requested_.store(true);
+}
+
 }  // namespace agribot_behavior

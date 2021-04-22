@@ -7,12 +7,18 @@
                 <Sequence name="auto drive squence">
                     <Condition ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
                     <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
-                    <Action ID="Handle" action_to_handle="manual" name="handle manual control"/>
+                    <ReactiveSequence>
+                        <Condition ID="CheckStartConditions" condition_to_check="manual"/>
+                        <Action ID="Handle" action_to_handle="manual" name="handle manual control"/>
+                    </ReactiveSequence>
                 </Sequence>
                 <Sequence name="manual control squence">
                     <Condition ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
                     <Action ID="SwitchControlArbiters" control_source="navigation" name="change arbiter source to nav"/>
-                    <Action ID="Handle" action_to_handle="navigation" name="handle auto drive"/>
+                    <ReactiveSequence>
+                        <Condition ID="CheckStartConditions" condition_to_check="navigation"/>
+                        <Action ID="Handle" action_to_handle="navigation" name="handle auto drive"/>
+                    </ReactiveSequence>
                 </Sequence>
             </Fallback>
             <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
