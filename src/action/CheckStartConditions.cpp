@@ -54,7 +54,9 @@ inline BT::NodeStatus CheckStartConditions::checkManualCondition()
 
 inline BT::NodeStatus CheckStartConditions::checkNavigationCondition()
 {
-  return task_name_->getData() != "" ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
+  return (task_name_->getData() != "" && robot_mode_->getData().val != industrial_msgs::RobotMode::MANUAL) ?
+             BT::NodeStatus::SUCCESS :
+             BT::NodeStatus::FAILURE;
 }
 
 }  // namespace agribot_behavior

@@ -35,6 +35,7 @@ BT::NodeStatus SwitchControlArbiters::tick()
       ROS_ERROR_STREAM("[BehaviorTree][SwitchControlArbiters] Failed to change tool control source");
       return BT::NodeStatus::FAILURE;
     }
+    changeCmdVelControlSource(tool_manager::ControlSource::None);
     if (changeCmdVelControlSource(msg.value()))
     {
       ROS_INFO_STREAM("[BehaviorTree][SwitchControlArbiters] Successfuly chagned cmd_vel control source");
