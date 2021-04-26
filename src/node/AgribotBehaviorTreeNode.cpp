@@ -59,6 +59,9 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   // Publishers
   move_base_command_publisher_ =
       node_handle_->advertise<agribot_msgs::AgribotMoveBaseCommand>("/agribot/move_base_monitor/command", 1);
+  waypoints_publisher_ =
+      node_handle_->advertise<agribot_msgs::NavSatFixOrientation>("/agribot/waypoints", 1);
+
   // Subscribers
   task_name_subscriber_ =
       node_handle_->subscribe("/agribot/state_machine/task", 1, &AgribotBehaviorTreeNode::taskNameCallback, this);
@@ -89,6 +92,9 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   tree_state_publisher_ = std::make_unique<BT::PublisherZMQ>(*tree_);
 
   initTreeNodesWithRosDependencies();
+
+
+  path_feeder_.loadPath("test_path_moderna.yaml");
 }
 
 void AgribotBehaviorTreeNode::run()

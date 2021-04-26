@@ -10,6 +10,7 @@
 #include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/action/Handle.h>
 #include <agribot_behavior/common/Shared.h>
+#include <agribot_behavior/path_handle/PathFeeder.h>
 
 #include <std_srvs/Empty.h>
 #include <std_msgs/String.h>
@@ -18,6 +19,7 @@
 #include <agribot_msgs/AgribotMoveBaseCommand.h>
 #include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
 #include <agribot_msgs/AgribotObstacleDetection.h>
+#include <agribot_msgs/NavSatFixOrientation.h>
 
 #include <ros/ros.h>
 #include <ros/package.h>
@@ -36,8 +38,13 @@ private:
   std::shared_ptr<ros::NodeHandle> node_handle_;
   std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot
 
+  // Note: the functionality of parsing YAML and feeding
+  // movebase with path points should be moved to separate node in the future
+  PathFeeder path_feeder_;
+
   // Publishers
   ros::Publisher move_base_command_publisher_;
+  ros::Publisher waypoints_publisher_;
   // Subscribers
   ros::Subscriber task_name_subscriber_;
   ros::Subscriber robot_mode_subscriber_;
@@ -63,8 +70,7 @@ public:
   void run();
   void taskNameCallback(const std_msgs::String::ConstPtr& msg);
   void robotModeCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
-  void AgribotBehaviorTreeNode::moveBaseMonitorResultCallback(
-      const agribot_msgs::AgribotMoveBaseMonitorResult::ConstPtr& msg);
-  void AgribotBehaviorTreeNode::obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
+  void moveBaseMonitorResultCallback(const agribot_msgs::AgribotMoveBaseMonitorResult::ConstPtr& msg);
+  void obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
 };
 }  // namespace agribot_behavior

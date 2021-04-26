@@ -65,10 +65,10 @@ link_directories(
 
 # -------------------BT------------------------------------------------------------------------------------
 list(APPEND agribot_behavior_sources src/action/CheckStartConditions.cpp src/action/SwitchControlArbiters.cpp src/action/Handle.cpp)
-list(APPEND agribot_behavior_sources src/common/Shared.cpp)
+list(APPEND agribot_behavior_sources src/common/Shared.cpp src/path_handle/PathParser.cpp src/path_handle/PathFeeder.cpp)
 
 add_executable(agribot_behavior_node src/node/agribot_behavior_node.cpp src/node/AgribotBehaviorTreeNode.cpp ${agribot_behavior_sources})
-target_link_libraries(agribot_behavior_node ${catkin_LIBRARIES} ${behaviortree_cpp_v3_LIBRARIES})
+target_link_libraries(agribot_behavior_node ${catkin_LIBRARIES} ${behaviortree_cpp_v3_LIBRARIES} yaml-cpp)
 add_dependencies(agribot_behavior_node ${catkin_EXPORTED_TARGETS})
 # ---------------------------------------------------------------------------------------------------------
 
