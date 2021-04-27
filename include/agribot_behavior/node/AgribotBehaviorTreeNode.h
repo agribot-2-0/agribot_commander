@@ -38,10 +38,6 @@ private:
   std::shared_ptr<ros::NodeHandle> node_handle_;
   std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot
 
-  // Note: the functionality of parsing YAML and feeding
-  // movebase with path points should be moved to separate node in the future
-  PathFeeder path_feeder_;
-
   // Publishers
   ros::Publisher move_base_command_publisher_;
   ros::Publisher waypoints_publisher_;

@@ -44,6 +44,11 @@ BT::NodeStatus Handle::tick()
   }
 }
 
+void Handle::initSharedFields(std::shared_ptr<Shared<std::string>> task_name)
+{
+  task_name_ = task_name;
+}
+
 void Handle::halt()
 {
   halt_requested_.store(true);
@@ -60,9 +65,17 @@ void Handle::handleManualControl()
 
 void Handle::handleAutonomousControl()
 {
-  while (!halt_requested_)
+  if (path_feeder_.loadPath(task_name_->getData()))
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ROS_WARN_STREAM("[BehaviorTree][Handle] Loaded path " << path_feeder_.getLoadedPathLocation());
+    while (!halt_requested_)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+  }
+  else
+  {
+    ROS_ERROR_STREAM("[BehaviorTree][Handle] Failed to load path from task " << task_name_->getData());
   }
 }
 

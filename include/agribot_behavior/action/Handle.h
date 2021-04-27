@@ -6,9 +6,14 @@
 
 #include <behaviortree_cpp_v3/action_node.h>
 
+#include <agribot_behavior/path_handle/PathFeeder.h>
+#include <agribot_behavior/common/Shared.h>
+
 #include <agribot_common/common_enums/ControlSource.h>
+
 #include <ros/console.h>
 
+#include <memory>
 #include <atomic>
 #include <string>
 #include <chrono>  // NOLINT
@@ -19,12 +24,15 @@ namespace agribot_behavior
 class Handle : public BT::AsyncActionNode
 {
 private:
+  PathFeeder path_feeder_;
+  std::shared_ptr<Shared<std::string>> task_name_;
   std::atomic<bool> halt_requested_;
 
 public:
   Handle(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
+  void initSharedFields(std::shared_ptr<Shared<std::string>> task_name);
   void halt() override;
   void handleManualControl();
   void handleAutonomousControl();

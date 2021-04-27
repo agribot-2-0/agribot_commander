@@ -6,6 +6,25 @@
 
 namespace agribot_behavior
 {
+std::string PathParser::getPathNameFromTask(const std::string& task_name)
+{
+  std::string task_location = std::getenv("AGRIBOT_HOME");
+  task_location += task_folder_;
+  task_location += task_name;
+  task_location += ".yaml";
+  if (fileExists(task_location))
+  {
+    YAML::Node task_yaml = YAML::LoadFile(task_location);
+
+    std::cerr << task_location << std::endl;
+    if (task_yaml["task"]["path_name"][0])
+    {
+      return task_yaml["task"]["path_name"][0].as<std::string>() + ".yaml";
+    }
+  }
+  return "";
+}
+
 inline bool PathParser::fileExists(const std::string& name)
 {
   std::ifstream f(name.c_str());
@@ -24,15 +43,19 @@ void PathParser::setPose(const YAML::Node& node, std::size_t index,
   path_points[index].altitude = node["position"][2].as<double>();
 }
 
-bool PathParser::setPathName(const std::string& name)
+bool PathParser::setPathName(const std::string& task_name)
 {
-  std::string path_location = std::getenv("AGRIBOT_HOME");
-  path_location += "/agribot/configs/base/map/paths/paths/";
-  path_location += name;
-  if (fileExists(path_location))
+  std::string path_name = getPathNameFromTask(task_name);
+  if (path_name != "")
   {
-    path_location_ = path_location;
-    return true;
+    std::string path_location = std::getenv("AGRIBOT_HOME");
+    path_location += path_folder_;
+    path_location += path_name;
+    if (fileExists(path_location))
+    {
+      path_location_ = path_location;
+      return true;
+    }
   }
   return false;
 }
@@ -52,6 +75,11 @@ std::vector<agribot_msgs::NavSatFixOrientation> PathParser::parsePath()
     return path_points;
   }
   return std::vector<agribot_msgs::NavSatFixOrientation>();
+}
+
+std::string PathParser::getPathLocation() const
+{
+  return path_location_;
 }
 
 }  // namespace agribot_behavior

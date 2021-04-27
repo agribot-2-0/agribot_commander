@@ -17,11 +17,14 @@ class PathFeeder
 private:
   PathParser path_parser_;
   std::size_t path_index_;
+  bool feeding_completed_;
   std::vector<agribot_msgs::NavSatFixOrientation> path_points_;
 
 public:
   bool loadPath(const std::string& path_name);
   agribot_msgs::NavSatFixOrientation feed();
   void reset();
+  bool feedingCompleted();
+  std::string getLoadedPathLocation();
 };
 }  // namespace agribot_behavior

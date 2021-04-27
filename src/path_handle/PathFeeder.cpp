@@ -6,9 +6,10 @@
 
 namespace agribot_behavior
 {
-bool PathFeeder::loadPath(const std::string& path_name)
+bool PathFeeder::loadPath(const std::string& task_name)
 {
-  if (path_parser_.setPathName(path_name))
+  reset();
+  if (path_parser_.setPathName(task_name))
   {
     path_points_ = path_parser_.parsePath();
     return true;
@@ -24,16 +25,32 @@ agribot_msgs::NavSatFixOrientation PathFeeder::feed()
     ++path_index_;
     return pose;
   }
-  else if (path_index_ == path_points_.size())
+  else
   {
-    --path_index_;
-    return path_points_[path_index_];
+    feeding_completed_ = true;
+    return path_points_[--path_index_];  // when all the points from path are send, send the last point again
   }
 }
 
 void PathFeeder::reset()
 {
+  feeding_completed_ = false;
   path_index_ = 0;
+}
+
+bool PathFeeder::feedingCompleted()
+{
+  if (feeding_completed_)
+  {
+    reset();
+    return true;
+  }
+  return feeding_completed_;
+}
+
+std::string PathFeeder::getLoadedPathLocation()
+{
+  return path_parser_.getPathLocation();
 }
 
 }  // namespace agribot_behavior
