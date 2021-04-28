@@ -19,7 +19,7 @@ void AgribotBehaviorTreeNode::registerAllNodes()
   factory_->registerNodeType<CheckStartConditions>("CheckStartConditions");
   factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
   factory_->registerNodeType<Handle>("Handle");
-  factory_->registerSimpleCondition("ObstacleIsNotDetected", std::bind(&AgribotBehaviorTreeNode::checkBattery, this));
+  factory_->registerSimpleCondition("ObstacleIsNotDetected", std::bind(&AgribotBehaviorTreeNode::checkObstacle, this));
 }
 
 std::string AgribotBehaviorTreeNode::getTreeLocation() const
