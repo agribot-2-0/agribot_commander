@@ -20,9 +20,11 @@ T Shared<T>::getData()
   return data;
 }
 
-
 template void Shared<std::string>::writeData(const std::string&);
 template std::string Shared<std::string>::getData();
 template void Shared<industrial_msgs::RobotMode>::writeData(const industrial_msgs::RobotMode&);
 template industrial_msgs::RobotMode Shared<industrial_msgs::RobotMode>::getData();
+template void
+Shared<agribot_msgs::AgribotMoveBaseMonitorResult>::writeData(const agribot_msgs::AgribotMoveBaseMonitorResult&);
+template agribot_msgs::AgribotMoveBaseMonitorResult Shared<agribot_msgs::AgribotMoveBaseMonitorResult>::getData();
 }  // namespace agribot_behavior

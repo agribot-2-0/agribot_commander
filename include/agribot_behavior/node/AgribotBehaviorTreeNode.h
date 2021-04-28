@@ -12,6 +12,9 @@
 #include <agribot_behavior/common/Shared.h>
 #include <agribot_behavior/path_handle/PathFeeder.h>
 
+#include <ros/ros.h>
+#include <ros/package.h>
+
 #include <std_srvs/Empty.h>
 #include <std_msgs/String.h>
 #include <industrial_msgs/RobotMode.h>
@@ -20,9 +23,6 @@
 #include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
 #include <agribot_msgs/AgribotObstacleDetection.h>
 #include <agribot_msgs/NavSatFixOrientation.h>
-
-#include <ros/ros.h>
-#include <ros/package.h>
 
 #include <string>
 #include <memory>
@@ -56,6 +56,7 @@ private:
   // Variables shared between tree nodes, which are changed in callbacks
   std::shared_ptr<Shared<std::string>> task_name_;
   std::shared_ptr<Shared<industrial_msgs::RobotMode>> robot_mode_;
+  std::shared_ptr<Shared<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result_;
 
 public:
   AgribotBehaviorTreeNode(int argc, char** argv);

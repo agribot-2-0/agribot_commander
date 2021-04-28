@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
 #include <industrial_msgs/RobotMode.h>
 
 #include <shared_mutex>

@@ -40,13 +40,16 @@ BT::NodeStatus Handle::tick()
         break;
     }
     halt_requested_.store(false);
-    return BT::NodeStatus::FAILURE;
+    return BT::NodeStatus::SUCCESS;
   }
 }
 
-void Handle::initSharedFields(std::shared_ptr<Shared<std::string>> task_name)
+void Handle::initSharedFields(
+    std::shared_ptr<Shared<std::string>> task_name,
+    std::shared_ptr<Shared<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result)
 {
   task_name_ = task_name;
+  move_base_monitor_result_ = move_base_monitor_result;
 }
 
 void Handle::initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
@@ -58,8 +61,6 @@ void Handle::initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
 
 void Handle::halt()
 {
-  publishMoveBaseCommand(agribot_msgs::AgribotMoveBaseCommand::ABORT);
-  path_feeder_.reset();
   halt_requested_.store(true);
 }
 
@@ -80,18 +81,28 @@ void Handle::handleAutonomousControl()
   {
     ROS_WARN_STREAM("[BehaviorTree][Handle] Loaded path " << path_feeder_.getLoadedPathLocation());
     ros::Rate rate(10);
-    while (!halt_requested_ && !path_feeder_.feedingCompleted())
+    while (!halt_requested_ && ros::ok() && !path_feeder_.feedingCompleted())
     {
       publishWaypoint(path_feeder_.getPathPoint());
       ros::spinOnce();
       rate.sleep();
     }
-
-    while (!halt_requested_ && ros::ok())
+    if (moveBaseReady())
     {
-      ros::spinOnce();
-      rate.sleep();
+      ROS_WARN_STREAM("[BehaviorTree][Handle] Move base is active. Started executing task.");
+      while (!halt_requested_ && ros::ok() && moveBaseActive())
+      {
+        ros::spinOnce();
+        rate.sleep();
+      }
+      ROS_WARN_STREAM("[BehaviorTree][Handle] Autonomous task finished with move base status "
+                      << static_cast<int>(move_base_monitor_result_->getData().result));
     }
+    else
+    {
+      ROS_ERROR_STREAM("[BehaviorTree][Handle] Move base activate timeout");
+    }
+    resetAutonomousDriving();
   }
   else
   {
@@ -111,6 +122,39 @@ void Handle::publishMoveBaseCommand(const uint8_t command) const
     msg.command = command;
     return msg;
   }());
+}
+
+void Handle::resetAutonomousDriving()
+{
+  publishMoveBaseCommand(agribot_msgs::AgribotMoveBaseCommand::ABORT);
+  path_feeder_.reset();
+}
+
+bool Handle::moveBaseActive()
+{
+  if (move_base_monitor_result_->getData().result != agribot_msgs::AgribotMoveBaseMonitorResult::ACTIVE)
+  {
+    return false;
+  }
+  return true;
+}
+
+bool Handle::moveBaseReady()
+{
+  std::size_t timeout = 50;  // 5s
+  std::size_t cnt = 0;
+  ros::Rate rate(10);
+  while (!moveBaseActive())
+  {
+    if (cnt >= timeout)
+    {
+      return false;
+    }
+    ros::spinOnce();
+    rate.sleep();
+    ++cnt;
+  }
+  return true;
 }
 
 }  // namespace agribot_behavior

@@ -38,7 +38,7 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     }
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
-      handle->initSharedFields(task_name_);
+      handle->initSharedFields(task_name_, move_base_monitor_result_);
       handle->initPublishers(waypoints_publisher_, move_base_command_publisher_);
     }
   }
@@ -48,6 +48,7 @@ void AgribotBehaviorTreeNode::initSharedData()
 {
   task_name_ = std::make_shared<Shared<std::string>>();
   robot_mode_ = std::make_shared<Shared<industrial_msgs::RobotMode>>();
+  move_base_monitor_result_ = std::make_shared<Shared<agribot_msgs::AgribotMoveBaseMonitorResult>>();
 }
 
 // TODO(someone): while refactoring change state_machine -> behavior_tree in topic names
@@ -101,7 +102,7 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
 
 void AgribotBehaviorTreeNode::run()
 {
-  ros::Rate rate(1);
+  ros::Rate rate(10);
   ros::AsyncSpinner spinner(4);
   spinner.start();
   while (ros::ok())
@@ -125,6 +126,7 @@ void AgribotBehaviorTreeNode::robotModeCallback(const industrial_msgs::RobotMode
 void AgribotBehaviorTreeNode::moveBaseMonitorResultCallback(
     const agribot_msgs::AgribotMoveBaseMonitorResult::ConstPtr& msg)
 {
+  move_base_monitor_result_->writeData(*msg);
 }
 
 void AgribotBehaviorTreeNode::obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg)
