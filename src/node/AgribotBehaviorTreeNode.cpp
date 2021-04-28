@@ -8,11 +8,18 @@
 
 namespace agribot_behavior
 {
+BT::NodeStatus AgribotBehaviorTreeNode::checkObstacle()
+{
+  // if detected = success, if not = false
+  return BT::NodeStatus::SUCCESS;
+}
+
 void AgribotBehaviorTreeNode::registerAllNodes()
 {
   factory_->registerNodeType<CheckStartConditions>("CheckStartConditions");
   factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
   factory_->registerNodeType<Handle>("Handle");
+  factory_->registerSimpleCondition("ObstacleIsNotDetected", std::bind(&AgribotBehaviorTreeNode::checkBattery, this));
 }
 
 std::string AgribotBehaviorTreeNode::getTreeLocation() const

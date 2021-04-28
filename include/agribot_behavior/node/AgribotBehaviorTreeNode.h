@@ -69,5 +69,6 @@ public:
   void robotModeCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
   void moveBaseMonitorResultCallback(const agribot_msgs::AgribotMoveBaseMonitorResult::ConstPtr& msg);
   void obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
+  BT::NodeStatus checkObstacle();
 };
 }  // namespace agribot_behavior
