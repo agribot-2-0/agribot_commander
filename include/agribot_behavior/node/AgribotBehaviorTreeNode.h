@@ -39,8 +39,8 @@ private:
   std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot
 
   // Publishers
-  ros::Publisher move_base_command_publisher_;
-  ros::Publisher waypoints_publisher_;
+  std::shared_ptr<ros::Publisher> move_base_command_publisher_;
+  std::shared_ptr<ros::Publisher> waypoints_publisher_;
   // Subscribers
   ros::Subscriber task_name_subscriber_;
   ros::Subscriber robot_mode_subscriber_;

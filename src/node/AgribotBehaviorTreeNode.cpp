@@ -36,10 +36,10 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     {
       check_start_conditions->initSharedFields(task_name_, robot_mode_);
     }
-    if (auto handle = dynamic_cast<Handle*>(node.get());
-        handle != nullptr)
+    if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
       handle->initSharedFields(task_name_);
+      handle->initPublishers(waypoints_publisher_, move_base_command_publisher_);
     }
   }
 }
@@ -50,7 +50,7 @@ void AgribotBehaviorTreeNode::initSharedData()
   robot_mode_ = std::make_shared<Shared<industrial_msgs::RobotMode>>();
 }
 
-// TODO(someone): change state_machine -> behavior_tree in topic names
+// TODO(someone): while refactoring change state_machine -> behavior_tree in topic names
 AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   : factory_{ std::make_unique<BT::BehaviorTreeFactory>() }
 {
@@ -62,9 +62,10 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   initSharedData();
 
   // Publishers
-  move_base_command_publisher_ =
-      node_handle_->advertise<agribot_msgs::AgribotMoveBaseCommand>("/agribot/move_base_monitor/command", 1);
-  waypoints_publisher_ = node_handle_->advertise<agribot_msgs::NavSatFixOrientation>("/agribot/waypoints", 1);
+  move_base_command_publisher_ = std::make_shared<ros::Publisher>(
+      node_handle_->advertise<agribot_msgs::AgribotMoveBaseCommand>("/agribot/move_base_monitor/command", 1));
+  waypoints_publisher_ = std::make_shared<ros::Publisher>(
+      node_handle_->advertise<agribot_msgs::NavSatFixOrientation>("/agribot/waypoints", 1000));
 
   // Subscribers
   task_name_subscriber_ =

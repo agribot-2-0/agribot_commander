@@ -17,7 +17,7 @@ bool PathFeeder::loadPath(const std::string& task_name)
   return false;
 }
 
-agribot_msgs::NavSatFixOrientation PathFeeder::feed()
+agribot_msgs::NavSatFixOrientation PathFeeder::getPathPoint()
 {
   if (path_index_ < path_points_.size())
   {

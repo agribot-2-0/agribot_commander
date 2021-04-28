@@ -22,7 +22,7 @@ private:
 
 public:
   bool loadPath(const std::string& path_name);
-  agribot_msgs::NavSatFixOrientation feed();
+  agribot_msgs::NavSatFixOrientation getPathPoint();
   void reset();
   bool feedingCompleted();
   std::string getLoadedPathLocation();

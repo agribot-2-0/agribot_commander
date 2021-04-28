@@ -11,7 +11,10 @@
 
 #include <agribot_common/common_enums/ControlSource.h>
 
+#include <ros/ros.h>
 #include <ros/console.h>
+#include <agribot_msgs/NavSatFixOrientation.h>
+#include <agribot_msgs/AgribotMoveBaseCommand.h>
 
 #include <memory>
 #include <atomic>
@@ -26,6 +29,8 @@ class Handle : public BT::AsyncActionNode
 private:
   PathFeeder path_feeder_;
   std::shared_ptr<Shared<std::string>> task_name_;
+  std::shared_ptr<ros::Publisher> waypoints_publisher_;
+  std::shared_ptr<ros::Publisher> move_base_command_publisher_;
   std::atomic<bool> halt_requested_;
 
 public:
@@ -33,8 +38,12 @@ public:
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
   void initSharedFields(std::shared_ptr<Shared<std::string>> task_name);
+  void initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
+                      std::shared_ptr<ros::Publisher> move_base_command_publisher);
   void halt() override;
   void handleManualControl();
   void handleAutonomousControl();
+  void publishWaypoint(const agribot_msgs::NavSatFixOrientation& waypoint) const;
+  void publishMoveBaseCommand(const uint8_t command) const;
 };
 }  // namespace agribot_behavior

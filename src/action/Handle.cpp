@@ -49,17 +49,28 @@ void Handle::initSharedFields(std::shared_ptr<Shared<std::string>> task_name)
   task_name_ = task_name;
 }
 
+void Handle::initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
+                            std::shared_ptr<ros::Publisher> move_base_command_publisher)
+{
+  waypoints_publisher_ = waypoints_publisher;
+  move_base_command_publisher_ = move_base_command_publisher;
+}
+
 void Handle::halt()
 {
+  publishMoveBaseCommand(agribot_msgs::AgribotMoveBaseCommand::ABORT);
+  path_feeder_.reset();
   halt_requested_.store(true);
 }
 
 // Manual control is idle action since another ROS nodes are handling it
 void Handle::handleManualControl()
 {
-  while (!halt_requested_)
+  ros::Rate rate(10);
+  while (!halt_requested_ && ros::ok())
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ros::spinOnce();
+    rate.sleep();
   }
 }
 
@@ -68,15 +79,38 @@ void Handle::handleAutonomousControl()
   if (path_feeder_.loadPath(task_name_->getData()))
   {
     ROS_WARN_STREAM("[BehaviorTree][Handle] Loaded path " << path_feeder_.getLoadedPathLocation());
-    while (!halt_requested_)
+    ros::Rate rate(10);
+    while (!halt_requested_ && !path_feeder_.feedingCompleted())
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      publishWaypoint(path_feeder_.getPathPoint());
+      ros::spinOnce();
+      rate.sleep();
+    }
+
+    while (!halt_requested_ && ros::ok())
+    {
+      ros::spinOnce();
+      rate.sleep();
     }
   }
   else
   {
     ROS_ERROR_STREAM("[BehaviorTree][Handle] Failed to load path from task " << task_name_->getData());
   }
+}
+
+void Handle::publishWaypoint(const agribot_msgs::NavSatFixOrientation& waypoint) const
+{
+  waypoints_publisher_->publish(waypoint);
+}
+
+void Handle::publishMoveBaseCommand(const uint8_t command) const
+{
+  move_base_command_publisher_->publish([command] {
+    agribot_msgs::AgribotMoveBaseCommand msg;
+    msg.command = command;
+    return msg;
+  }());
 }
 
 }  // namespace agribot_behavior

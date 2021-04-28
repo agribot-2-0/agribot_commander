@@ -15,8 +15,6 @@ std::string PathParser::getPathNameFromTask(const std::string& task_name)
   if (fileExists(task_location))
   {
     YAML::Node task_yaml = YAML::LoadFile(task_location);
-
-    std::cerr << task_location << std::endl;
     if (task_yaml["task"]["path_name"][0])
     {
       return task_yaml["task"]["path_name"][0].as<std::string>() + ".yaml";
