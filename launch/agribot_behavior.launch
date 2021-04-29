@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="agribot_commander" type="agribot_behavior_node" name="agribot_behavior_node"/>
-</launch>
