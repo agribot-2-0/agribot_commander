@@ -23,6 +23,7 @@
 #include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
 #include <agribot_msgs/AgribotObstacleDetection.h>
 #include <agribot_msgs/NavSatFixOrientation.h>
+#include <agribot_msgs/AgribotAppErrorFlag.h>
 
 #include <string>
 #include <atomic>
@@ -30,12 +31,19 @@
 
 namespace agribot_behavior
 {
+enum class ToCheck
+{
+  obstacle,
+  mobile_app_error_flag
+};
+
 class AgribotBehaviorTreeNode
 {
 private:
   std::unique_ptr<BT::BehaviorTreeFactory> factory_;
   std::unique_ptr<BT::Tree> tree_;
   std::atomic<bool> obstacle_absent_;
+  std::atomic<bool> error_absent_;
 
   std::shared_ptr<ros::NodeHandle> node_handle_;
   std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot
@@ -48,6 +56,7 @@ private:
   ros::Subscriber robot_mode_subscriber_;
   ros::Subscriber move_base_result_subscriber_;
   ros::Subscriber obstacle_detected_subscriber_;
+  ros::Subscriber mobile_app_error_flag_subscriber_;
   // Parameters
   // Services
   std::shared_ptr<ros::ServiceClient> tool_arbiter_client_;
@@ -71,6 +80,7 @@ public:
   void robotModeCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
   void moveBaseMonitorResultCallback(const agribot_msgs::AgribotMoveBaseMonitorResult::ConstPtr& msg);
   void obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
-  BT::NodeStatus checkObstacle();
+  void mobileAppErrorFlagCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
+  BT::NodeStatus simpleCheck(ToCheck check);
 };
 }  // namespace agribot_behavior

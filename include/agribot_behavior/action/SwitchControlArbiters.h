@@ -8,10 +8,10 @@
 #include <agribot_behavior/generic_ports/ControlSourcePort.h>
 
 #include <agribot_common/common_enums/ControlSource.h>
-#include <agribot_msgs/ToolManagerControlSource.h>
 
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
+#include <agribot_msgs/ToolManagerControlSource.h>
 
 #include <memory>
 #include <string>

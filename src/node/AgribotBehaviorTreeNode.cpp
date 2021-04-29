@@ -4,16 +4,30 @@
 
 #include <agribot_behavior/node/AgribotBehaviorTreeNode.h>
 
-#include <iostream>  // for debug TODO(mwiadoms): remove later
-
 namespace agribot_behavior
 {
-BT::NodeStatus AgribotBehaviorTreeNode::checkObstacle()
+BT::NodeStatus AgribotBehaviorTreeNode::simpleCheck(ToCheck check)
 {
-  if (obstacle_absent_.load())
+  switch (check)
   {
-    return BT::NodeStatus::SUCCESS;
+    case ToCheck::mobile_app_error_flag:
+      if (error_absent_.load())
+      {
+        return BT::NodeStatus::SUCCESS;
+      }
+      ROS_WARN_STREAM("[AgribotBehavior] MobileAppError detected");
+      break;
+    case ToCheck::obstacle:
+      if (obstacle_absent_.load())
+      {
+        return BT::NodeStatus::SUCCESS;
+      }
+      ROS_WARN_STREAM("[AgribotBehavior] Obstacle detected");
+      break;
+    default:
+      break;
   }
+
   robot_mode_->writeData([] {
     industrial_msgs::RobotMode msg;
     msg.val = msg.UNKNOWN;
@@ -27,7 +41,10 @@ void AgribotBehaviorTreeNode::registerAllNodes()
   factory_->registerNodeType<CheckStartConditions>("CheckStartConditions");
   factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
   factory_->registerNodeType<Handle>("Handle");
-  factory_->registerSimpleCondition("ObstacleAbsent", std::bind(&AgribotBehaviorTreeNode::checkObstacle, this));
+  factory_->registerSimpleCondition("ObstacleAbsent",
+                                    std::bind(&AgribotBehaviorTreeNode::simpleCheck, this, ToCheck::obstacle));
+  factory_->registerSimpleCondition(
+      "MobileAppErrorAbsent", std::bind(&AgribotBehaviorTreeNode::simpleCheck, this, ToCheck::mobile_app_error_flag));
 }
 
 std::string AgribotBehaviorTreeNode::getTreeLocation() const
@@ -92,7 +109,8 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
                                                          &AgribotBehaviorTreeNode::moveBaseMonitorResultCallback, this);
   obstacle_detected_subscriber_ = node_handle_->subscribe("/agribot/obstacle_detected", 1,
                                                           &AgribotBehaviorTreeNode::obstacleDetectedCallback, this);
-
+  mobile_app_error_flag_subscriber_ = node_handle_->subscribe(
+      "/agribot/state_machine/error", 1, &AgribotBehaviorTreeNode::mobileAppErrorFlagCallback, this);
   // Parameters
 
   // Services
@@ -152,6 +170,16 @@ void AgribotBehaviorTreeNode::obstacleDetectedCallback(const agribot_msgs::Agrib
     return;
   }
   obstacle_absent_.store(true);
+}
+
+void AgribotBehaviorTreeNode::mobileAppErrorFlagCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg)
+{
+  if (msg->error_flag == msg->APP_PROTOCOL_ERROR || msg->error_flag == msg->APP_MANUAL_ERROR)
+  {
+    error_absent_.store(false);
+    return;
+  }
+  error_absent_.store(true);
 }
 
 }  // namespace agribot_behavior

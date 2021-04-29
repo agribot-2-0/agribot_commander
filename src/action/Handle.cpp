@@ -29,11 +29,11 @@ BT::NodeStatus Handle::tick()
     switch (msg.value())
     {
       case tool_manager::ControlSource::Manual:
-        ROS_WARN_STREAM("[BehaviorTree][Handle] Running manual action");
+        ROS_WARN_STREAM("[BehaviorTree][HandleManual] Running manual action");
         handleManualControl();
         break;
       case tool_manager::ControlSource::Navigation:
-        ROS_WARN_STREAM("[BehaviorTree][Handle] Running autonomous action");
+        ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Running autonomous action");
         handleAutonomousControl();
         break;
       default:
@@ -79,7 +79,7 @@ void Handle::handleAutonomousControl()
 {
   if (path_feeder_.loadPath(task_name_->getData()))
   {
-    ROS_WARN_STREAM("[BehaviorTree][Handle] Loaded path " << path_feeder_.getLoadedPathLocation());
+    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << path_feeder_.getLoadedPathLocation());
     ros::Rate rate(10);
     while (!halt_requested_ && ros::ok() && !path_feeder_.feedingCompleted())
     {
@@ -89,24 +89,24 @@ void Handle::handleAutonomousControl()
     }
     if (moveBaseReady())
     {
-      ROS_WARN_STREAM("[BehaviorTree][Handle] Move base is active. Started executing task.");
+      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task.");
       while (!halt_requested_ && ros::ok() && moveBaseActive())
       {
         ros::spinOnce();
         rate.sleep();
       }
-      ROS_WARN_STREAM("[BehaviorTree][Handle] Autonomous task finished with move base status "
+      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Autonomous task finished with move base status "
                       << static_cast<int>(move_base_monitor_result_->getData().result));
     }
     else
     {
-      ROS_ERROR_STREAM("[BehaviorTree][Handle] Move base activate timeout");
+      ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Move base activate timeout");
     }
     resetAutonomousDriving();
   }
   else
   {
-    ROS_ERROR_STREAM("[BehaviorTree][Handle] Failed to load path from task " << task_name_->getData());
+    ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Failed to load path from task " << task_name_->getData());
   }
 }
 

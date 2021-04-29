@@ -9,6 +9,7 @@
                     <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
                     <ReactiveSequence>
                         <Action ID="CheckStartConditions" condition_to_check="manual"/>
+                        <Condition ID="MobileAppErrorAbsent"/>
                         <Action ID="Handle" action_to_handle="manual" name="handle manual control"/>
                     </ReactiveSequence>
                 </Sequence>
@@ -33,6 +34,7 @@
         <Action ID="Handle">
             <input_port name="action_to_handle" type="tool_manager::ControlSource"/>
         </Action>
+        <Condition ID="MobileAppErrorAbsent"/>
         <Condition ID="ObstacleAbsent"/>
         <Action ID="SwitchControlArbiters">
             <input_port name="control_source" type="tool_manager::ControlSource"/>

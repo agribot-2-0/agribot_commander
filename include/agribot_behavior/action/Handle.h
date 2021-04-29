@@ -8,7 +8,6 @@
 
 #include <agribot_behavior/path_handle/PathFeeder.h>
 #include <agribot_behavior/common/Shared.h>
-
 #include <agribot_common/common_enums/ControlSource.h>
 
 #include <ros/ros.h>
@@ -19,8 +18,6 @@
 #include <memory>
 #include <atomic>
 #include <string>
-#include <chrono>  // NOLINT
-// todo(mwiadoms): remove chrono header
 
 namespace agribot_behavior
 {

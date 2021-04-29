@@ -6,8 +6,8 @@
 
 #include <behaviortree_cpp_v3/action_node.h>
 #include <agribot_behavior/generic_ports/ControlSourcePort.h>
-#include <agribot_behavior/common/Shared.h>
 
+#include <agribot_behavior/common/Shared.h>
 #include <agribot_common/common_enums/ControlSource.h>
 
 #include <ros/console.h>
