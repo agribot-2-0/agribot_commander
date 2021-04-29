@@ -10,8 +10,16 @@ namespace agribot_behavior
 {
 BT::NodeStatus AgribotBehaviorTreeNode::checkObstacle()
 {
-  // if detected = success, if not = false
-  return BT::NodeStatus::SUCCESS;
+  if (obstacle_absent_.load())
+  {
+    return BT::NodeStatus::SUCCESS;
+  }
+  robot_mode_->writeData([] {
+    industrial_msgs::RobotMode msg;
+    msg.val = msg.UNKNOWN;
+    return msg;
+  }());
+  return BT::NodeStatus::FAILURE;
 }
 
 void AgribotBehaviorTreeNode::registerAllNodes()
@@ -19,7 +27,7 @@ void AgribotBehaviorTreeNode::registerAllNodes()
   factory_->registerNodeType<CheckStartConditions>("CheckStartConditions");
   factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
   factory_->registerNodeType<Handle>("Handle");
-  factory_->registerSimpleCondition("ObstacleIsNotDetected", std::bind(&AgribotBehaviorTreeNode::checkObstacle, this));
+  factory_->registerSimpleCondition("ObstacleAbsent", std::bind(&AgribotBehaviorTreeNode::checkObstacle, this));
 }
 
 std::string AgribotBehaviorTreeNode::getTreeLocation() const
@@ -138,6 +146,12 @@ void AgribotBehaviorTreeNode::moveBaseMonitorResultCallback(
 
 void AgribotBehaviorTreeNode::obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg)
 {
+  if (msg->status == msg->OBSTACLE_DETECTED)
+  {
+    obstacle_absent_.store(false);
+    return;
+  }
+  obstacle_absent_.store(true);
 }
 
 }  // namespace agribot_behavior

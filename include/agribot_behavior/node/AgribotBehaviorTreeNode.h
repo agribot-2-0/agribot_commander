@@ -25,6 +25,7 @@
 #include <agribot_msgs/NavSatFixOrientation.h>
 
 #include <string>
+#include <atomic>
 #include <memory>
 
 namespace agribot_behavior
@@ -34,6 +35,7 @@ class AgribotBehaviorTreeNode
 private:
   std::unique_ptr<BT::BehaviorTreeFactory> factory_;
   std::unique_ptr<BT::Tree> tree_;
+  std::atomic<bool> obstacle_absent_;
 
   std::shared_ptr<ros::NodeHandle> node_handle_;
   std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot

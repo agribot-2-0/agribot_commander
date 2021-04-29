@@ -5,19 +5,19 @@
         <Sequence>
             <Fallback>
                 <Sequence name="manual squence">
-                    <Condition ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
+                    <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
                     <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
                     <ReactiveSequence>
-                        <Condition ID="CheckStartConditions" condition_to_check="manual"/>
+                        <Action ID="CheckStartConditions" condition_to_check="manual"/>
                         <Action ID="Handle" action_to_handle="manual" name="handle manual control"/>
                     </ReactiveSequence>
                 </Sequence>
                 <Sequence name="auto drive squence">
-                    <Condition ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
+                    <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
                     <Action ID="SwitchControlArbiters" control_source="navigation" name="change arbiter source to nav"/>
                     <ReactiveSequence>
-                        <Condition ID="CheckStartConditions" condition_to_check="navigation"/>
-                        <Condition ID="ObstacleIsNotDetected"/>
+                        <Action ID="CheckStartConditions" condition_to_check="navigation"/>
+                        <Condition ID="ObstacleAbsent"/>
                         <Action ID="Handle" action_to_handle="navigation" name="handle auto drive"/>
                     </ReactiveSequence>
                 </Sequence>
@@ -33,7 +33,7 @@
         <Action ID="Handle">
             <input_port name="action_to_handle" type="tool_manager::ControlSource"/>
         </Action>
-        <Condition ID="ObstacleIsNotDetected"/>
+        <Condition ID="ObstacleAbsent"/>
         <Action ID="SwitchControlArbiters">
             <input_port name="control_source" type="tool_manager::ControlSource"/>
         </Action>
