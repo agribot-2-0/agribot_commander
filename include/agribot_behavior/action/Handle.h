@@ -33,6 +33,14 @@ private:
   std::shared_ptr<ros::Publisher> move_base_command_publisher_;
   std::atomic<bool> halt_requested_;
 
+  void handleManualControl();
+  void handleAutonomousControl();
+  void publishWaypoint(const agribot_msgs::NavSatFixOrientation& waypoint) const;
+  void publishMoveBaseCommand(const uint8_t command) const;
+  void resetAutonomousDriving();
+  bool moveBaseActive();
+  bool moveBaseReady();
+
 public:
   Handle(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
@@ -42,12 +50,5 @@ public:
   void initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
                       std::shared_ptr<ros::Publisher> move_base_command_publisher);
   void halt() override;
-  void handleManualControl();
-  void handleAutonomousControl();
-  void publishWaypoint(const agribot_msgs::NavSatFixOrientation& waypoint) const;
-  void publishMoveBaseCommand(const uint8_t command) const;
-  void resetAutonomousDriving();
-  bool moveBaseActive();
-  bool moveBaseReady();
 };
 }  // namespace agribot_behavior

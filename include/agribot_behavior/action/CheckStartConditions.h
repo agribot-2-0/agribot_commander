@@ -24,13 +24,14 @@ private:
   std::shared_ptr<Shared<std::string>> task_name_;
   std::shared_ptr<Shared<industrial_msgs::RobotMode>> robot_mode_;
 
+  BT::NodeStatus checkManualCondition();
+  BT::NodeStatus checkNavigationCondition();
+
 public:
   CheckStartConditions(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
   void initSharedFields(std::shared_ptr<Shared<std::string>> task_name,
                         std::shared_ptr<Shared<industrial_msgs::RobotMode>> robot_mode);
-  BT::NodeStatus checkManualCondition();
-  BT::NodeStatus checkNavigationCondition();
 };
 }  // namespace agribot_behavior

@@ -25,6 +25,9 @@ class SwitchControlArbiters : public BT::SyncActionNode
   std::shared_ptr<ros::ServiceClient> cmd_vel_navigation_client_;
   std::shared_ptr<ros::ServiceClient> cmd_vel_stop_client_;
 
+  bool changeToolControlSource(const tool_manager::ControlSource selected_source);
+  bool changeCmdVelControlSource(const tool_manager::ControlSource selected_source);
+
 public:
   SwitchControlArbiters(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
@@ -33,8 +36,6 @@ public:
   void initCmdVelArbiterClients(std::shared_ptr<ros::ServiceClient> cmd_vel_manual,
                                 std::shared_ptr<ros::ServiceClient> cmd_vel_navigation,
                                 std::shared_ptr<ros::ServiceClient> cmd_vel_stop);
-  bool changeToolControlSource(const tool_manager::ControlSource selected_source);
-  bool changeCmdVelControlSource(const tool_manager::ControlSource selected_source);
 };
 
 }  // namespace agribot_behavior

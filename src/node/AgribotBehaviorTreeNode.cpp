@@ -36,7 +36,7 @@ BT::NodeStatus AgribotBehaviorTreeNode::simpleCheck(ToCheck check)
   return BT::NodeStatus::FAILURE;
 }
 
-void AgribotBehaviorTreeNode::registerAllNodes()
+void AgribotBehaviorTreeNode::registerNodes()
 {
   factory_->registerNodeType<CheckStartConditions>("CheckStartConditions");
   factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
@@ -83,6 +83,12 @@ void AgribotBehaviorTreeNode::initSharedData()
   move_base_monitor_result_ = std::make_shared<Shared<agribot_msgs::AgribotMoveBaseMonitorResult>>();
 }
 
+void AgribotBehaviorTreeNode::initAtomics()
+{
+  obstacle_absent_.store(true);
+  error_absent_.store(true);
+}
+
 // TODO(someone): while refactoring change state_machine -> behavior_tree in topic names
 AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   : factory_{ std::make_unique<BT::BehaviorTreeFactory>() }
@@ -93,6 +99,8 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
 
   // Initialize variables shared between tree nodes
   initSharedData();
+  // Initialize atomic variables used to check conditions
+  initAtomics();
 
   // Publishers
   move_base_command_publisher_ = std::make_shared<ros::Publisher>(
@@ -124,7 +132,7 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
       node_handle_->serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_stop"));
 
   // Register all custom actions on nodes factory and load tree from XML file
-  registerAllNodes();
+  registerNodes();
   tree_ = std::make_unique<BT::Tree>(factory_->createTreeFromFile(getTreeLocation()));
 
   // Register ZeroMQ publisher for Groot tree view:

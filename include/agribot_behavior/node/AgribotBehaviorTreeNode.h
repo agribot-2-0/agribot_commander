@@ -69,18 +69,21 @@ private:
   std::shared_ptr<Shared<industrial_msgs::RobotMode>> robot_mode_;
   std::shared_ptr<Shared<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result_;
 
-public:
-  AgribotBehaviorTreeNode(int argc, char** argv);
-  void registerAllNodes();
+  BT::NodeStatus simpleCheck(ToCheck check);
+  void registerNodes();
   std::string getTreeLocation() const;
   void initTreeNodesWithRosDependencies();
   void initSharedData();
-  void run();
+  void initAtomics();
+
   void taskNameCallback(const std_msgs::String::ConstPtr& msg);
   void robotModeCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
   void moveBaseMonitorResultCallback(const agribot_msgs::AgribotMoveBaseMonitorResult::ConstPtr& msg);
   void obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
   void mobileAppErrorFlagCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
-  BT::NodeStatus simpleCheck(ToCheck check);
+
+public:
+  AgribotBehaviorTreeNode(int argc, char** argv);
+  void run();
 };
 }  // namespace agribot_behavior

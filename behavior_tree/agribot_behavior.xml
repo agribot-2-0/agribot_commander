@@ -5,6 +5,7 @@
         <Sequence>
             <Fallback>
                 <Sequence name="manual squence">
+                    <Condition ID="MobileAppErrorAbsent"/>
                     <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
                     <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
                     <ReactiveSequence>
@@ -14,6 +15,7 @@
                     </ReactiveSequence>
                 </Sequence>
                 <Sequence name="auto drive squence">
+                    <Condition ID="ObstacleAbsent"/>
                     <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
                     <Action ID="SwitchControlArbiters" control_source="navigation" name="change arbiter source to nav"/>
                     <ReactiveSequence>
