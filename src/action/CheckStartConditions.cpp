@@ -39,8 +39,8 @@ BT::NodeStatus CheckStartConditions::CheckStartConditions::tick()
   }
 }
 
-void CheckStartConditions::initSharedFields(std::shared_ptr<Shared<std::string>> task_name,
-                                            std::shared_ptr<Shared<industrial_msgs::RobotMode>> robot_mode)
+void CheckStartConditions::initSharedFields(std::shared_ptr<SharedField<std::string>> task_name,
+                                            std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode)
 {
   task_name_ = task_name;
   robot_mode_ = robot_mode;

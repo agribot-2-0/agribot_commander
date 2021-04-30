@@ -45,8 +45,8 @@ BT::NodeStatus Handle::tick()
 }
 
 void Handle::initSharedFields(
-    std::shared_ptr<Shared<std::string>> task_name,
-    std::shared_ptr<Shared<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result)
+    std::shared_ptr<SharedField<std::string>> task_name,
+    std::shared_ptr<SharedField<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result)
 {
   task_name_ = task_name;
   move_base_monitor_result_ = move_base_monitor_result;
@@ -62,6 +62,11 @@ void Handle::initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
 void Handle::halt()
 {
   halt_requested_.store(true);
+}
+
+void Handle::initPathFeeder(const std::string& path_folder, const std::string& task_folder)
+{
+  path_feeder_.init(path_folder, task_folder);
 }
 
 // Manual control is idle action since another ROS nodes are handling it
@@ -89,7 +94,7 @@ void Handle::handleAutonomousControl()
     }
     if (moveBaseReady())
     {
-      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task.");
+      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task");
       while (!halt_requested_ && ros::ok() && moveBaseActive())
       {
         ros::spinOnce();

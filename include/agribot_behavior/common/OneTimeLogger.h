@@ -16,7 +16,6 @@ namespace agribot_behavior
 class OneTimeLogger
 {
 private:
-  // log once
   std::unordered_map<std::string_view, std::atomic<bool>> logged_once_;
 
 public:

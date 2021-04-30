@@ -19,8 +19,8 @@ class PathParser
 {
 private:
   std::string path_location_;
-  static constexpr std::string_view path_folder_ = "/agribot/configs/base/map/paths/paths/";
-  static constexpr std::string_view task_folder_ = "/agribot/configs/base/map/tasks/";
+  std::string path_folder_;
+  std::string task_folder_;
 
   std::string getPathNameFromTask(const std::string& task_name);
   bool fileExists(const std::string& name);
@@ -28,6 +28,8 @@ private:
                std::vector<agribot_msgs::NavSatFixOrientation>& path_points);  // NOLINT
 
 public:
+  PathParser() = delete;
+  PathParser(const std::string& path_folder, const std::string& task_folder);
   bool setPathName(const std::string& task_name);
   std::vector<agribot_msgs::NavSatFixOrientation> parsePath();
   std::string getPathLocation() const;

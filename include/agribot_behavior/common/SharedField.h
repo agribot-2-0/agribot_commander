@@ -12,9 +12,9 @@
 
 namespace agribot_behavior
 {
-// Thread safety is guaranteed by Shared class and mutex lock mechanism
+// Thread safety is guaranteed by SharedField class and mutex lock mechanism
 template <typename T>
-class Shared
+class SharedField
 {
 private:
   std::shared_timed_mutex mutex;

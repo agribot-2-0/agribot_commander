@@ -6,6 +6,12 @@
 
 namespace agribot_behavior
 {
+PathParser::PathParser(const std::string& path_folder, const std::string& task_folder)
+{
+  path_folder_ = "/" + path_folder + "/paths/";
+  task_folder_ = "/" + task_folder + "/";
+}
+
 std::string PathParser::getPathNameFromTask(const std::string& task_name)
 {
   std::string task_location = std::getenv("AGRIBOT_HOME");

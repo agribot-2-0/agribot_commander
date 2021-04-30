@@ -7,7 +7,7 @@
 #include <behaviortree_cpp_v3/action_node.h>
 
 #include <agribot_behavior/path_handle/PathFeeder.h>
-#include <agribot_behavior/common/Shared.h>
+#include <agribot_behavior/common/SharedField.h>
 #include <agribot_common/common_enums/ControlSource.h>
 
 #include <ros/ros.h>
@@ -26,8 +26,8 @@ class Handle : public BT::AsyncActionNode
 private:
   PathFeeder path_feeder_;
 
-  std::shared_ptr<Shared<std::string>> task_name_;
-  std::shared_ptr<Shared<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result_;
+  std::shared_ptr<SharedField<std::string>> task_name_;
+  std::shared_ptr<SharedField<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result_;
 
   std::shared_ptr<ros::Publisher> waypoints_publisher_;
   std::shared_ptr<ros::Publisher> move_base_command_publisher_;
@@ -45,10 +45,12 @@ public:
   Handle(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
-  void initSharedFields(std::shared_ptr<Shared<std::string>> task_name,
-                        std::shared_ptr<Shared<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result);
+  void halt() override;
+  void initPathFeeder(const std::string& path_folder, const std::string& task_folder);
+  void
+  initSharedFields(std::shared_ptr<SharedField<std::string>> task_name,
+                   std::shared_ptr<SharedField<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result);
   void initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
                       std::shared_ptr<ros::Publisher> move_base_command_publisher);
-  void halt() override;
 };
 }  // namespace agribot_behavior

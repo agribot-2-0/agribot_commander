@@ -35,7 +35,7 @@ BT::NodeStatus SwitchControlArbiters::tick()
       ROS_ERROR_STREAM("[BehaviorTree][SwitchControlArbiters] Failed to change tool control source");
       return BT::NodeStatus::FAILURE;
     }
-    changeCmdVelControlSource(tool_manager::ControlSource::None);
+
     if (changeCmdVelControlSource(msg.value()))
     {
       ROS_INFO_STREAM("[BehaviorTree][SwitchControlArbiters] Successfuly chagned cmd_vel control source");
@@ -70,7 +70,6 @@ bool SwitchControlArbiters::changeToolControlSource(const tool_manager::ControlS
   srv.request.source = static_cast<std::uint8_t>(selected_source);
   if (!tool_arbiter_client_->call(srv))
   {
-    ROS_ERROR_STREAM("[BehaviorTree][SwitchControlArbiters] Failed to call tool control service");
     return false;
   }
   return (srv.response.result == srv.response.SUCCESS ? true : false);
@@ -93,10 +92,6 @@ bool SwitchControlArbiters::changeCmdVelControlSource(const tool_manager::Contro
       break;
     default:
       break;
-  }
-  if (!success)
-  {
-    ROS_ERROR_STREAM("[BehaviorTree][SwitchControlArbiters] Failed to call cmd_vel control service");
   }
   return success;
 }
