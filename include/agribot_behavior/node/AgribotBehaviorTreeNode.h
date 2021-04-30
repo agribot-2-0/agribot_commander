@@ -10,6 +10,7 @@
 #include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/action/Handle.h>
 #include <agribot_behavior/common/Shared.h>
+#include <agribot_behavior/common/OneTimeLogger.h>
 #include <agribot_behavior/path_handle/PathFeeder.h>
 
 #include <ros/ros.h>
@@ -82,6 +83,7 @@ private:
   void obstacleDetectedCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
   void mobileAppErrorFlagCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
 
+  OneTimeLogger log_once_;
 public:
   AgribotBehaviorTreeNode(int argc, char** argv);
   void run();

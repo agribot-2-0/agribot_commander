@@ -6,6 +6,8 @@
 
 namespace agribot_behavior
 {
+typedef ros::console::Level RosLogLevel;
+
 BT::NodeStatus AgribotBehaviorTreeNode::simpleCheck(ToCheck check)
 {
   switch (check)
@@ -13,26 +15,23 @@ BT::NodeStatus AgribotBehaviorTreeNode::simpleCheck(ToCheck check)
     case ToCheck::mobile_app_error_flag:
       if (error_absent_.load())
       {
+        log_once_.reset("mobile_app_error");
         return BT::NodeStatus::SUCCESS;
       }
-      ROS_WARN_STREAM("[AgribotBehavior] MobileAppError detected");
+      log_once_.log("mobile_app_error", RosLogLevel::Warn, "[AgribotBehavior] MobileAppError detected");
       break;
     case ToCheck::obstacle:
       if (obstacle_absent_.load())
       {
+        log_once_.reset("obstacle");
         return BT::NodeStatus::SUCCESS;
       }
-      ROS_WARN_STREAM("[AgribotBehavior] Obstacle detected");
+      log_once_.log("obstacle", RosLogLevel::Warn, "[AgribotBehavior] Obstacle detected");
       break;
     default:
       break;
   }
 
-  robot_mode_->writeData([] {
-    industrial_msgs::RobotMode msg;
-    msg.val = msg.UNKNOWN;
-    return msg;
-  }());
   return BT::NodeStatus::FAILURE;
 }
 
