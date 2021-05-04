@@ -5,8 +5,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(agribot_commander)
 
 ## Compilation options
-#add_compile_options(-std=c++17 -Wall -Wextra -pedantic -Werror)
-add_compile_options(-std=c++17 -Wall -Wextra -pedantic)
+add_compile_options(-std=c++17 -Wall -Wextra -pedantic -Werror)
 
 #############################################################################
 ## Find catkin packages and libraries for catkin and system dependencies   ##
