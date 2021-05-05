@@ -3,7 +3,6 @@
  */
 
 #include <agribot_behavior/path_handle/PathParser.h>
-#include <ros/console.h>
 
 namespace agribot_behavior
 {
@@ -54,7 +53,6 @@ bool PathParser::setPathName(const std::experimental::filesystem::path& task_nam
   if (path_name != "")
   {
     std::experimental::filesystem::path path_location = path_folder_ / path_name;
-    ROS_ERROR_STREAM(path_location);
     if (fileExists(path_location))
     {
       path_location_ = path_location;
