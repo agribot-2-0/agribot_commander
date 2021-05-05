@@ -6,12 +6,13 @@
 
 namespace agribot_behavior
 {
-void PathFeeder::init(const std::string& path_folder, const std::string& task_folder)
+void PathFeeder::init(const std::experimental::filesystem::path& path_folder,
+                      const std::experimental::filesystem::path& task_folder)
 {
   path_parser_ = std::make_unique<PathParser>(path_folder, task_folder);
 }
 
-bool PathFeeder::loadPath(const std::string& task_name)
+bool PathFeeder::loadPath(const std::experimental::filesystem::path& task_name)
 {
   reset();
   if (path_parser_->setPathName(task_name))
@@ -53,7 +54,7 @@ bool PathFeeder::feedingCompleted()
   return feeding_completed_;
 }
 
-std::string PathFeeder::getLoadedPathLocation()
+std::experimental::filesystem::path PathFeeder::getLoadedPathLocation()
 {
   return path_parser_->getPathLocation();
 }

@@ -30,7 +30,8 @@ private:
 
 public:
   PathParser() = delete;
-  PathParser(const std::experimental::filesystem::path& path_folder, const std::experimental::filesystem::path& task_folder);
+  PathParser(const std::experimental::filesystem::path& path_folder,
+             const std::experimental::filesystem::path& task_folder);
   bool setPathName(const std::experimental::filesystem::path& task_name);
   std::vector<agribot_msgs::NavSatFixOrientation> parsePath();
   std::experimental::filesystem::path getPathLocation() const;

@@ -134,7 +134,8 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   try
   {
     task_folder_ = agribot_home_location / ros_common_functions::getRosParam<std::string>("agribot_map/tasks_path");
-    path_folder_ = agribot_home_location / ros_common_functions::getRosParam<std::string>("agribot_map/paths_path") / "paths";
+    path_folder_ =
+        agribot_home_location / ros_common_functions::getRosParam<std::string>("agribot_map/paths_path") / "paths";
   }
   catch (const agribot_exceptions::ParameterNotSet& ex)
   {

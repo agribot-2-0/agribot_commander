@@ -22,11 +22,12 @@ private:
   std::vector<agribot_msgs::NavSatFixOrientation> path_points_;
 
 public:
-  void init(const std::string& path_folder, const std::string& task_folder);
-  bool loadPath(const std::string& path_name);
+  void init(const std::experimental::filesystem::path& path_folder,
+            const std::experimental::filesystem::path& task_folder);
+  bool loadPath(const std::experimental::filesystem::path& path_name);
   agribot_msgs::NavSatFixOrientation getPathPoint();
   void reset();
   bool feedingCompleted();
-  std::string getLoadedPathLocation();
+  std::experimental::filesystem::path getLoadedPathLocation();
 };
 }  // namespace agribot_behavior
