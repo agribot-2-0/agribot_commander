@@ -38,8 +38,8 @@ private:
   void publishWaypoint(const agribot_msgs::NavSatFixOrientation& waypoint) const;
   void publishMoveBaseCommand(const uint8_t command) const;
   void resetAutonomousDriving();
-  bool moveBaseActive();
-  bool moveBaseReady();
+  bool moveBaseActive() const;
+  bool moveBaseReady() const;
 
 public:
   Handle(const std::string& name, const BT::NodeConfiguration& config);

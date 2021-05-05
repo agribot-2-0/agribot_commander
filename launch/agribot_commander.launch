@@ -3,6 +3,12 @@
   <rosparam command="load" file="$(env AGRIBOT_HOME)/agribot/configs/base/firebase.yaml" />
   <rosparam command="load" file="$(env AGRIBOT_HOME)/agribot/configs/base/map/config.yaml" />
 
+  <remap from="~result" to="/agribot/move_base_monitor/result"/>
+  <remap from="~mode" to="/agribot/state_machine/mode"/>
+  <remap from="~task" to="/agribot/state_machine/task"/>
+  <remap from="~obstacle_detected" to="/agribot/obstacle_detected"/>
+  <remap from="~mobile_app_error" to="/agribot/state_machine/error"/>
+
   <group if="$(env AGRIBOT_TASK_SUPERVISOR)">
     <node name="agribot_task_supervisor_node" pkg="agribot_commander" type="agribot_task_supervisor_node.py" output="screen"/>
   </group>

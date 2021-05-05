@@ -135,28 +135,25 @@ void Handle::resetAutonomousDriving()
   path_feeder_.reset();
 }
 
-bool Handle::moveBaseActive()
+bool Handle::moveBaseActive() const
 {
   return move_base_monitor_result_->getData().result == agribot_msgs::AgribotMoveBaseMonitorResult::ACTIVE;
 }
 
-bool Handle::moveBaseReady()
+bool Handle::moveBaseReady() const
 {
-  std::size_t ros_loop_rate = 10;
-  std::size_t timeout_in_seconds = 5;
-  std::size_t timeout = ros_loop_rate * timeout_in_seconds;
-
-  std::size_t cnt = 0;
-  ros::Rate rate(ros_loop_rate);
+  ros::Duration timeout{5};
+  ros::Rate rate{10};
+  ros::Time start_time = ros::Time::now();
   while (!moveBaseActive())
   {
-    if (cnt >= timeout)
+    ros::Time time_now = ros::Time::now();
+    if (time_now - start_time >= timeout)
     {
       return false;
     }
     ros::spinOnce();
     rate.sleep();
-    ++cnt;
   }
   return true;
 }

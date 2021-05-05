@@ -99,15 +99,15 @@ void AgribotBehaviorTreeNode::initRosPublishers()
 void AgribotBehaviorTreeNode::initRosSubscribers()
 {
   task_name_subscriber_ =
-      node_handle_->subscribe("/agribot/state_machine/task", 1, &AgribotBehaviorTreeNode::taskNameRosCallback, this);
+      node_handle_->subscribe("task", 1, &AgribotBehaviorTreeNode::taskNameRosCallback, this);
   robot_mode_subscriber_ =
-      node_handle_->subscribe("/agribot/state_machine/mode", 1, &AgribotBehaviorTreeNode::robotModeRosCallback, this);
+      node_handle_->subscribe("mode", 1, &AgribotBehaviorTreeNode::robotModeRosCallback, this);
   move_base_result_subscriber_ = node_handle_->subscribe(
-      "/agribot/move_base_monitor/result", 1, &AgribotBehaviorTreeNode::moveBaseMonitorResultRosCallback, this);
-  obstacle_detected_subscriber_ = node_handle_->subscribe("/agribot/obstacle_detected", 1,
-                                                          &AgribotBehaviorTreeNode::obstacleDetectedRosCallback, this);
-  mobile_app_error_flag_subscriber_ = node_handle_->subscribe(
-      "/agribot/state_machine/error", 1, &AgribotBehaviorTreeNode::mobileAppErrorFlagRosCallback, this);
+      "result", 1, &AgribotBehaviorTreeNode::moveBaseMonitorResultRosCallback, this);
+  obstacle_detected_subscriber_ =
+      node_handle_->subscribe("obstacle_detected", 1, &AgribotBehaviorTreeNode::obstacleDetectedRosCallback, this);
+  mobile_app_error_flag_subscriber_ =
+      node_handle_->subscribe("mobile_app_error", 1, &AgribotBehaviorTreeNode::mobileAppErrorFlagRosCallback, this);
 }
 
 void AgribotBehaviorTreeNode::initRosServices()
@@ -130,7 +130,7 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   // ROS init
   ros::init(argc, argv, "agribot_tools_control_node");
   std::experimental::filesystem::path agribot_home_location = std::getenv("AGRIBOT_HOME");
-  node_handle_ = std::make_shared<ros::NodeHandle>();
+  node_handle_ = std::make_shared<ros::NodeHandle>("~");
   try
   {
     task_folder_ = agribot_home_location / ros_common_functions::getRosParam<std::string>("agribot_map/tasks_path");
@@ -163,7 +163,7 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
 
 void AgribotBehaviorTreeNode::run()
 {
-  ros::Rate rate(10);
+  ros::Rate rate(50);
   ros::AsyncSpinner spinner(4);
   spinner.start();
   while (ros::ok())

@@ -7,7 +7,7 @@
                 <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
                 <Condition ID="MobileAppErrorAbsent" name="true if error absent"/>
                 <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
-                <Fallback name="switch source to none">
+                <Fallback name="switch source from manual to none">
                     <ReactiveSequence name="manual control">
                         <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
                         <Condition ID="MobileAppErrorAbsent"/>
@@ -20,7 +20,7 @@
                 <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
                 <Condition ID="ObstacleAbsent" name="true if obstacle absent"/>
                 <Action ID="SwitchControlArbiters" control_source="navigation" name="switch source to navigation"/>
-                <Fallback name="switch source to none">
+                <Fallback name="switch source from navigation to none">
                     <ReactiveSequence name="autonomous task">
                         <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
                         <Condition ID="ObstacleAbsent"/>
