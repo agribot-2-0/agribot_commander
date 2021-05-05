@@ -28,6 +28,7 @@
 #include <agribot_msgs/NavSatFixOrientation.h>
 #include <agribot_msgs/AgribotAppErrorFlag.h>
 
+#include <experimental/filesystem>  // when migrating to GCC version >= 8.0 experimental part of header should be removed
 #include <string>
 #include <atomic>
 #include <memory>
@@ -37,18 +38,18 @@ namespace agribot_behavior
 class AgribotBehaviorTreeNode
 {
 private:
-  enum class ToCheck
+  enum class CheckAbsenceOf
   {
-    obstacle,
-    mobile_app_error_flag
+    Obstacle,
+    MobileAppErrorFlag
   };
 
   std::unique_ptr<BT::BehaviorTreeFactory> factory_;
   std::unique_ptr<BT::Tree> tree_;
   OneTimeLogger log_once_;
 
-  std::string task_folder_;
-  std::string path_folder_;
+  std::experimental::filesystem::path task_folder_;
+  std::experimental::filesystem::path path_folder_;
 
   std::shared_ptr<ros::NodeHandle> node_handle_;
   std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot
@@ -84,7 +85,7 @@ private:
   std::atomic<bool> obstacle_absent_;
   std::atomic<bool> error_absent_;
 
-  BT::NodeStatus simpleConditionCheck(const ToCheck check);
+  BT::NodeStatus simpleConditionCheck(const CheckAbsenceOf check);
   void registerTreeNodes();
   std::string getTreeLocation() const;
   void initTreeNodesWithRosDependencies();

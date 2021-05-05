@@ -6,6 +6,5 @@
   <group if="$(env AGRIBOT_TASK_SUPERVISOR)">
     <node name="agribot_task_supervisor_node" pkg="agribot_commander" type="agribot_task_supervisor_node.py" output="screen"/>
   </group>
-  <!-- <node name="agribot_commander_state_machine" pkg="agribot_commander" type="AgribotStateMachine.py" output="screen" /> -->
   <node pkg="agribot_commander" type="agribot_behavior_node" name="agribot_behavior_node"/>
 </launch>

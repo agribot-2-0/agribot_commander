@@ -72,7 +72,7 @@ bool SwitchControlArbiters::changeToolControlSource(const tool_manager::ControlS
   {
     return false;
   }
-  return (srv.response.result == srv.response.SUCCESS ? true : false);
+  return srv.response.result == srv.response.SUCCESS;
 }
 
 bool SwitchControlArbiters::changeCmdVelControlSource(const tool_manager::ControlSource selected_source)

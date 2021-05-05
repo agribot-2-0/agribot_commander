@@ -8,11 +8,11 @@ namespace agribot_behavior
 {
 typedef ros::console::Level RosLogLevel;
 
-BT::NodeStatus AgribotBehaviorTreeNode::simpleConditionCheck(const ToCheck check)
+BT::NodeStatus AgribotBehaviorTreeNode::simpleConditionCheck(const CheckAbsenceOf check)
 {
   switch (check)
   {
-    case ToCheck::mobile_app_error_flag:
+    case CheckAbsenceOf::MobileAppErrorFlag:
       if (error_absent_.load())
       {
         log_once_.reset("mobile_app_error");
@@ -20,7 +20,7 @@ BT::NodeStatus AgribotBehaviorTreeNode::simpleConditionCheck(const ToCheck check
       }
       log_once_.log("mobile_app_error", RosLogLevel::Warn, "[AgribotBehavior] MobileAppError detected");
       break;
-    case ToCheck::obstacle:
+    case CheckAbsenceOf::Obstacle:
       if (obstacle_absent_.load())
       {
         log_once_.reset("obstacle");
@@ -39,10 +39,10 @@ void AgribotBehaviorTreeNode::registerTreeNodes()
   factory_->registerNodeType<CheckStartConditions>("CheckStartConditions");
   factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
   factory_->registerNodeType<Handle>("Handle");
-  factory_->registerSimpleCondition("ObstacleAbsent",
-                                    std::bind(&AgribotBehaviorTreeNode::simpleConditionCheck, this, ToCheck::obstacle));
+  factory_->registerSimpleCondition(
+      "ObstacleAbsent", std::bind(&AgribotBehaviorTreeNode::simpleConditionCheck, this, CheckAbsenceOf::Obstacle));
   factory_->registerSimpleCondition("MobileAppErrorAbsent", std::bind(&AgribotBehaviorTreeNode::simpleConditionCheck,
-                                                                      this, ToCheck::mobile_app_error_flag));
+                                                                      this, CheckAbsenceOf::MobileAppErrorFlag));
 }
 
 std::string AgribotBehaviorTreeNode::getTreeLocation() const
@@ -129,11 +129,12 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
 {
   // ROS init
   ros::init(argc, argv, "agribot_tools_control_node");
+  std::experimental::filesystem::path agribot_home_location = std::getenv("AGRIBOT_HOME");
   node_handle_ = std::make_shared<ros::NodeHandle>();
   try
   {
-    task_folder_ = ros_common_functions::getRosParam<std::string>("agribot_map/tasks_path");
-    path_folder_ = ros_common_functions::getRosParam<std::string>("agribot_map/paths_path");
+    task_folder_ = agribot_home_location / ros_common_functions::getRosParam<std::string>("agribot_map/tasks_path");
+    path_folder_ = agribot_home_location / ros_common_functions::getRosParam<std::string>("agribot_map/paths_path") / "paths";
   }
   catch (const agribot_exceptions::ParameterNotSet& ex)
   {

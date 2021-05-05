@@ -3,20 +3,21 @@
  */
 
 #include <agribot_behavior/path_handle/PathParser.h>
+#include <ros/console.h>
 
 namespace agribot_behavior
 {
-PathParser::PathParser(const std::string& path_folder, const std::string& task_folder)
+PathParser::PathParser(const std::experimental::filesystem::path& path_folder,
+                       const std::experimental::filesystem::path& task_folder)
 {
-  path_folder_ = "/" + path_folder + "/paths/";
-  task_folder_ = "/" + task_folder + "/";
+  path_folder_ = path_folder;
+  task_folder_ = task_folder;
 }
 
-std::string PathParser::getPathNameFromTask(const std::string& task_name)
+std::experimental::filesystem::path
+PathParser::getPathNameFromTask(const std::experimental::filesystem::path& task_name)
 {
-  std::string task_location = std::getenv("AGRIBOT_HOME");
-  task_location += task_folder_;
-  task_location += task_name;
+  std::experimental::filesystem::path task_location = task_folder_ / task_name;
   task_location += ".yaml";
   if (fileExists(task_location))
   {
@@ -29,7 +30,7 @@ std::string PathParser::getPathNameFromTask(const std::string& task_name)
   return "";
 }
 
-inline bool PathParser::fileExists(const std::string& name)
+inline bool PathParser::fileExists(const std::experimental::filesystem::path& name)
 {
   std::ifstream f(name.c_str());
   return f.good();
@@ -47,14 +48,13 @@ void PathParser::setPose(const YAML::Node& node, std::size_t index,
   path_points[index].altitude = node["position"][2].as<double>();
 }
 
-bool PathParser::setPathName(const std::string& task_name)
+bool PathParser::setPathName(const std::experimental::filesystem::path& task_name)
 {
-  std::string path_name = getPathNameFromTask(task_name);
+  std::experimental::filesystem::path path_name = getPathNameFromTask(task_name);
   if (path_name != "")
   {
-    std::string path_location = std::getenv("AGRIBOT_HOME");
-    path_location += path_folder_;
-    path_location += path_name;
+    std::experimental::filesystem::path path_location = path_folder_ / path_name;
+    ROS_ERROR_STREAM(path_location);
     if (fileExists(path_location))
     {
       path_location_ = path_location;
@@ -81,7 +81,7 @@ std::vector<agribot_msgs::NavSatFixOrientation> PathParser::parsePath()
   return std::vector<agribot_msgs::NavSatFixOrientation>();
 }
 
-std::string PathParser::getPathLocation() const
+std::experimental::filesystem::path PathParser::getPathLocation() const
 {
   return path_location_;
 }

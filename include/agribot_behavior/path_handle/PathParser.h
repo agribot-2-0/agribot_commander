@@ -8,6 +8,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <experimental/filesystem>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -18,20 +19,20 @@ namespace agribot_behavior
 class PathParser
 {
 private:
-  std::string path_location_;
-  std::string path_folder_;
-  std::string task_folder_;
+  std::experimental::filesystem::path path_location_;
+  std::experimental::filesystem::path path_folder_;
+  std::experimental::filesystem::path task_folder_;
 
-  std::string getPathNameFromTask(const std::string& task_name);
-  bool fileExists(const std::string& name);
+  std::experimental::filesystem::path getPathNameFromTask(const std::experimental::filesystem::path& task_name);
+  bool fileExists(const std::experimental::filesystem::path& name);
   void setPose(const YAML::Node& node, std::size_t index,
                std::vector<agribot_msgs::NavSatFixOrientation>& path_points);  // NOLINT
 
 public:
   PathParser() = delete;
-  PathParser(const std::string& path_folder, const std::string& task_folder);
-  bool setPathName(const std::string& task_name);
+  PathParser(const std::experimental::filesystem::path& path_folder, const std::experimental::filesystem::path& task_folder);
+  bool setPathName(const std::experimental::filesystem::path& task_name);
   std::vector<agribot_msgs::NavSatFixOrientation> parsePath();
-  std::string getPathLocation() const;
+  std::experimental::filesystem::path getPathLocation() const;
 };
 }  // namespace agribot_behavior
