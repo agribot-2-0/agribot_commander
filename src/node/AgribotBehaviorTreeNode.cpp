@@ -98,12 +98,10 @@ void AgribotBehaviorTreeNode::initRosPublishers()
 
 void AgribotBehaviorTreeNode::initRosSubscribers()
 {
-  task_name_subscriber_ =
-      node_handle_->subscribe("task", 1, &AgribotBehaviorTreeNode::taskNameRosCallback, this);
-  robot_mode_subscriber_ =
-      node_handle_->subscribe("mode", 1, &AgribotBehaviorTreeNode::robotModeRosCallback, this);
-  move_base_result_subscriber_ = node_handle_->subscribe(
-      "result", 1, &AgribotBehaviorTreeNode::moveBaseMonitorResultRosCallback, this);
+  task_name_subscriber_ = node_handle_->subscribe("task", 1, &AgribotBehaviorTreeNode::taskNameRosCallback, this);
+  robot_mode_subscriber_ = node_handle_->subscribe("mode", 1, &AgribotBehaviorTreeNode::robotModeRosCallback, this);
+  move_base_result_subscriber_ =
+      node_handle_->subscribe("result", 1, &AgribotBehaviorTreeNode::moveBaseMonitorResultRosCallback, this);
   obstacle_detected_subscriber_ =
       node_handle_->subscribe("obstacle_detected", 1, &AgribotBehaviorTreeNode::obstacleDetectedRosCallback, this);
   mobile_app_error_flag_subscriber_ =
@@ -114,7 +112,7 @@ void AgribotBehaviorTreeNode::initRosServices()
 {
   // Services
   tool_arbiter_client_ = std::make_shared<ros::ServiceClient>(
-      node_handle_->serviceClient<agribot_msgs::ToolManagerControlSource>("agribot/tool_management/control_source"));
+      node_handle_->serviceClient<agribot_msgs::ToolManagerControlSource>("/agribot/tool_management/control_source"));
   cmd_vel_manual_client_ = std::make_shared<ros::ServiceClient>(
       node_handle_->serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_teleop"));
   cmd_vel_navigation_client_ = std::make_shared<ros::ServiceClient>(
