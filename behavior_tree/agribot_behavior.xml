@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Fallback name="check start conditions">
+            <Sequence name="manual condition check">
+                <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
+                <Condition ID="MobileAppErrorAbsent" name="true if error absent"/>
+                <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
+                <Fallback name="switch source from manual to none">
+                    <ReactiveSequence name="manual control">
+                        <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
+                        <Condition ID="MobileAppErrorAbsent"/>
+                        <Action ID="Handle" action_to_handle="manual" name="handle manual control"/>
+                    </ReactiveSequence>
+                    <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
+                </Fallback>
+            </Sequence>
+            <Sequence name="auto condition check">
+                <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
+                <Condition ID="ObstacleAbsent" name="true if obstacle absent"/>
+                <Action ID="SwitchControlArbiters" control_source="navigation" name="switch source to navigation"/>
+                <Fallback name="switch source from navigation to none">
+                    <ReactiveSequence name="autonomous task">
+                        <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
+                        <Condition ID="ObstacleAbsent"/>
+                        <Action ID="Handle" action_to_handle="navigation" name="handle autonomous task"/>
+                    </ReactiveSequence>
+                    <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
+                </Fallback>
+            </Sequence>
+        </Fallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="CheckStartConditions">
+            <input_port name="condition_to_check" type="tool_manager::ControlSource"/>
+        </Action>
+        <Action ID="Handle">
+            <input_port name="action_to_handle" type="tool_manager::ControlSource"/>
+        </Action>
+        <Condition ID="MobileAppErrorAbsent"/>
+        <Condition ID="ObstacleAbsent"/>
+        <Action ID="SwitchControlArbiters">
+            <input_port name="control_source" type="tool_manager::ControlSource"/>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+

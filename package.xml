@@ -7,8 +7,8 @@
   <maintainer email="a.mendaluk@agribot.eu">Adam Mendaluk</maintainer>
   <maintainer email="m.wiadomski@agribot.eu">Michal Wiadomski</maintainer>
 
-  <license>Proprietary</license>
-  
+  <license>PROPRIETARY</license>
+
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>smach_ros</buildtool_depend>
 
@@ -24,6 +24,8 @@
   <build_depend>agribot_msgs</build_depend>
   <build_depend>agribot_common</build_depend>
   <build_depend>tf</build_depend>
+  <build_depend>behaviortree_cpp_v3</build_depend>
+  <build_depend>yaml-cpp</build_depend>
 
   <build_export_depend>agribot_map</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
@@ -32,6 +34,8 @@
   <build_export_depend>sensor_msgs</build_export_depend>
   <build_export_depend>industrial_msgs</build_export_depend>
   <build_export_depend>tf</build_export_depend>
+  <build_export_depend>behaviortree_cpp_v3</build_export_depend>
+  <build_export_depend>yaml-cpp</build_export_depend>
 
   <exec_depend>rospy</exec_depend>
   <exec_depend>roscpp</exec_depend>
@@ -47,5 +51,6 @@
   <exec_depend>geometry2</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>python-can</exec_depend>
-
+  <exec_depend>behaviortree_cpp_v3</exec_depend>
+  <exec_depend>yaml-cpp</exec_depend>
 </package>

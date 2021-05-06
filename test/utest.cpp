@@ -1,0 +1,15 @@
+/*
+ * Copyright (C) 2021 Agribot. All rights reserved.
+ */
+
+#include <gtest/gtest.h>
+
+// TEST_F(namespaceName, methodToTest__)
+// {
+// }
+
+int main(int argc, char** argv)
+{
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
