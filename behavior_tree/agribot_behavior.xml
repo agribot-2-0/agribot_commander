@@ -3,7 +3,11 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <SequenceStar>
-            <Action ID="LightsControl" lights_control="ready"/>
+            <Fallback>
+                <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
+                <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for manual control"/>
+                <Action ID="LightsControl" lights_control="ready"/>
+            </Fallback>
             <Fallback name="check start conditions">
                 <Sequence name="manual condition check">
                     <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
