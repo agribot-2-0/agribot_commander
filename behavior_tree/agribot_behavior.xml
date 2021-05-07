@@ -7,12 +7,15 @@
             <Fallback name="check start conditions">
                 <Sequence name="manual condition check">
                     <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
-                    <Fallback>
+                    <SequenceStar>
+                        <Fallback>
+                            <Condition ID="MobileAppErrorAbsent" name="true if error absent"/>
+                            <Inverter>
+                                <Action ID="LightsControl" lights_control="error"/>
+                            </Inverter>
+                        </Fallback>
                         <Condition ID="MobileAppErrorAbsent" name="true if error absent"/>
-                        <Inverter>
-                            <Action ID="LightsControl" lights_control="error"/>
-                        </Inverter>
-                    </Fallback>
+                    </SequenceStar>
                     <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
                     <Action ID="LightsControl" lights_control="manual"/>
                     <Fallback name="switch source from manual to none">
@@ -26,12 +29,15 @@
                 </Sequence>
                 <Sequence name="auto condition check">
                     <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
-                    <Fallback>
+                    <SequenceStar>
+                        <Fallback>
+                            <Condition ID="ObstacleAbsent" name="true if obstacle absent"/>
+                            <Inverter>
+                                <Action ID="LightsControl" lights_control="obstacle"/>
+                            </Inverter>
+                        </Fallback>
                         <Condition ID="ObstacleAbsent" name="true if obstacle absent"/>
-                        <Inverter>
-                            <Action ID="LightsControl" lights_control="obstacle"/>
-                        </Inverter>
-                    </Fallback>
+                    </SequenceStar>
                     <Action ID="SwitchControlArbiters" control_source="navigation" name="switch source to navigation"/>
                     <Action ID="LightsControl" lights_control="auto"/>
                     <Fallback name="switch source from navigation to none">
