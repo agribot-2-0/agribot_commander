@@ -14,9 +14,7 @@
                     <SequenceStar>
                         <Fallback>
                             <Condition ID="MobileAppErrorAbsent" name="true if error absent"/>
-                            <Inverter>
-                                <Action ID="LightsControl" lights_control="error"/>
-                            </Inverter>
+                            <Action ID="LightsControl" lights_control="error"/>
                         </Fallback>
                         <Condition ID="MobileAppErrorAbsent" name="true if error absent"/>
                     </SequenceStar>
@@ -36,9 +34,7 @@
                     <SequenceStar>
                         <Fallback>
                             <Condition ID="ObstacleAbsent" name="true if obstacle absent"/>
-                            <Inverter>
-                                <Action ID="LightsControl" lights_control="obstacle"/>
-                            </Inverter>
+                            <Action ID="LightsControl" lights_control="obstacle"/>
                         </Fallback>
                         <Condition ID="ObstacleAbsent" name="true if obstacle absent"/>
                     </SequenceStar>
