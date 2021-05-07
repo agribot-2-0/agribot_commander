@@ -39,6 +39,7 @@ void AgribotBehaviorTreeNode::registerTreeNodes()
   factory_->registerNodeType<CheckStartConditions>("CheckStartConditions");
   factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
   factory_->registerNodeType<Handle>("Handle");
+  factory_->registerNodeType<LightsControl>("LightsControl");
   factory_->registerSimpleCondition(
       "ObstacleAbsent", std::bind(&AgribotBehaviorTreeNode::simpleConditionCheck, this, CheckAbsenceOf::Obstacle));
   factory_->registerSimpleCondition("MobileAppErrorAbsent", std::bind(&AgribotBehaviorTreeNode::simpleConditionCheck,
@@ -71,6 +72,10 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
       handle->initSharedFields(task_name_, move_base_monitor_result_);
       handle->initPublishers(waypoints_publisher_, move_base_command_publisher_);
       handle->initPathFeeder(path_folder_, task_folder_);
+    }
+    if (auto lights_control = dynamic_cast<LightsControl*>(node.get()); lights_control != nullptr)
+    {
+      lights_control->initSharedFields(hal_lights_client_);
     }
   }
 }
@@ -119,6 +124,8 @@ void AgribotBehaviorTreeNode::initRosServices()
       node_handle_->serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_navigation"));
   cmd_vel_stop_client_ = std::make_shared<ros::ServiceClient>(
       node_handle_->serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_stop"));
+  hal_lights_client_ = std::make_shared<ros::ServiceClient>(
+      node_handle_->serviceClient<agribot_msgs::LampsControl>("/agribot/hal_lights/change_lamps_configuration"));
 }
 
 // TODO(someone): while refactoring change state_machine -> behavior_tree in topic names
