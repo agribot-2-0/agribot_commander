@@ -20,30 +20,35 @@ inline agribot_msgs::LampsControl convertFromString(StringView str)
   {
     srv.request.color = srv.request.green;
     srv.request.flash_period_in_miliseconds = 1000;
+    srv.request.fading_period_in_miliseconds = 1000;
     return srv;
   }
   else if (str == "auto")
   {
     srv.request.color = srv.request.green;
     srv.request.flash_period_in_miliseconds = 0;
+    srv.request.fading_period_in_miliseconds = 0;
     return srv;
   }
   else if (str == "manual")
   {
     srv.request.color = srv.request.blue;
     srv.request.flash_period_in_miliseconds = 0;
+    srv.request.fading_period_in_miliseconds = 0;
     return srv;
   }
   else if (str == "error")
   {
     srv.request.color = srv.request.red;
     srv.request.flash_period_in_miliseconds = 1000;
+    srv.request.fading_period_in_miliseconds = 1000;
     return srv;
   }
   else if (str == "obstacle")
   {
     srv.request.color = srv.request.orange;
     srv.request.flash_period_in_miliseconds = 1000;
+    srv.request.fading_period_in_miliseconds = 1000;
     return srv;
   }
   else
