@@ -28,7 +28,8 @@
 #include <std_srvs/Empty.h>
 
 #include <atomic>
-#include <experimental/filesystem>  // when migrating to GCC version >= 8.0 experimental part of header should be removed
+// when migrating to GCC version >= 8.0 experimental part of header should be removed
+#include <experimental/filesystem>  //NOLINT (build/include_order)
 #include <memory>
 #include <string>
 
