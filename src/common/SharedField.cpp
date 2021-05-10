@@ -24,7 +24,8 @@ template void SharedField<std::string>::writeData(const std::string&);
 template std::string SharedField<std::string>::getData();
 template void SharedField<industrial_msgs::RobotMode>::writeData(const industrial_msgs::RobotMode&);
 template industrial_msgs::RobotMode SharedField<industrial_msgs::RobotMode>::getData();
-template void
-SharedField<agribot_msgs::AgribotNavigationManagerResult>::writeData(const agribot_msgs::AgribotNavigationManagerResult&);
-template agribot_msgs::AgribotNavigationManagerResult SharedField<agribot_msgs::AgribotNavigationManagerResult>::getData();
+template void SharedField<agribot_msgs::AgribotNavigationManagerResult>::writeData(
+    const agribot_msgs::AgribotNavigationManagerResult&);
+template agribot_msgs::AgribotNavigationManagerResult
+SharedField<agribot_msgs::AgribotNavigationManagerResult>::getData();
 }  // namespace agribot_behavior

@@ -47,9 +47,9 @@ public:
   BT::NodeStatus tick() override;
   void halt() override;
   void initPathFeeder(const std::string& path_folder, const std::string& task_folder);
-  void
-  initSharedFields(std::shared_ptr<SharedField<std::string>> task_name,
-                   std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> navigation_manager_result);
+  void initSharedFields(
+      std::shared_ptr<SharedField<std::string>> task_name,
+      std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> navigation_manager_result);
   void initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
                       std::shared_ptr<ros::Publisher> move_base_command_publisher);
 };
