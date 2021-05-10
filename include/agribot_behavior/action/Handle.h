@@ -27,7 +27,7 @@ private:
   PathFeeder path_feeder_;
 
   std::shared_ptr<SharedField<std::string>> task_name_;
-  std::shared_ptr<SharedField<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result_;
+  std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> navigation_manager_result_;
 
   std::shared_ptr<ros::Publisher> waypoints_publisher_;
   std::shared_ptr<ros::Publisher> move_base_command_publisher_;
@@ -49,7 +49,7 @@ public:
   void initPathFeeder(const std::string& path_folder, const std::string& task_folder);
   void
   initSharedFields(std::shared_ptr<SharedField<std::string>> task_name,
-                   std::shared_ptr<SharedField<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result);
+                   std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> navigation_manager_result);
   void initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
                       std::shared_ptr<ros::Publisher> move_base_command_publisher);
 };

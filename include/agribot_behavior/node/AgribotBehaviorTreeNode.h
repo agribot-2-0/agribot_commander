@@ -23,7 +23,7 @@
 #include <industrial_msgs/RobotMode.h>
 #include <agribot_msgs/ToolManagerControlSource.h>
 #include <agribot_msgs/AgribotMoveBaseCommand.h>
-#include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
+#include <agribot_msgs/AgribotNavigationManagerResult.h>
 #include <agribot_msgs/AgribotObstacleDetection.h>
 #include <agribot_msgs/NavSatFixOrientation.h>
 #include <agribot_msgs/AgribotAppErrorFlag.h>
@@ -80,7 +80,7 @@ private:
   // class
   std::shared_ptr<SharedField<std::string>> task_name_;
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
-  std::shared_ptr<SharedField<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result_;
+  std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> navigation_manager_result_;
 
   std::atomic<bool> obstacle_absent_;
   std::atomic<bool> error_absent_;
@@ -97,7 +97,7 @@ private:
 
   void taskNameRosCallback(const std_msgs::String::ConstPtr& msg);
   void robotModeRosCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
-  void moveBaseMonitorResultRosCallback(const agribot_msgs::AgribotMoveBaseMonitorResult::ConstPtr& msg);
+  void NavigationManagerResultRosCallback(const agribot_msgs::AgribotNavigationManagerResult::ConstPtr& msg);
   void obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
   void mobileAppErrorFlagRosCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
 

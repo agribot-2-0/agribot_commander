@@ -47,7 +47,7 @@ class ChooseTask(smach.State):
                              output_keys=['choose_task_output'])
         self.mutex = threading.Lock()
         self.pub = rospy.Publisher('agribot/waypoints', NavSatFixOrientation, queue_size=1000)
-        self.pub_move_base_command = rospy.Publisher('/agribot/move_base_monitor/command',
+        self.pub_move_base_command = rospy.Publisher('/agribot/navigation_manager/command',
                                                      AgribotMoveBaseCommand,
                                                      queue_size=10)
         self.choosen_path_name = ''
@@ -64,21 +64,21 @@ class ChooseTask(smach.State):
         self.state_msg = String()
 
     def clear_previous_path(self):
-        move_base_monitor_ready = False
+        navigation_manager_ready = False
         # send the ABORT to clear the current task
         move_base_commands_msg = AgribotMoveBaseCommand()
         move_base_commands_msg.command = AgribotMoveBaseCommand.ABORT
         self.pub_move_base_command.publish(move_base_commands_msg)
         rate = rospy.Rate(10)  # ROS Rate at 10 Hz
-        rospy.loginfo("[StateMachine] Waiting for the move_base_monitor to clear the previous task")
-        while not move_base_monitor_ready:
-            if rospy.has_param('/agribot/move_base_monitor/is_ready'):
-                move_base_monitor_ready = rospy.get_param('/agribot/move_base_monitor/is_ready')
+        rospy.loginfo("[StateMachine] Waiting for the navigation_manager to clear the previous task")
+        while not navigation_manager_ready:
+            if rospy.has_param('/agribot/navigation_manager/is_ready'):
+                navigation_manager_ready = rospy.get_param('/agribot/navigation_manager/is_ready')
             try:
                 rate.sleep()
             except rospy.ROSInterruptException as exc_choose:
                 rospy.logerr("[StateMachine]: " + str(exc_choose))
-        rospy.loginfo("[StateMachine] Previous path cleared from move_base_monitor")
+        rospy.loginfo("[StateMachine] Previous path cleared from navigation_manager")
 
     def load_the_chosen_path(self):
         function_output = ["transition", "user_data"]

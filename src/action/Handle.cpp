@@ -46,10 +46,10 @@ BT::NodeStatus Handle::tick()
 
 void Handle::initSharedFields(
     std::shared_ptr<SharedField<std::string>> task_name,
-    std::shared_ptr<SharedField<agribot_msgs::AgribotMoveBaseMonitorResult>> move_base_monitor_result)
+    std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> navigation_manager_result)
 {
   task_name_ = task_name;
-  move_base_monitor_result_ = move_base_monitor_result;
+  navigation_manager_result_ = navigation_manager_result;
 }
 
 void Handle::initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
@@ -101,7 +101,7 @@ void Handle::handleAutonomousControl()
         rate.sleep();
       }
       ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Autonomous task finished with move base status "
-                      << static_cast<int>(move_base_monitor_result_->getData().result));
+                      << static_cast<int>(navigation_manager_result_->getData().result));
     }
     else
     {
@@ -137,7 +137,7 @@ void Handle::resetAutonomousDriving()
 
 bool Handle::moveBaseActive() const
 {
-  return move_base_monitor_result_->getData().result == agribot_msgs::AgribotMoveBaseMonitorResult::ACTIVE;
+  return navigation_manager_result_->getData().result == agribot_msgs::AgribotNavigationManagerResult::ACTIVE;
 }
 
 bool Handle::moveBaseReady() const
