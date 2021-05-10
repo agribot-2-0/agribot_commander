@@ -93,7 +93,7 @@ void AgribotBehaviorTreeNode::initRosPublishers()
   move_base_command_publisher_ = std::make_shared<ros::Publisher>(
       node_handle_->advertise<agribot_msgs::AgribotMoveBaseCommand>("/agribot/navigation_manager/command", 1));
   waypoints_publisher_ = std::make_shared<ros::Publisher>(
-      node_handle_->advertise<agribot_msgs::NavSatFixOrientation>("/agribot/waypoints", 1000));
+      node_handle_->advertise<sensor_msgs::NavSatFix>("/agribot/waypoints", 1000));
 }
 
 void AgribotBehaviorTreeNode::initRosSubscribers()

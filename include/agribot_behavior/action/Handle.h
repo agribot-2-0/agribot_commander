@@ -12,7 +12,7 @@
 
 #include <ros/ros.h>
 #include <ros/console.h>
-#include <agribot_msgs/NavSatFixOrientation.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <agribot_msgs/AgribotMoveBaseCommand.h>
 
 #include <memory>
@@ -35,7 +35,7 @@ private:
 
   void handleManualControl();
   void handleAutonomousControl();
-  void publishWaypoint(const agribot_msgs::NavSatFixOrientation& waypoint) const;
+  void publishWaypoint(const sensor_msgs::NavSatFix& waypoint) const;
   void publishMoveBaseCommand(const uint8_t command) const;
   void resetAutonomousDriving();
   bool moveBaseActive() const;

@@ -23,11 +23,11 @@ bool PathFeeder::loadPath(const std::experimental::filesystem::path& task_name)
   return false;
 }
 
-agribot_msgs::NavSatFixOrientation PathFeeder::getPathPoint()
+sensor_msgs::NavSatFix PathFeeder::getPathPoint()
 {
   if (path_index_ < path_points_.size())
   {
-    agribot_msgs::NavSatFixOrientation pose = path_points_[path_index_];
+    sensor_msgs::NavSatFix pose = path_points_[path_index_];
     ++path_index_;
     return pose;
   }

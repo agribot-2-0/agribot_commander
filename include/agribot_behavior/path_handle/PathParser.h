@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <agribot_msgs/NavSatFixOrientation.h>
+#include <sensor_msgs/NavSatFix.h>
 
 #include <yaml-cpp/yaml.h>
 
@@ -26,14 +26,14 @@ private:
   std::experimental::filesystem::path getPathNameFromTask(const std::experimental::filesystem::path& task_name);
   bool fileExists(const std::experimental::filesystem::path& name);
   void setPose(const YAML::Node& node, std::size_t index,
-               std::vector<agribot_msgs::NavSatFixOrientation>& path_points);  // NOLINT
+               std::vector<sensor_msgs::NavSatFix>& path_points);  // NOLINT
 
 public:
   PathParser() = delete;
   PathParser(const std::experimental::filesystem::path& path_folder,
              const std::experimental::filesystem::path& task_folder);
   bool setPathName(const std::experimental::filesystem::path& task_name);
-  std::vector<agribot_msgs::NavSatFixOrientation> parsePath();
+  std::vector<sensor_msgs::NavSatFix> parsePath();
   std::experimental::filesystem::path getPathLocation() const;
 };
 }  // namespace agribot_behavior

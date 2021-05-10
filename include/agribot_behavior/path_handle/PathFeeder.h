@@ -5,7 +5,7 @@
 #pragma once
 
 #include <agribot_behavior/path_handle/PathParser.h>
-#include <agribot_msgs/NavSatFixOrientation.h>
+#include <sensor_msgs/NavSatFix.h>
 
 #include <string>
 #include <vector>
@@ -19,13 +19,13 @@ private:
   std::unique_ptr<PathParser> path_parser_;
   std::size_t path_index_;
   bool feeding_completed_;
-  std::vector<agribot_msgs::NavSatFixOrientation> path_points_;
+  std::vector<sensor_msgs::NavSatFix> path_points_;
 
 public:
   void init(const std::experimental::filesystem::path& path_folder,
             const std::experimental::filesystem::path& task_folder);
   bool loadPath(const std::experimental::filesystem::path& path_name);
-  agribot_msgs::NavSatFixOrientation getPathPoint();
+  sensor_msgs::NavSatFix getPathPoint();
   void reset();
   bool feedingCompleted();
   std::experimental::filesystem::path getLoadedPathLocation();

@@ -25,7 +25,7 @@
 #include <agribot_msgs/AgribotMoveBaseCommand.h>
 #include <agribot_msgs/AgribotNavigationManagerResult.h>
 #include <agribot_msgs/AgribotObstacleDetection.h>
-#include <agribot_msgs/NavSatFixOrientation.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <agribot_msgs/AgribotAppErrorFlag.h>
 
 #include <experimental/filesystem>  // when migrating to GCC version >= 8.0 experimental part of header should be removed

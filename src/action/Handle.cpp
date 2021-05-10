@@ -115,7 +115,7 @@ void Handle::handleAutonomousControl()
   }
 }
 
-void Handle::publishWaypoint(const agribot_msgs::NavSatFixOrientation& waypoint) const
+void Handle::publishWaypoint(const sensor_msgs::NavSatFix& waypoint) const
 {
   waypoints_publisher_->publish(waypoint);
 }
