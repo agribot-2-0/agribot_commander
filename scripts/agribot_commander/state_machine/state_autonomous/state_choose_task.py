@@ -70,7 +70,7 @@ class ChooseTask(smach.State):
         move_base_commands_msg.command = AgribotMoveBaseCommand.ABORT
         self.pub_move_base_command.publish(move_base_commands_msg)
         rate = rospy.Rate(10)  # ROS Rate at 10 Hz
-        rospy.loginfo("[StateMachine] Waiting for the navigation_manager to clear the previous task")
+        rospy.loginfo("[StateMachine] Waiting for the navigation_manager to clear the prev task")
         while not navigation_manager_ready:
             if rospy.has_param('/agribot/navigation_manager/is_ready'):
                 navigation_manager_ready = rospy.get_param('/agribot/navigation_manager/is_ready')
