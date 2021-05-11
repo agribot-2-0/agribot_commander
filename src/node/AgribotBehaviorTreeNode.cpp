@@ -68,9 +68,10 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     }
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
-      handle->initSharedFields(task_name_, navigation_manager_result_);
-      handle->initPublishers(waypoints_publisher_, move_base_command_publisher_);
-      handle->initPathFeeder(path_folder_, task_folder_);
+      handle->initSharedFields(task_name_);
+      handle->initPublishers(move_base_command_publisher_);
+      handle->initActionlibs(autonomous_path_action_client_);
+      handle->initPathParser(path_folder_, task_folder_);
     }
   }
 }
@@ -79,7 +80,6 @@ void AgribotBehaviorTreeNode::initSharedData()
 {
   task_name_ = std::make_shared<SharedField<std::string>>();
   robot_mode_ = std::make_shared<SharedField<industrial_msgs::RobotMode>>();
-  navigation_manager_result_ = std::make_shared<SharedField<agribot_msgs::AgribotNavigationManagerResult>>();
 }
 
 void AgribotBehaviorTreeNode::initAtomics()
@@ -92,16 +92,19 @@ void AgribotBehaviorTreeNode::initRosPublishers()
 {
   move_base_command_publisher_ = std::make_shared<ros::Publisher>(
       node_handle_->advertise<agribot_msgs::AgribotMoveBaseCommand>("/agribot/navigation_manager/command", 1));
-  waypoints_publisher_ = std::make_shared<ros::Publisher>(
-      node_handle_->advertise<sensor_msgs::NavSatFix>("/agribot/waypoints", 1000));
+}
+
+void AgribotBehaviorTreeNode::initRosActionlibClients()
+{
+  autonomous_path_action_client_ =
+      std::make_shared<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>(
+          "/agribot/navigation_manager/path_action", true);
 }
 
 void AgribotBehaviorTreeNode::initRosSubscribers()
 {
   task_name_subscriber_ = node_handle_->subscribe("task", 1, &AgribotBehaviorTreeNode::taskNameRosCallback, this);
   robot_mode_subscriber_ = node_handle_->subscribe("mode", 1, &AgribotBehaviorTreeNode::robotModeRosCallback, this);
-  move_base_result_subscriber_ =
-      node_handle_->subscribe("result", 1, &AgribotBehaviorTreeNode::NavigationManagerResultRosCallback, this);
   obstacle_detected_subscriber_ =
       node_handle_->subscribe("obstacle_detected", 1, &AgribotBehaviorTreeNode::obstacleDetectedRosCallback, this);
   mobile_app_error_flag_subscriber_ =
@@ -154,6 +157,7 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   tree_state_publisher_ = std::make_unique<BT::PublisherZMQ>(*tree_);
 
   initRosPublishers();
+  initRosActionlibClients();
   initRosSubscribers();
   initRosServices();
   initTreeNodesWithRosDependencies();
@@ -182,11 +186,6 @@ void AgribotBehaviorTreeNode::robotModeRosCallback(const industrial_msgs::RobotM
   robot_mode_->writeData(*msg);
 }
 
-void AgribotBehaviorTreeNode::NavigationManagerResultRosCallback(
-    const agribot_msgs::AgribotNavigationManagerResult::ConstPtr& msg)
-{
-  navigation_manager_result_->writeData(*msg);
-}
 
 void AgribotBehaviorTreeNode::obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg)
 {

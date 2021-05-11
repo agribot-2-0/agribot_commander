@@ -44,19 +44,20 @@ BT::NodeStatus Handle::tick()
   }
 }
 
-void Handle::initSharedFields(
-    std::shared_ptr<SharedField<std::string>> task_name,
-    std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> navigation_manager_result)
+void Handle::initSharedFields(std::shared_ptr<SharedField<std::string>> task_name)
 {
   task_name_ = task_name;
-  navigation_manager_result_ = navigation_manager_result;
 }
 
-void Handle::initPublishers(std::shared_ptr<ros::Publisher> waypoints_publisher,
-                            std::shared_ptr<ros::Publisher> move_base_command_publisher)
+void Handle::initPublishers(std::shared_ptr<ros::Publisher> move_base_command_publisher)
 {
-  waypoints_publisher_ = waypoints_publisher;
   move_base_command_publisher_ = move_base_command_publisher;
+}
+
+void Handle::initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
+                                autonomous_path_action_client)
+{
+  autonomous_path_action_client_ = autonomous_path_action_client;
 }
 
 void Handle::halt()
@@ -64,9 +65,9 @@ void Handle::halt()
   halt_requested_.store(true);
 }
 
-void Handle::initPathFeeder(const std::string& path_folder, const std::string& task_folder)
+void Handle::initPathParser(const std::string& path_folder, const std::string& task_folder)
 {
-  path_feeder_.init(path_folder, task_folder);
+  path_parser_ = std::make_unique<PathParser>(path_folder, task_folder);
 }
 
 // Manual control is idle action since another ROS nodes are handling it
@@ -82,26 +83,23 @@ void Handle::handleManualControl()
 
 void Handle::handleAutonomousControl()
 {
-  if (path_feeder_.loadPath(task_name_->getData()))
+  path_parser_->setPathName(task_name_->getData());
+  std::vector<sensor_msgs::NavSatFix> path_points = path_parser_->parsePath();
+  if (!path_points.empty())
   {
-    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << path_feeder_.getLoadedPathLocation());
-    ros::Rate rate(10);
-    while (!halt_requested_ && ros::ok() && !path_feeder_.feedingCompleted())
-    {
-      publishWaypoint(path_feeder_.getPathPoint());
-      ros::spinOnce();
-      rate.sleep();
-    }
+    sendAutonomousPathGoal(path_points);
+    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << path_parser_->getPathLocation());
     if (moveBaseReady())
     {
       ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task");
+      ros::Rate rate{ 10 };
       while (!halt_requested_ && ros::ok() && moveBaseActive())
       {
         ros::spinOnce();
         rate.sleep();
       }
       ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Autonomous task finished with move base status "
-                      << static_cast<int>(navigation_manager_result_->getData().result));
+                      << static_cast<int>(autonomous_path_action_feedback_.result));
     }
     else
     {
@@ -113,11 +111,6 @@ void Handle::handleAutonomousControl()
   {
     ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Failed to load path from task " << task_name_->getData());
   }
-}
-
-void Handle::publishWaypoint(const sensor_msgs::NavSatFix& waypoint) const
-{
-  waypoints_publisher_->publish(waypoint);
 }
 
 void Handle::publishMoveBaseCommand(const uint8_t command) const
@@ -132,18 +125,18 @@ void Handle::publishMoveBaseCommand(const uint8_t command) const
 void Handle::resetAutonomousDriving()
 {
   publishMoveBaseCommand(agribot_msgs::AgribotMoveBaseCommand::ABORT);
-  path_feeder_.reset();
+  autonomous_path_action_client_->cancelAllGoals();
 }
 
 bool Handle::moveBaseActive() const
 {
-  return navigation_manager_result_->getData().result == agribot_msgs::AgribotNavigationManagerResult::ACTIVE;
+  return autonomous_path_action_client_->getState().state_ == autonomous_path_action_client_->getState().ACTIVE;
 }
 
 bool Handle::moveBaseReady() const
 {
-  ros::Duration timeout{5};
-  ros::Rate rate{10};
+  ros::Duration timeout{ 5 };
+  ros::Rate rate{ 10 };
   ros::Time start_time = ros::Time::now();
   while (!moveBaseActive())
   {
@@ -156,6 +149,15 @@ bool Handle::moveBaseReady() const
     rate.sleep();
   }
   return true;
+}
+
+void Handle::sendAutonomousPathGoal(const std::vector<sensor_msgs::NavSatFix>& path_points)
+{
+  autonomous_path_action_client_->sendGoal([path_points]() {
+    agribot_msgs::PerformAutonomousPathGoal goal_path;
+    goal_path.path = path_points;
+    return goal_path;
+  }());
 }
 
 }  // namespace agribot_behavior

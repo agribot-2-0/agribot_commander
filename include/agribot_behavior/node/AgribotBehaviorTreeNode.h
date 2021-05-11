@@ -12,15 +12,19 @@
 #include <agribot_behavior/action/Handle.h>
 #include <agribot_behavior/common/SharedField.h>
 #include <agribot_behavior/common/OneTimeLogger.h>
-#include <agribot_behavior/path_handle/PathFeeder.h>
 #include <agribot_common/CommonFunctions/ros_common_functions.h>
 
 #include <ros/ros.h>
 #include <ros/package.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include <actionlib/client/simple_action_client.h>
+#pragma GCC diagnostic pop
 
 #include <std_srvs/Empty.h>
 #include <std_msgs/String.h>
 #include <industrial_msgs/RobotMode.h>
+#include <agribot_msgs/PerformAutonomousPathAction.h>
 #include <agribot_msgs/ToolManagerControlSource.h>
 #include <agribot_msgs/AgribotMoveBaseCommand.h>
 #include <agribot_msgs/AgribotNavigationManagerResult.h>
@@ -57,14 +61,14 @@ private:
   // Publishers - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to publish something are
   // granted with shared_ptr of the Publishers
   std::shared_ptr<ros::Publisher> move_base_command_publisher_;
-  std::shared_ptr<ros::Publisher> waypoints_publisher_;
+  std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
+      autonomous_path_action_client_;
 
   // Subscribers - initialized inside AgribotBehaviorTreeNode. Also the callbacks are defined in
   // AgribotBehaviorTreeNode. The callbacks are thread-safe and are distributing ros messages to proper class fields.
   // The tree nodes, which need access to the fileds, are granted with shared_ptr to desired field
   ros::Subscriber task_name_subscriber_;
   ros::Subscriber robot_mode_subscriber_;
-  ros::Subscriber move_base_result_subscriber_;
   ros::Subscriber obstacle_detected_subscriber_;
   ros::Subscriber mobile_app_error_flag_subscriber_;
 
@@ -80,7 +84,6 @@ private:
   // class
   std::shared_ptr<SharedField<std::string>> task_name_;
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
-  std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> navigation_manager_result_;
 
   std::atomic<bool> obstacle_absent_;
   std::atomic<bool> error_absent_;
@@ -92,12 +95,12 @@ private:
   void initSharedData();
   void initAtomics();
   void initRosPublishers();
+  void initRosActionlibClients();
   void initRosSubscribers();
   void initRosServices();
 
   void taskNameRosCallback(const std_msgs::String::ConstPtr& msg);
   void robotModeRosCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
-  void NavigationManagerResultRosCallback(const agribot_msgs::AgribotNavigationManagerResult::ConstPtr& msg);
   void obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
   void mobileAppErrorFlagRosCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
 
