@@ -24,6 +24,6 @@ public:
   LightsControl(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
-  void initSharedFields(std::shared_ptr<ros::ServiceClient> hal_lights_client);
+  void initLightsClient(std::shared_ptr<ros::ServiceClient> hal_lights_client);
 };
 }  // namespace agribot_behavior

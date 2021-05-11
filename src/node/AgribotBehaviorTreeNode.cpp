@@ -75,7 +75,7 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     }
     if (auto lights_control = dynamic_cast<LightsControl*>(node.get()); lights_control != nullptr)
     {
-      lights_control->initSharedFields(hal_lights_client_);
+      lights_control->initLightsClient(hal_lights_client_);
     }
   }
 }

@@ -34,7 +34,7 @@ BT::NodeStatus LightsControl::tick()
   return BT::NodeStatus::SUCCESS;
 }
 
-void LightsControl::initSharedFields(std::shared_ptr<ros::ServiceClient> hal_lights_client)
+void LightsControl::initLightsClient(std::shared_ptr<ros::ServiceClient> hal_lights_client)
 {
   hal_lights_client_ = hal_lights_client;
 }
