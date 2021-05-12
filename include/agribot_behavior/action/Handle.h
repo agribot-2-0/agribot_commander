@@ -44,10 +44,15 @@ private:
   void handleAutonomousControl();
   void publishMoveBaseCommand(const uint8_t command) const;
   void resetAutonomousDriving();
-  bool moveBaseActive() const;
-  bool moveBaseReady() const;
+  bool navigationManagerActive() const;
+  bool navigationManagerReady() const;
 
   void sendAutonomousPathGoal(const std::vector<sensor_msgs::NavSatFix>& path_points);
+
+  void doneCb(const actionlib::SimpleClientGoalState& state,
+              const agribot_msgs::PerformAutonomousPathResultConstPtr& result);
+  void activeCb();
+  void feedbackCb(const agribot_msgs::PerformAutonomousPathFeedbackConstPtr& feedback);
 
 public:
   Handle(const std::string& name, const BT::NodeConfiguration& config);

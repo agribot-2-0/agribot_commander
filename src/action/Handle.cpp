@@ -89,11 +89,11 @@ void Handle::handleAutonomousControl()
   {
     sendAutonomousPathGoal(path_points);
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << path_parser_->getPathLocation());
-    if (moveBaseReady())
+    if (navigationManagerReady())
     {
       ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task");
       ros::Rate rate{ 10 };
-      while (!halt_requested_ && ros::ok() && moveBaseActive())
+      while (!halt_requested_ && ros::ok() && navigationManagerActive())
       {
         ros::spinOnce();
         rate.sleep();
@@ -128,17 +128,17 @@ void Handle::resetAutonomousDriving()
   autonomous_path_action_client_->cancelAllGoals();
 }
 
-bool Handle::moveBaseActive() const
+bool Handle::navigationManagerActive() const
 {
   return autonomous_path_action_client_->getState().state_ == autonomous_path_action_client_->getState().ACTIVE;
 }
 
-bool Handle::moveBaseReady() const
+bool Handle::navigationManagerReady() const
 {
   ros::Duration timeout{ 5 };
   ros::Rate rate{ 10 };
   ros::Time start_time = ros::Time::now();
-  while (!moveBaseActive())
+  while (!navigationManagerActive())
   {
     ros::Time time_now = ros::Time::now();
     if (time_now - start_time >= timeout)
@@ -153,11 +153,34 @@ bool Handle::moveBaseReady() const
 
 void Handle::sendAutonomousPathGoal(const std::vector<sensor_msgs::NavSatFix>& path_points)
 {
-  autonomous_path_action_client_->sendGoal([path_points]() {
-    agribot_msgs::PerformAutonomousPathGoal goal_path;
-    goal_path.path = path_points;
-    return goal_path;
-  }());
+  autonomous_path_action_client_->sendGoal(
+      [path_points]() {
+        agribot_msgs::PerformAutonomousPathGoal goal_path;
+        goal_path.path = path_points;
+        return goal_path;
+      }(),
+      boost::bind(&agribot_behavior::Handle::doneCb, this, _1, _2), boost::bind(&agribot_behavior::Handle::activeCb, this),
+      boost::bind(&agribot_behavior::Handle::feedbackCb, this, _1));
+}
+
+// Called once when the goal completes
+void Handle::doneCb(const actionlib::SimpleClientGoalState& state,
+                    const agribot_msgs::PerformAutonomousPathResultConstPtr& result)
+{
+  ROS_ERROR_STREAM("[ACTIONLIB] Finished in state " << state.toString().c_str());
+  ROS_ERROR_STREAM("[ACTIONLIB] Answer: Final angle is " << result->finished);
+}
+
+// Called once when the goal becomes active
+void Handle::activeCb()
+{
+  ROS_ERROR_STREAM("[ACTIONLIB] Goal just went active");
+}
+
+// Called every time feedback is received for the goal
+void Handle::feedbackCb(const agribot_msgs::PerformAutonomousPathFeedbackConstPtr& feedback)
+{
+  ROS_ERROR_STREAM("[ACTIONLIB] Got Feedback" << feedback->feedback.result);
 }
 
 }  // namespace agribot_behavior
