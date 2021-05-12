@@ -28,4 +28,6 @@ template void SharedField<agribot_msgs::AgribotNavigationManagerResult>::writeDa
     const agribot_msgs::AgribotNavigationManagerResult&);
 template agribot_msgs::AgribotNavigationManagerResult
 SharedField<agribot_msgs::AgribotNavigationManagerResult>::getData();
+template void SharedField<std::size_t>::writeData(const std::size_t&);
+template std::size_t SharedField<std::size_t>::getData();
 }  // namespace agribot_behavior

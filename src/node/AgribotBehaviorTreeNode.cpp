@@ -64,11 +64,11 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto check_start_conditions = dynamic_cast<CheckStartConditions*>(node.get());
         check_start_conditions != nullptr)
     {
-      check_start_conditions->initSharedFields(task_name_, robot_mode_);
+      check_start_conditions->initSharedFields(current_task_name_, robot_mode_);
     }
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
-      handle->initSharedFields(task_name_);
+      handle->initSharedFields(current_task_name_, previous_task_name_, current_waypoint_);
       handle->initActionlibs(autonomous_path_action_client_);
       handle->initPathParser(path_folder_, task_folder_);
     }
@@ -77,7 +77,9 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
 
 void AgribotBehaviorTreeNode::initSharedData()
 {
-  task_name_ = std::make_shared<SharedField<std::string>>();
+  current_task_name_ = std::make_shared<SharedField<std::string>>();
+  previous_task_name_ = std::make_shared<SharedField<std::string>>();
+  current_waypoint_ = std::make_shared<SharedField<std::size_t>>();
   robot_mode_ = std::make_shared<SharedField<industrial_msgs::RobotMode>>();
 }
 
@@ -170,14 +172,13 @@ void AgribotBehaviorTreeNode::run()
 
 void AgribotBehaviorTreeNode::taskNameRosCallback(const std_msgs::String::ConstPtr& msg)
 {
-  task_name_->writeData(msg->data);
+  current_task_name_->writeData(msg->data);
 }
 
 void AgribotBehaviorTreeNode::robotModeRosCallback(const industrial_msgs::RobotMode::ConstPtr& msg)
 {
   robot_mode_->writeData(*msg);
 }
-
 
 void AgribotBehaviorTreeNode::obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg)
 {

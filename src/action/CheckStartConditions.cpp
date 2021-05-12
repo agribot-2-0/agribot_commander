@@ -39,10 +39,10 @@ BT::NodeStatus CheckStartConditions::CheckStartConditions::tick()
   }
 }
 
-void CheckStartConditions::initSharedFields(std::shared_ptr<SharedField<std::string>> task_name,
+void CheckStartConditions::initSharedFields(std::shared_ptr<SharedField<std::string>> current_task_name,
                                             std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode)
 {
-  task_name_ = task_name;
+  current_task_name_ = current_task_name;
   robot_mode_ = robot_mode;
 }
 
@@ -54,7 +54,7 @@ inline BT::NodeStatus CheckStartConditions::checkManualCondition()
 
 inline BT::NodeStatus CheckStartConditions::checkNavigationCondition()
 {
-  return (task_name_->getData() != "" && robot_mode_->getData().val == industrial_msgs::RobotMode::AUTO) ?
+  return (current_task_name_->getData() != "" && robot_mode_->getData().val == industrial_msgs::RobotMode::AUTO) ?
              BT::NodeStatus::SUCCESS :
              BT::NodeStatus::FAILURE;
 }

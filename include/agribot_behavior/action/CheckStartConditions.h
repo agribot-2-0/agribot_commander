@@ -21,7 +21,7 @@ namespace agribot_behavior
 class CheckStartConditions : public BT::SyncActionNode
 {
 private:
-  std::shared_ptr<SharedField<std::string>> task_name_;
+  std::shared_ptr<SharedField<std::string>> current_task_name_;
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
 
   BT::NodeStatus checkManualCondition();
@@ -31,7 +31,7 @@ public:
   CheckStartConditions(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
-  void initSharedFields(std::shared_ptr<SharedField<std::string>> task_name,
+  void initSharedFields(std::shared_ptr<SharedField<std::string>> current_task_name,
                         std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode);
 };
 }  // namespace agribot_behavior
