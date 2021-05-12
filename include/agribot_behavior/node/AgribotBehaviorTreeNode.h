@@ -4,34 +4,34 @@
 
 #pragma once
 
-#include <behaviortree_cpp_v3/bt_factory.h>
-#include <behaviortree_cpp_v3/loggers/bt_zmq_publisher.h>
-
 #include <agribot_behavior/action/CheckStartConditions.h>
-#include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/action/Handle.h>
-#include <agribot_behavior/common/SharedField.h>
+#include <agribot_behavior/action/LightsControl.h>
+#include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/common/OneTimeLogger.h>
+#include <agribot_behavior/common/SharedField.h>
 #include <agribot_behavior/path_handle/PathFeeder.h>
 #include <agribot_common/CommonFunctions/ros_common_functions.h>
-
-#include <ros/ros.h>
-#include <ros/package.h>
-
-#include <std_srvs/Empty.h>
-#include <std_msgs/String.h>
-#include <industrial_msgs/RobotMode.h>
-#include <agribot_msgs/ToolManagerControlSource.h>
+#include <agribot_msgs/AgribotAppErrorFlag.h>
 #include <agribot_msgs/AgribotMoveBaseCommand.h>
 #include <agribot_msgs/AgribotMoveBaseMonitorResult.h>
 #include <agribot_msgs/AgribotObstacleDetection.h>
+#include <agribot_msgs/LampsControl.h>
 #include <agribot_msgs/NavSatFixOrientation.h>
-#include <agribot_msgs/AgribotAppErrorFlag.h>
+#include <agribot_msgs/ToolManagerControlSource.h>
+#include <behaviortree_cpp_v3/bt_factory.h>
+#include <behaviortree_cpp_v3/loggers/bt_zmq_publisher.h>
+#include <industrial_msgs/RobotMode.h>
+#include <ros/package.h>
+#include <ros/ros.h>
+#include <std_msgs/String.h>
+#include <std_srvs/Empty.h>
 
-#include <experimental/filesystem>  // when migrating to GCC version >= 8.0 experimental part of header should be removed
-#include <string>
 #include <atomic>
+// when migrating to GCC version >= 8.0 experimental part of header should be removed
+#include <experimental/filesystem>  //NOLINT (build/include_order)
 #include <memory>
+#include <string>
 
 namespace agribot_behavior
 {
@@ -75,6 +75,7 @@ private:
   std::shared_ptr<ros::ServiceClient> cmd_vel_manual_client_;
   std::shared_ptr<ros::ServiceClient> cmd_vel_navigation_client_;
   std::shared_ptr<ros::ServiceClient> cmd_vel_stop_client_;
+  std::shared_ptr<ros::ServiceClient> hal_lights_client_;
 
   // Variables shared between tree nodes, which are changed in callbacks. The thread safety is guaranteed by Shared<>
   // class
