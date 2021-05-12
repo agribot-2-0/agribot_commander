@@ -51,7 +51,7 @@ private:
   void autonomousPathFeedbackCallback(const agribot_msgs::PerformAutonomousPathFeedbackConstPtr& feedback);
 
   bool taskUnchanged();
-  void removeVisitedWaypointsFromPath(std::vector<sensor_msgs::NavSatFix>& path_points);
+  void removeVisitedWaypointsFromPath(std::vector<sensor_msgs::NavSatFix>& path_points); // NOLINT
 
 public:
   Handle(const std::string& name, const BT::NodeConfiguration& config);
