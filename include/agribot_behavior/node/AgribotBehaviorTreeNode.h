@@ -26,7 +26,6 @@
 #include <industrial_msgs/RobotMode.h>
 #include <agribot_msgs/PerformAutonomousPathAction.h>
 #include <agribot_msgs/ToolManagerControlSource.h>
-#include <agribot_msgs/AgribotMoveBaseCommand.h>
 #include <agribot_msgs/AgribotNavigationManagerResult.h>
 #include <agribot_msgs/AgribotObstacleDetection.h>
 #include <sensor_msgs/NavSatFix.h>
@@ -58,9 +57,8 @@ private:
   std::shared_ptr<ros::NodeHandle> node_handle_;
   std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot
 
-  // Publishers - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to publish something are
-  // granted with shared_ptr of the Publishers
-  std::shared_ptr<ros::Publisher> move_base_command_publisher_;
+  // Actionlib - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to set goal for actionlib are
+  // granted with shared_ptr of the SimpleActionClient
   std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
       autonomous_path_action_client_;
 
@@ -94,7 +92,6 @@ private:
   void initTreeNodesWithRosDependencies();
   void initSharedData();
   void initAtomics();
-  void initRosPublishers();
   void initRosActionlibClients();
   void initRosSubscribers();
   void initRosServices();

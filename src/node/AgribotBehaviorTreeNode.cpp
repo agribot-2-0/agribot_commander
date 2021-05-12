@@ -69,7 +69,6 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
       handle->initSharedFields(task_name_);
-      handle->initPublishers(move_base_command_publisher_);
       handle->initActionlibs(autonomous_path_action_client_);
       handle->initPathParser(path_folder_, task_folder_);
     }
@@ -86,12 +85,6 @@ void AgribotBehaviorTreeNode::initAtomics()
 {
   obstacle_absent_.store(true);
   error_absent_.store(true);
-}
-
-void AgribotBehaviorTreeNode::initRosPublishers()
-{
-  move_base_command_publisher_ = std::make_shared<ros::Publisher>(
-      node_handle_->advertise<agribot_msgs::AgribotMoveBaseCommand>("/agribot/navigation_manager/command", 1));
 }
 
 void AgribotBehaviorTreeNode::initRosActionlibClients()
@@ -156,7 +149,6 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   // Register ZeroMQ publisher for Groot tree view:
   tree_state_publisher_ = std::make_unique<BT::PublisherZMQ>(*tree_);
 
-  initRosPublishers();
   initRosActionlibClients();
   initRosSubscribers();
   initRosServices();

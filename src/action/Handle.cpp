@@ -40,18 +40,13 @@ BT::NodeStatus Handle::tick()
         break;
     }
     halt_requested_.store(false);
-    return BT::NodeStatus::SUCCESS;
+    return BT::NodeStatus::FAILURE;
   }
 }
 
 void Handle::initSharedFields(std::shared_ptr<SharedField<std::string>> task_name)
 {
   task_name_ = task_name;
-}
-
-void Handle::initPublishers(std::shared_ptr<ros::Publisher> move_base_command_publisher)
-{
-  move_base_command_publisher_ = move_base_command_publisher;
 }
 
 void Handle::initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
@@ -113,18 +108,9 @@ void Handle::handleAutonomousControl()
   }
 }
 
-void Handle::publishMoveBaseCommand(const uint8_t command) const
-{
-  move_base_command_publisher_->publish([command] {
-    agribot_msgs::AgribotMoveBaseCommand msg;
-    msg.command = command;
-    return msg;
-  }());
-}
-
 void Handle::resetAutonomousDriving()
 {
-  publishMoveBaseCommand(agribot_msgs::AgribotMoveBaseCommand::ABORT);
+  task_name_->writeData("");  // TODO(mwiadoms): is it ok?
   autonomous_path_action_client_->cancelAllGoals();
 }
 
@@ -159,7 +145,8 @@ void Handle::sendAutonomousPathGoal(const std::vector<sensor_msgs::NavSatFix>& p
         goal_path.path = path_points;
         return goal_path;
       }(),
-      boost::bind(&agribot_behavior::Handle::doneCb, this, _1, _2), boost::bind(&agribot_behavior::Handle::activeCb, this),
+      boost::bind(&agribot_behavior::Handle::doneCb, this, _1, _2),
+      boost::bind(&agribot_behavior::Handle::activeCb, this),
       boost::bind(&agribot_behavior::Handle::feedbackCb, this, _1));
 }
 
@@ -167,20 +154,21 @@ void Handle::sendAutonomousPathGoal(const std::vector<sensor_msgs::NavSatFix>& p
 void Handle::doneCb(const actionlib::SimpleClientGoalState& state,
                     const agribot_msgs::PerformAutonomousPathResultConstPtr& result)
 {
-  ROS_ERROR_STREAM("[ACTIONLIB] Finished in state " << state.toString().c_str());
-  ROS_ERROR_STREAM("[ACTIONLIB] Answer: Final angle is " << result->finished);
+  ROS_WARN_STREAM("[BehaviorTree][HandleAuto][doneCb] finish status: " << static_cast<int>(result->finished));
+  ROS_WARN_STREAM("[BehaviorTree][HandleAuto][doneCb] state: " << static_cast<int>(state.state_));
+
+  resetAutonomousDriving();
 }
 
 // Called once when the goal becomes active
 void Handle::activeCb()
 {
-  ROS_ERROR_STREAM("[ACTIONLIB] Goal just went active");
 }
 
 // Called every time feedback is received for the goal
 void Handle::feedbackCb(const agribot_msgs::PerformAutonomousPathFeedbackConstPtr& feedback)
 {
-  ROS_ERROR_STREAM("[ACTIONLIB] Got Feedback" << feedback->feedback.result);
+  ROS_ERROR_STREAM("[ACTIONLIB] Got Feedback " << static_cast<int>(feedback->feedback.result));
 }
 
 }  // namespace agribot_behavior

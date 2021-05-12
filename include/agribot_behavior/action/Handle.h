@@ -16,7 +16,6 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <sensor_msgs/NavSatFix.h>
-#include <agribot_msgs/AgribotMoveBaseCommand.h>
 #include <agribot_msgs/PerformAutonomousPathAction.h>
 
 #include <memory>
@@ -33,7 +32,6 @@ private:
 
   std::shared_ptr<SharedField<std::string>> task_name_;
 
-  std::shared_ptr<ros::Publisher> move_base_command_publisher_;
   std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
       autonomous_path_action_client_;
   agribot_msgs::AgribotNavigationManagerResult autonomous_path_action_feedback_;
@@ -42,7 +40,6 @@ private:
 
   void handleManualControl();
   void handleAutonomousControl();
-  void publishMoveBaseCommand(const uint8_t command) const;
   void resetAutonomousDriving();
   bool navigationManagerActive() const;
   bool navigationManagerReady() const;
@@ -61,7 +58,6 @@ public:
   void halt() override;
   void initPathParser(const std::string& path_folder, const std::string& task_folder);
   void initSharedFields(std::shared_ptr<SharedField<std::string>> task_name);
-  void initPublishers(std::shared_ptr<ros::Publisher> move_base_command_publisher);
   void initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
                           autonomous_path_action_client);
 };
