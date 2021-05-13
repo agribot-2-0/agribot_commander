@@ -46,11 +46,11 @@ BT::NodeStatus Handle::tick()
 
 void Handle::initSharedFields(std::shared_ptr<SharedField<std::string>> current_task_name,
                               std::shared_ptr<SharedField<std::string>> previous_task_name,
-                              std::shared_ptr<SharedField<std::size_t>> current_waypoint)
+                              std::shared_ptr<SharedField<std::size_t>> path_progression)
 {
   current_task_name_ = current_task_name;
   previous_task_name_ = previous_task_name;
-  current_waypoint_ = current_waypoint;
+  path_progression_ = path_progression;
 }
 
 void Handle::initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
@@ -82,17 +82,18 @@ void Handle::handleManualControl()
 
 void Handle::handleAutonomousControl()
 {
-  path_parser_->setPathName(task_name_->getData());
+  path_parser_->setPathName(current_task_name_->getData());
   std::vector<sensor_msgs::NavSatFix> path_points = path_parser_->parsePath();
   if (!path_points.empty())
   {
-    ROS_WARN_STREAM("---------------previous_task:  " << previous_task_name_->getData());
-    ROS_WARN_STREAM("---------------current_task: " << task_name_->getData());
     if (taskUnchanged())  // continue path from last visited waypoint
     {
-      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Continuing path from waypoint "
-                      << static_cast<int>(current_waypoint_->getData()));
-      removeVisitedWaypointsFromPath(path_points);
+      ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Path unchanged. Continuing path from waypoint "
+                       << static_cast<int>(path_progression_->getData()));
+    }
+    else
+    {
+      path_progression_->writeData(0);
     }
     sendAutonomousPathGoal(path_points);
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << path_parser_->getPathLocation());
@@ -116,16 +117,26 @@ void Handle::handleAutonomousControl()
   }
   else
   {
-    ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Failed to load path from task " << task_name_->getData());
+    ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Failed to load path from task " << current_task_name_->getData());
   }
 }
 
 void Handle::resetAutonomousDriving()
 {
-  current_waypoint_->writeData(autonomous_path_action_feedback_.current_waypoint);
-  previous_task_name_->writeData(task_name_->getData());
-  task_name_->writeData("");  // TODO(mwiadoms): is it ok?
-  autonomous_path_action_client_->cancelAllGoals();
+  if (pathFinished())
+  {
+    path_progression_->writeData(0);
+    current_task_name_->writeData("");
+  }
+  else
+  {
+    path_progression_->writeData(autonomous_path_action_feedback_.current_waypoint);
+    ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Saved path progression "
+                     << path_progression_->getData() << " out of " << autonomous_path_action_feedback_.total_waypoints
+                     << " waypoints");
+    previous_task_name_->writeData(current_task_name_->getData());
+    autonomous_path_action_client_->cancelGoal();
+  }
 }
 
 bool Handle::navigationManagerActive() const
@@ -154,9 +165,10 @@ bool Handle::navigationManagerReady() const
 void Handle::sendAutonomousPathGoal(const std::vector<sensor_msgs::NavSatFix>& path_points)
 {
   autonomous_path_action_client_->sendGoal(
-      [path_points]() {
+      [this, path_points]() {
         agribot_msgs::PerformAutonomousPathGoal goal_path;
         goal_path.path = path_points;
+        goal_path.path_progression = path_progression_->getData();
         return goal_path;
       }(),
       boost::bind(&agribot_behavior::Handle::autonomousPathDoneCallback, this, _1, _2),
@@ -170,8 +182,6 @@ void Handle::autonomousPathDoneCallback(const actionlib::SimpleClientGoalState& 
 {
   ROS_WARN_STREAM("[BehaviorTree][autonomousPathDoneCallback] finish status: " << static_cast<int>(result->finished));
   ROS_WARN_STREAM("[BehaviorTree][autonomousPathDoneCallback] state: " << static_cast<int>(state.state_));
-
-  resetAutonomousDriving();
 }
 
 // Called once when the goal becomes active
@@ -182,18 +192,17 @@ void Handle::autonomousPathActiveCallback()
 // Called every time feedback is received for the goal
 void Handle::autonomousPathFeedbackCallback(const agribot_msgs::PerformAutonomousPathFeedbackConstPtr& feedback)
 {
-  ROS_ERROR_STREAM("[ACTIONLIB] Current waypoint: " << static_cast<int>(feedback->feedback.current_waypoint));
   autonomous_path_action_feedback_ = feedback->feedback;
 }
 
 bool Handle::taskUnchanged()
 {
-  return task_name_->getData() == previous_task_name_->getData();
+  return current_task_name_->getData() == previous_task_name_->getData();
 }
 
-void Handle::removeVisitedWaypointsFromPath(std::vector<sensor_msgs::NavSatFix>& path_points)
+bool Handle::pathFinished()
 {
-  path_points.erase(path_points.begin(), path_points.begin() + current_waypoint_->getData());
+  return (autonomous_path_action_feedback_.result == autonomous_path_action_feedback_.PATH_COMPLETED);
 }
 
 }  // namespace agribot_behavior

@@ -29,14 +29,13 @@ class Handle : public BT::AsyncActionNode
 {
 private:
   std::unique_ptr<PathParser> path_parser_;
-  std::shared_ptr<SharedField<std::string>> task_name_;
   std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
       autonomous_path_action_client_;
   agribot_msgs::AgribotNavigationManagerResult autonomous_path_action_feedback_;
   std::atomic<bool> halt_requested_;
   std::shared_ptr<SharedField<std::string>> current_task_name_;
   std::shared_ptr<SharedField<std::string>> previous_task_name_;
-  std::shared_ptr<SharedField<std::size_t>> current_waypoint_;
+  std::shared_ptr<SharedField<std::size_t>> path_progression_;
 
   void handleManualControl();
   void handleAutonomousControl();
@@ -51,7 +50,7 @@ private:
   void autonomousPathFeedbackCallback(const agribot_msgs::PerformAutonomousPathFeedbackConstPtr& feedback);
 
   bool taskUnchanged();
-  void removeVisitedWaypointsFromPath(std::vector<sensor_msgs::NavSatFix>& path_points); // NOLINT
+  bool pathFinished();
 
 public:
   Handle(const std::string& name, const BT::NodeConfiguration& config);
@@ -61,7 +60,7 @@ public:
   void initPathParser(const std::string& path_folder, const std::string& task_folder);
   void initSharedFields(std::shared_ptr<SharedField<std::string>> current_task_name,
                         std::shared_ptr<SharedField<std::string>> previous_task_name,
-                        std::shared_ptr<SharedField<std::size_t>> current_waypoint);
+                        std::shared_ptr<SharedField<std::size_t>> path_progression);
   void initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
                           autonomous_path_action_client);
 };

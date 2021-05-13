@@ -68,7 +68,7 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     }
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
-      handle->initSharedFields(current_task_name_, previous_task_name_, current_waypoint_);
+      handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_);
       handle->initActionlibs(autonomous_path_action_client_);
       handle->initPathParser(path_folder_, task_folder_);
     }
@@ -79,7 +79,7 @@ void AgribotBehaviorTreeNode::initSharedData()
 {
   current_task_name_ = std::make_shared<SharedField<std::string>>();
   previous_task_name_ = std::make_shared<SharedField<std::string>>();
-  current_waypoint_ = std::make_shared<SharedField<std::size_t>>();
+  path_progression_ = std::make_shared<SharedField<std::size_t>>();
   robot_mode_ = std::make_shared<SharedField<industrial_msgs::RobotMode>>();
 }
 

@@ -82,7 +82,7 @@ private:
   // class
   std::shared_ptr<SharedField<std::string>> current_task_name_;
   std::shared_ptr<SharedField<std::string>> previous_task_name_;
-  std::shared_ptr<SharedField<std::size_t>> current_waypoint_;
+  std::shared_ptr<SharedField<std::size_t>> path_progression_;
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
 
   std::atomic<bool> obstacle_absent_;
