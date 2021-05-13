@@ -9,7 +9,6 @@ namespace agribot_behavior
 Handle::Handle(const std::string& name, const BT::NodeConfiguration& config) : AsyncActionNode(name, config)
 {
   halt_requested_.store(false);
-  previous_task_name_->writeData("");
 }
 
 BT::PortsList Handle::providedPorts()
