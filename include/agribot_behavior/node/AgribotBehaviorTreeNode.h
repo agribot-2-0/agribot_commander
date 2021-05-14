@@ -19,12 +19,14 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <actionlib/client/simple_action_client.h>
+#include <actionlib/server/simple_action_server.h>
 #pragma GCC diagnostic pop
 
 #include <std_srvs/Empty.h>
 #include <std_msgs/String.h>
 #include <industrial_msgs/RobotMode.h>
 #include <agribot_msgs/PerformAutonomousPathAction.h>
+#include <agribot_msgs/PerformAutonomousTaskAction.h>
 #include <agribot_msgs/ToolManagerControlSource.h>
 #include <agribot_msgs/AgribotNavigationManagerResult.h>
 #include <agribot_msgs/AgribotObstacleDetection.h>
@@ -57,15 +59,18 @@ private:
   std::shared_ptr<ros::NodeHandle> node_handle_;
   std::unique_ptr<BT::PublisherZMQ> tree_state_publisher_;  // used by Groot
 
-  // Actionlib - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to set goal for actionlib are
-  // granted with shared_ptr of the SimpleActionClient
+  // ActionlibClient - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to set goal for actionlib
+  // are granted with shared_ptr of the SimpleActionClient
   std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
       autonomous_path_action_client_;
+
+  // ActionlibServer is used only in AgribotBehaviorTreeNode, and is not shared with other tree nodes
+  std::unique_ptr<actionlib::SimpleActionServer<agribot_msgs::PerformAutonomousTaskAction>>
+      autonomous_task_action_server_;
 
   // Subscribers - initialized inside AgribotBehaviorTreeNode. Also the callbacks are defined in
   // AgribotBehaviorTreeNode. The callbacks are thread-safe and are distributing ros messages to proper class fields.
   // The tree nodes, which need access to the fileds, are granted with shared_ptr to desired field
-  ros::Subscriber task_name_subscriber_;
   ros::Subscriber robot_mode_subscriber_;
   ros::Subscriber obstacle_detected_subscriber_;
   ros::Subscriber mobile_app_error_flag_subscriber_;
@@ -84,6 +89,7 @@ private:
   std::shared_ptr<SharedField<std::string>> previous_task_name_;
   std::shared_ptr<SharedField<std::size_t>> path_progression_;
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
+  std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback_;
 
   std::atomic<bool> obstacle_absent_;
   std::atomic<bool> error_absent_;
@@ -95,6 +101,7 @@ private:
   void initSharedData();
   void initAtomics();
   void initRosActionlibClients();
+  void initRosActionlibServers();
   void initRosSubscribers();
   void initRosServices();
 
@@ -102,6 +109,9 @@ private:
   void robotModeRosCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
   void obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
   void mobileAppErrorFlagRosCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
+
+  void performAutonomousTaskCallback(const agribot_msgs::PerformAutonomousTaskGoalConstPtr& goal);
+  bool pathFinished();
 
 public:
   AgribotBehaviorTreeNode(int argc, char** argv);

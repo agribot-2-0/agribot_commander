@@ -68,7 +68,8 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     }
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
-      handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_);
+      handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_,
+                               autonomous_path_action_feedback_);
       handle->initActionlibs(autonomous_path_action_client_);
       handle->initPathParser(path_folder_, task_folder_);
     }
@@ -81,6 +82,7 @@ void AgribotBehaviorTreeNode::initSharedData()
   previous_task_name_ = std::make_shared<SharedField<std::string>>();
   path_progression_ = std::make_shared<SharedField<std::size_t>>();
   robot_mode_ = std::make_shared<SharedField<industrial_msgs::RobotMode>>();
+  autonomous_path_action_feedback_ = std::make_shared<SharedField<agribot_msgs::AgribotNavigationManagerResult>>();
 }
 
 void AgribotBehaviorTreeNode::initAtomics()
@@ -96,9 +98,18 @@ void AgribotBehaviorTreeNode::initRosActionlibClients()
           "/agribot/navigation_manager/path_action", true);
 }
 
+void AgribotBehaviorTreeNode::initRosActionlibServers()
+{
+  autonomous_task_action_server_ =
+      std::make_unique<actionlib::SimpleActionServer<agribot_msgs::PerformAutonomousTaskAction>>(
+          (*node_handle_), "/agribot/behavior_tree/task_action",
+          boost::bind(&AgribotBehaviorTreeNode::performAutonomousTaskCallback, this, _1), false);
+
+  autonomous_task_action_server_->start();
+}
+
 void AgribotBehaviorTreeNode::initRosSubscribers()
 {
-  task_name_subscriber_ = node_handle_->subscribe("task", 1, &AgribotBehaviorTreeNode::taskNameRosCallback, this);
   robot_mode_subscriber_ = node_handle_->subscribe("mode", 1, &AgribotBehaviorTreeNode::robotModeRosCallback, this);
   obstacle_detected_subscriber_ =
       node_handle_->subscribe("obstacle_detected", 1, &AgribotBehaviorTreeNode::obstacleDetectedRosCallback, this);
@@ -152,6 +163,7 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   tree_state_publisher_ = std::make_unique<BT::PublisherZMQ>(*tree_);
 
   initRosActionlibClients();
+  initRosActionlibServers();
   initRosSubscribers();
   initRosServices();
   initTreeNodesWithRosDependencies();
@@ -168,11 +180,6 @@ void AgribotBehaviorTreeNode::run()
     ros::spinOnce();
     rate.sleep();
   }
-}
-
-void AgribotBehaviorTreeNode::taskNameRosCallback(const std_msgs::String::ConstPtr& msg)
-{
-  current_task_name_->writeData(msg->data);
 }
 
 void AgribotBehaviorTreeNode::robotModeRosCallback(const industrial_msgs::RobotMode::ConstPtr& msg)
@@ -198,6 +205,48 @@ void AgribotBehaviorTreeNode::mobileAppErrorFlagRosCallback(const agribot_msgs::
     return;
   }
   error_absent_.store(true);
+}
+
+void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::PerformAutonomousTaskGoalConstPtr& goal)
+{
+  current_task_name_->writeData(goal->task_name);
+  robot_mode_->writeData([] {
+    industrial_msgs::RobotMode msg;
+    msg.val = industrial_msgs::RobotMode::AUTO;
+    return msg;
+  }());
+  ros::Rate loop_rate(10);
+  while (ros::ok() && !autonomous_task_action_server_->isPreemptRequested())
+  {
+    // Publish feedback to TaskSupervisor
+    autonomous_task_action_server_->publishFeedback([this] {
+      agribot_msgs::PerformAutonomousTaskFeedback feedback;
+      feedback.feedback = autonomous_path_action_feedback_->getData();
+      return feedback;
+    }());
+    if (pathFinished())
+    {
+      break;
+    }
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
+  autonomous_task_action_server_->setSucceeded([this]{
+      agribot_msgs::PerformAutonomousTaskResult path_action_result;
+      path_action_result.finished = pathFinished();
+      return path_action_result;
+  }());
+  robot_mode_->writeData([] {
+    industrial_msgs::RobotMode msg;
+    msg.val = industrial_msgs::RobotMode::UNKNOWN;
+    return msg;
+  }());
+}
+
+bool AgribotBehaviorTreeNode::pathFinished()
+{
+  return (autonomous_path_action_feedback_->getData().result ==
+          autonomous_path_action_feedback_->getData().PATH_COMPLETED);
 }
 
 }  // namespace agribot_behavior

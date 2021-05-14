@@ -46,11 +46,13 @@ BT::NodeStatus Handle::tick()
 
 void Handle::initSharedFields(std::shared_ptr<SharedField<std::string>> current_task_name,
                               std::shared_ptr<SharedField<std::string>> previous_task_name,
-                              std::shared_ptr<SharedField<std::size_t>> path_progression)
+                              std::shared_ptr<SharedField<std::size_t>> path_progression,
+                              std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback)
 {
   current_task_name_ = current_task_name;
   previous_task_name_ = previous_task_name;
   path_progression_ = path_progression;
+  autonomous_path_action_feedback_ = autonomous_path_action_feedback;
 }
 
 void Handle::initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
@@ -107,7 +109,7 @@ void Handle::handleAutonomousControl()
         rate.sleep();
       }
       ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Autonomous task finished with NavigationManager status "
-                      << static_cast<int>(autonomous_path_action_feedback_.result));
+                      << static_cast<int>(autonomous_path_action_feedback_->getData().result));
     }
     else
     {
@@ -130,9 +132,9 @@ void Handle::resetAutonomousDriving()
   }
   else
   {
-    path_progression_->writeData(autonomous_path_action_feedback_.current_waypoint);
+    path_progression_->writeData(autonomous_path_action_feedback_->getData().current_waypoint);
     ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Saved path progression "
-                     << path_progression_->getData() << " out of " << autonomous_path_action_feedback_.total_waypoints
+                     << path_progression_->getData() << " out of " << autonomous_path_action_feedback_->getData().total_waypoints
                      << " waypoints");
     previous_task_name_->writeData(current_task_name_->getData());
     autonomous_path_action_client_->cancelGoal();
@@ -192,7 +194,7 @@ void Handle::autonomousPathActiveCallback()
 // Called every time feedback is received for the goal
 void Handle::autonomousPathFeedbackCallback(const agribot_msgs::PerformAutonomousPathFeedbackConstPtr& feedback)
 {
-  autonomous_path_action_feedback_ = feedback->feedback;
+  autonomous_path_action_feedback_->writeData(feedback->feedback);
 }
 
 bool Handle::taskUnchanged()
@@ -202,7 +204,7 @@ bool Handle::taskUnchanged()
 
 bool Handle::pathFinished()
 {
-  return (autonomous_path_action_feedback_.result == autonomous_path_action_feedback_.PATH_COMPLETED);
+  return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().PATH_COMPLETED);
 }
 
 }  // namespace agribot_behavior
