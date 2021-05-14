@@ -44,10 +44,11 @@ BT::NodeStatus Handle::tick()
   }
 }
 
-void Handle::initSharedFields(std::shared_ptr<SharedField<std::string>> current_task_name,
-                              std::shared_ptr<SharedField<std::string>> previous_task_name,
-                              std::shared_ptr<SharedField<std::size_t>> path_progression,
-                              std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback)
+void Handle::initSharedFields(
+    std::shared_ptr<SharedField<std::string>> current_task_name,
+    std::shared_ptr<SharedField<std::string>> previous_task_name,
+    std::shared_ptr<SharedField<std::size_t>> path_progression,
+    std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback)
 {
   current_task_name_ = current_task_name;
   previous_task_name_ = previous_task_name;
@@ -134,8 +135,8 @@ void Handle::resetAutonomousDriving()
   {
     path_progression_->writeData(autonomous_path_action_feedback_->getData().current_waypoint);
     ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Saved path progression "
-                     << path_progression_->getData() << " out of " << autonomous_path_action_feedback_->getData().total_waypoints
-                     << " waypoints");
+                     << path_progression_->getData() << " out of "
+                     << autonomous_path_action_feedback_->getData().total_waypoints << " waypoints");
     previous_task_name_->writeData(current_task_name_->getData());
     autonomous_path_action_client_->cancelGoal();
   }
@@ -204,7 +205,8 @@ bool Handle::taskUnchanged()
 
 bool Handle::pathFinished()
 {
-  return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().PATH_COMPLETED);
+  return (autonomous_path_action_feedback_->getData().result ==
+          autonomous_path_action_feedback_->getData().PATH_COMPLETED);
 }
 
 }  // namespace agribot_behavior
