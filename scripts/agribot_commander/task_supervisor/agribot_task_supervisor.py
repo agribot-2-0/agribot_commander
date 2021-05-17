@@ -2,13 +2,11 @@
 
 
 import threading
-import time
 import rospy
 
 import actionlib
 from agribot_msgs.msg import PerformAutonomousTaskAction
 from agribot_msgs.msg import PerformAutonomousTaskGoal
-from std_msgs.msg import String
 
 
 class AgribotTaskSupervisor(object):
@@ -43,15 +41,17 @@ class AgribotTaskSupervisor(object):
                     self.set_goal_task(self.actual_task_name)
         self.callback_done.set()
 
-    def goal_task_callback_active(self):
-        #TODO(lchojnacki): implement sending some reaction to goal task action active (eg. sending to firestore)
+    def goal_task_callback_active(self):  # pylint: disable=no-self-use
+        # TODO(lchojnacki): implement sending some reaction to goal task action active 
+        # (eg. sending active status to firestore)
         return
 
-    def goal_task_callback_feedback(self, feedback):
-        #TODO(lchojnacki): implement sending some reaction to goal task action feedback (eg. sending to firestore)
+    def goal_task_callback_feedback(self, feedback):  # pylint: disable=unused-argument,no-self-use
+        # TODO(lchojnacki): implement sending some reaction to goal task action feedback
+        # (eg. sending feedback to firestore)
         return
 
-    def goal_task_callback_done(self, state, result):
+    def goal_task_callback_done(self, state, result):  # pylint: disable=unused-argument,no-self-use
         # after finishing task, delete actual task from tasks list and set actual_task to
         # empty string in Firestore assume that task is completed when previous state is
         # TaskCompletionRaport from SM and actual state is Standby
@@ -69,8 +69,8 @@ class AgribotTaskSupervisor(object):
                                               active_cb=self.goal_task_callback_active,
                                               feedback_cb=self.goal_task_callback_feedback,
                                               done_cb=self.goal_task_callback_done)
-        except Exception as e:
-            rospy.logerror('[AgribotTaskSupervisor] Error sending goal task')
+        except Exception as my_except:
+            rospy.logerr("[AgribotTaskSupervisor] Failed to send task to beavior_tree: {}".format(my_except))
 
     @staticmethod
     def run():
