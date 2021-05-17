@@ -92,7 +92,7 @@ void Handle::handleAutonomousControl()
     if (taskUnchanged())  // continue path from last visited waypoint
     {
       ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Path unchanged. Continuing path from waypoint "
-                       << static_cast<int>(path_progression_->getData()));
+                      << static_cast<int>(path_progression_->getData()));
     }
     else
     {
@@ -182,6 +182,8 @@ void Handle::sendAutonomousPathGoal(const std::vector<sensor_msgs::NavSatFix>& p
 void Handle::autonomousPathDoneCallback(const actionlib::SimpleClientGoalState& state,
                                         const agribot_msgs::PerformAutonomousPathResultConstPtr& result)
 {
+  static_cast<void>(state);
+  static_cast<void>(result);
 }
 
 void Handle::autonomousPathActiveCallback()
