@@ -42,7 +42,7 @@ class AgribotTaskSupervisor(object):
         self.callback_done.set()
 
     def goal_task_callback_active(self):  # pylint: disable=no-self-use
-        # TODO(lchojnacki): implement sending some reaction to goal task action active 
+        # TODO(lchojnacki): implement sending some reaction to goal task action active
         # (eg. sending active status to firestore)
         return
 
@@ -69,8 +69,8 @@ class AgribotTaskSupervisor(object):
                                               active_cb=self.goal_task_callback_active,
                                               feedback_cb=self.goal_task_callback_feedback,
                                               done_cb=self.goal_task_callback_done)
-        except Exception as my_except:
-            rospy.logerr("[AgribotTaskSupervisor] Failed to send task to beavior_tree: {}".format(my_except))
+        except Exception as my_except:  # pylint: disable=broad-except
+            rospy.logerr("[AgribotTaskSupervisor] Failed to send task: {}".format(my_except))
 
     @staticmethod
     def run():
