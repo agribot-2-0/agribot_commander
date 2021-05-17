@@ -91,7 +91,7 @@ void Handle::handleAutonomousControl()
   {
     if (taskUnchanged())  // continue path from last visited waypoint
     {
-      ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Path unchanged. Continuing path from waypoint "
+      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Path unchanged. Continuing path from waypoint "
                        << static_cast<int>(path_progression_->getData()));
     }
     else
@@ -179,20 +179,15 @@ void Handle::sendAutonomousPathGoal(const std::vector<sensor_msgs::NavSatFix>& p
       boost::bind(&agribot_behavior::Handle::autonomousPathFeedbackCallback, this, _1));
 }
 
-// Called once when the goal completes
 void Handle::autonomousPathDoneCallback(const actionlib::SimpleClientGoalState& state,
                                         const agribot_msgs::PerformAutonomousPathResultConstPtr& result)
 {
-  ROS_WARN_STREAM("[BehaviorTree][autonomousPathDoneCallback] finish status: " << static_cast<int>(result->finished));
-  ROS_WARN_STREAM("[BehaviorTree][autonomousPathDoneCallback] state: " << static_cast<int>(state.state_));
 }
 
-// Called once when the goal becomes active
 void Handle::autonomousPathActiveCallback()
 {
 }
 
-// Called every time feedback is received for the goal
 void Handle::autonomousPathFeedbackCallback(const agribot_msgs::PerformAutonomousPathFeedbackConstPtr& feedback)
 {
   autonomous_path_action_feedback_->writeData(feedback->feedback);
