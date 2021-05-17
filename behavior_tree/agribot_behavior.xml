@@ -27,6 +27,7 @@
                             <Action ID="Handle" action_to_handle="manual" name="handle manual control"/>
                         </ReactiveSequence>
                         <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
+                        <Action ID="SwitchTtcontrolState" ttcontrol_state="safe_state"/>
                     </Fallback>
                 </Sequence>
                 <Sequence name="auto condition check">
@@ -39,6 +40,7 @@
                         <Condition ID="ObstacleAbsent" name="true if obstacle absent"/>
                     </SequenceStar>
                     <Action ID="SwitchControlArbiters" control_source="navigation" name="switch source to navigation"/>
+                    <Action ID="SwitchTtcontrolState" ttcontrol_state="auto"/>
                     <Action ID="LightsControl" lights_control="auto"/>
                     <Fallback name="switch source from navigation to none">
                         <ReactiveSequence name="autonomous task">
@@ -47,6 +49,7 @@
                             <Action ID="Handle" action_to_handle="navigation" name="handle autonomous task"/>
                         </ReactiveSequence>
                         <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
+                        <Action ID="SwitchTtcontrolState" ttcontrol_state="safe_state"/>
                     </Fallback>
                 </Sequence>
             </Fallback>
@@ -67,6 +70,9 @@
         <Condition ID="ObstacleAbsent"/>
         <Action ID="SwitchControlArbiters">
             <input_port name="control_source" type="tool_manager::ControlSource"/>
+        </Action>
+        <Action ID="SwitchTtcontrolState">
+            <input_port name="ttcontrol_state"/>
         </Action>
     </TreeNodesModel>
     <!-- ////////// -->

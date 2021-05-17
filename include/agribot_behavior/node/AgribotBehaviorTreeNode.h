@@ -8,6 +8,7 @@
 #include <agribot_behavior/action/Handle.h>
 #include <agribot_behavior/action/LightsControl.h>
 #include <agribot_behavior/action/SwitchControlArbiters.h>
+#include <agribot_behavior/action/SwitchTtcontrolState.h>
 #include <agribot_behavior/common/OneTimeLogger.h>
 #include <agribot_common/CommonFunctions/ros_common_functions.h>
 
@@ -21,6 +22,7 @@
 
 #include <std_srvs/Empty.h>
 #include <std_msgs/String.h>
+#include <std_srvs/Trigger.h>
 #include <industrial_msgs/RobotMode.h>
 #include <agribot_msgs/LampsControl.h>
 #include <agribot_behavior/common/SharedField.h>
@@ -85,6 +87,8 @@ private:
   std::shared_ptr<ros::ServiceClient> cmd_vel_navigation_client_;
   std::shared_ptr<ros::ServiceClient> cmd_vel_stop_client_;
   std::shared_ptr<ros::ServiceClient> hal_lights_client_;
+  std::shared_ptr<ros::ServiceClient> ttcontrol_safe_state_client_;
+  std::shared_ptr<ros::ServiceClient> ttcontrol_auto_state_client_;
 
   // Variables shared between tree nodes, which are changed in callbacks. The thread safety is guaranteed by Shared<>
   // class

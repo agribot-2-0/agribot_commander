@@ -40,6 +40,7 @@ void AgribotBehaviorTreeNode::registerTreeNodes()
   factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
   factory_->registerNodeType<Handle>("Handle");
   factory_->registerNodeType<LightsControl>("LightsControl");
+  factory_->registerNodeType<SwitchTtcontrolState>("SwitchTtcontrolState");
   factory_->registerSimpleCondition(
       "ObstacleAbsent", std::bind(&AgribotBehaviorTreeNode::simpleConditionCheck, this, CheckAbsenceOf::Obstacle));
   factory_->registerSimpleCondition("MobileAppErrorAbsent", std::bind(&AgribotBehaviorTreeNode::simpleConditionCheck,
@@ -77,6 +78,11 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto lights_control = dynamic_cast<LightsControl*>(node.get()); lights_control != nullptr)
     {
       lights_control->initLightsClient(hal_lights_client_);
+    }
+    if (auto switch_ttcontrol_state = dynamic_cast<SwitchTtcontrolState*>(node.get());
+        switch_ttcontrol_state != nullptr)
+    {
+      switch_ttcontrol_state->initTtcontrolStateClients(ttcontrol_safe_state_client_, ttcontrol_auto_state_client_);
     }
   }
 }
@@ -135,6 +141,10 @@ void AgribotBehaviorTreeNode::initRosServices()
       node_handle_->serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_stop"));
   hal_lights_client_ = std::make_shared<ros::ServiceClient>(
       node_handle_->serviceClient<agribot_msgs::LampsControl>("/agribot/hal_lights/change_lamps_configuration"));
+  ttcontrol_safe_state_client_ =
+      std::make_shared<ros::ServiceClient>(node_handle_->serviceClient<std_srvs::Trigger>("/agribot/set_safe_state"));
+  ttcontrol_auto_state_client_ = std::make_shared<ros::ServiceClient>(
+      node_handle_->serviceClient<std_srvs::Trigger>("/agribot/set_autonomous_mode"));
 }
 
 // TODO(someone): while refactoring change state_machine -> behavior_tree in topic names
