@@ -63,7 +63,8 @@ link_directories(
 
 
 # -------------------BT------------------------------------------------------------------------------------
-list(APPEND agribot_behavior_sources src/action/CheckStartConditions.cpp src/action/SwitchControlArbiters.cpp src/action/Handle.cpp)
+list(APPEND agribot_behavior_sources src/action/CheckStartConditions.cpp src/action/SwitchControlArbiters.cpp 
+    src/action/Handle.cpp src/action/LightsControl.cpp)
 list(APPEND agribot_behavior_sources src/common/SharedField.cpp src/common/OneTimeLogger.cpp)
 list(APPEND agribot_behavior_sources src/path_handle/PathParser.cpp)
 
