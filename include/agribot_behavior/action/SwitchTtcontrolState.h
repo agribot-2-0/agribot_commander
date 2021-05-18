@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <agribot_behavior/common/SharedField.h>
 #include <agribot_behavior/generic_ports/TtcontrolStatePort.h>
 #include <behaviortree_cpp_v3/action_node.h>
 #include <ros/console.h>

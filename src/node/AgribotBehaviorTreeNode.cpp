@@ -41,6 +41,7 @@ void AgribotBehaviorTreeNode::registerTreeNodes()
   factory_->registerNodeType<Handle>("Handle");
   factory_->registerNodeType<LightsControl>("LightsControl");
   factory_->registerNodeType<SwitchTtcontrolState>("SwitchTtcontrolState");
+  factory_->registerNodeType<ControlEngine>("ControlEngine");
   factory_->registerSimpleCondition(
       "ObstacleAbsent", std::bind(&AgribotBehaviorTreeNode::simpleConditionCheck, this, CheckAbsenceOf::Obstacle));
   factory_->registerSimpleCondition("MobileAppErrorAbsent", std::bind(&AgribotBehaviorTreeNode::simpleConditionCheck,
@@ -83,6 +84,10 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
         switch_ttcontrol_state != nullptr)
     {
       switch_ttcontrol_state->initTtcontrolStateClients(ttcontrol_safe_state_client_, ttcontrol_auto_state_client_);
+    }
+    if (auto control_engine = dynamic_cast<ControlEngine*>(node.get()); control_engine != nullptr)
+    {
+      control_engine->initEngineControlClients(engine_start_client_, engine_stop_client_);
     }
   }
 }
@@ -145,6 +150,10 @@ void AgribotBehaviorTreeNode::initRosServices()
       std::make_shared<ros::ServiceClient>(node_handle_->serviceClient<std_srvs::Trigger>("/agribot/set_safe_state"));
   ttcontrol_auto_state_client_ = std::make_shared<ros::ServiceClient>(
       node_handle_->serviceClient<std_srvs::Trigger>("/agribot/set_autonomous_mode"));
+  engine_start_client_ =
+      std::make_shared<ros::ServiceClient>(node_handle_->serviceClient<std_srvs::Trigger>("/agribot/engine_start"));
+  engine_stop_client_ =
+      std::make_shared<ros::ServiceClient>(node_handle_->serviceClient<std_srvs::Trigger>("/agribot/engine_stop"));
 }
 
 // TODO(someone): while refactoring change state_machine -> behavior_tree in topic names
@@ -264,8 +273,7 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
 
 bool AgribotBehaviorTreeNode::pathFinished()
 {
-  return (autonomous_path_action_feedback_->getData().result ==
-          autonomous_path_action_feedback_->getData().COMPLETED);
+  return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().COMPLETED);
 }
 
 }  // namespace agribot_behavior
