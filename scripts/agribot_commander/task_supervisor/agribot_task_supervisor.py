@@ -69,6 +69,7 @@ class AgribotTaskSupervisor(object):
                                               active_cb=self.goal_task_callback_active,
                                               feedback_cb=self.goal_task_callback_feedback,
                                               done_cb=self.goal_task_callback_done)
+            rospy.logerr("[AgribotTaskSupervisor] Sent task {}".format(task))
         except Exception as my_except:  # pylint: disable=broad-except
             rospy.logerr("[AgribotTaskSupervisor] Failed to send task: {}".format(my_except))
 

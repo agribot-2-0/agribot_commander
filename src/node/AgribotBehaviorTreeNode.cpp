@@ -265,7 +265,7 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
 bool AgribotBehaviorTreeNode::pathFinished()
 {
   return (autonomous_path_action_feedback_->getData().result ==
-          autonomous_path_action_feedback_->getData().PATH_COMPLETED);
+          autonomous_path_action_feedback_->getData().COMPLETED);
 }
 
 }  // namespace agribot_behavior

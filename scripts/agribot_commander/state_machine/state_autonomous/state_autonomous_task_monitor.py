@@ -143,7 +143,7 @@ class AutonomousTaskMonitor(smach.State):
             # if task is loaded
             if self.move_base_result != AgribotNavigationManagerResult.PAUSED:
                 #if task ended succesfully
-                if self.move_base_result == AgribotNavigationManagerResult.PATH_COMPLETED:
+                if self.move_base_result == AgribotNavigationManagerResult.COMPLETED:
                     ud.auto_task_monitor_output = 'succes'
                     output_transition = 'tr_succes'
                     self.mutex.release()

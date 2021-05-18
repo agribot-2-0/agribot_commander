@@ -3,6 +3,7 @@
  */
 
 #include <agribot_behavior/action/Handle.h>
+#include <agribot_common/CommonFunctions/navigation_manager_result.h>
 
 namespace agribot_behavior
 {
@@ -109,8 +110,9 @@ void Handle::handleAutonomousControl()
         ros::spinOnce();
         rate.sleep();
       }
-      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Autonomous task finished with NavigationManager status "
-                      << static_cast<int>(autonomous_path_action_feedback_->getData().result));
+      ROS_WARN_STREAM(
+          "[BehaviorTree][HandleAuto] Autonomous task finished with NavigationManager status "
+          << common_functions::navigationManagerResultToString(autonomous_path_action_feedback_->getData()));
     }
     else
     {
@@ -202,8 +204,7 @@ bool Handle::taskUnchanged()
 
 bool Handle::pathFinished()
 {
-  return (autonomous_path_action_feedback_->getData().result ==
-          autonomous_path_action_feedback_->getData().PATH_COMPLETED);
+  return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().COMPLETED);
 }
 
 }  // namespace agribot_behavior
