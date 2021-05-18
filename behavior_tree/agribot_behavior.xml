@@ -26,8 +26,10 @@
                             <Condition ID="MobileAppErrorAbsent"/>
                             <Action ID="Handle" action_to_handle="manual" name="handle manual control"/>
                         </ReactiveSequence>
-                        <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
-                        <Action ID="SwitchTtcontrolState" ttcontrol_state="safe_state"/>
+                        <Sequence>
+                            <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
+                            <Action ID="SwitchTtcontrolState" ttcontrol_state="safe_state"/>
+                        </Sequence>
                     </Fallback>
                 </Sequence>
                 <Sequence name="auto condition check">
@@ -49,8 +51,10 @@
                             <Condition ID="ObstacleAbsent"/>
                             <Action ID="Handle" action_to_handle="navigation" name="handle autonomous task"/>
                         </ReactiveSequence>
-                        <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
-                        <Action ID="SwitchTtcontrolState" ttcontrol_state="safe_state"/>
+                        <Sequence>
+                            <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
+                            <Action ID="SwitchTtcontrolState" ttcontrol_state="safe_state"/>
+                        </Sequence>
                     </Fallback>
                 </Sequence>
             </Fallback>
