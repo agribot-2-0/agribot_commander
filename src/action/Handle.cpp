@@ -141,6 +141,11 @@ void Handle::resetAutonomousDriving()
                      << autonomous_path_action_feedback_->getData().total_waypoints << " waypoints");
     previous_task_name_->writeData(current_task_name_->getData());
     autonomous_path_action_client_->cancelGoal();
+    autonomous_path_action_feedback_->writeData([] {
+      agribot_msgs::AgribotNavigationManagerResult feedback;
+      feedback.result = feedback.PAUSED;
+      return feedback;
+    }());
   }
 }
 
