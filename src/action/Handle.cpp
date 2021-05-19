@@ -143,7 +143,7 @@ void Handle::handleAutonomousControl()
 
 void Handle::resetAutonomousDriving()
 {
-  if (pathFinished())
+  if (pathFinished() || pathAborted())
   {
     path_progression_->writeData(0);
     current_task_name_->writeData("");
@@ -225,6 +225,11 @@ bool Handle::taskUnchanged()
 bool Handle::pathFinished()
 {
   return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().COMPLETED);
+}
+
+bool Handle::pathAborted()
+{
+  return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().ABORTED);
 }
 
 }  // namespace agribot_behavior

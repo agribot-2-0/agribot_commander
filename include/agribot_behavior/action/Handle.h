@@ -52,6 +52,7 @@ private:
 
   bool taskUnchanged();
   bool pathFinished();
+  bool pathAborted();
 
 public:
   Handle(const std::string& name, const BT::NodeConfiguration& config);
