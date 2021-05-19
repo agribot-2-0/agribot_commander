@@ -32,8 +32,9 @@
 #include <agribot_msgs/ToolManagerControlSource.h>
 #include <agribot_msgs/AgribotNavigationManagerResult.h>
 #include <agribot_msgs/AgribotObstacleDetection.h>
-#include <sensor_msgs/NavSatFix.h>
+#include <agribot_msgs/AgribotTtcontrolState.h>
 #include <agribot_msgs/AgribotAppErrorFlag.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <behaviortree_cpp_v3/bt_factory.h>
 #include <behaviortree_cpp_v3/loggers/bt_zmq_publisher.h>
 
@@ -76,9 +77,13 @@ private:
   // Subscribers - initialized inside AgribotBehaviorTreeNode. Also the callbacks are defined in
   // AgribotBehaviorTreeNode. The callbacks are thread-safe and are distributing ros messages to proper class fields.
   // The tree nodes, which need access to the fileds, are granted with shared_ptr to desired field
-  ros::Subscriber robot_mode_subscriber_;
   ros::Subscriber obstacle_detected_subscriber_;
   ros::Subscriber mobile_app_error_flag_subscriber_;
+  ros::Subscriber ttcontrol_state_subscriber_;
+
+  // Publishers - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to publish something are
+  // granted with shared_ptr of the Publishers
+  std::shared_ptr<ros::Publisher> robot_mode_publisher_;
 
   // Services - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to call service are
   // granted with shared_ptr of the ServiceClient. The implementation of service call is stored inside individual tree
@@ -100,6 +105,7 @@ private:
   std::shared_ptr<SharedField<std::size_t>> path_progression_;
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
   std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback_;
+  std::shared_ptr<SharedField<agribot_msgs::AgribotTtcontrolState>> ttcontrol_state_;
 
   std::atomic<bool> obstacle_absent_;
   std::atomic<bool> error_absent_;
@@ -113,12 +119,14 @@ private:
   void initRosActionlibClients();
   void initRosActionlibServers();
   void initRosSubscribers();
+  void initRosPublishers();
   void initRosServices();
 
   void taskNameRosCallback(const std_msgs::String::ConstPtr& msg);
   void robotModeRosCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
   void obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
   void mobileAppErrorFlagRosCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
+  void ttcontrolStateCallback(const agribot_msgs::AgribotTtcontrolState::ConstPtr& msg);
 
   void performAutonomousTaskCallback(const agribot_msgs::PerformAutonomousTaskGoalConstPtr& goal);
   bool pathFinished();

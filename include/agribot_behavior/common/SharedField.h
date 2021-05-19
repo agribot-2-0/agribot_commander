@@ -6,6 +6,7 @@
 
 #include <agribot_msgs/AgribotNavigationManagerResult.h>
 #include <industrial_msgs/RobotMode.h>
+#include <agribot_msgs/AgribotTtcontrolState.h>
 
 #include <shared_mutex>
 #include <string>

@@ -31,6 +31,7 @@ private:
   std::unique_ptr<PathParser> path_parser_;
   std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
       autonomous_path_action_client_;
+  std::shared_ptr<ros::Publisher> robot_mode_publisher_;
   std::atomic<bool> halt_requested_;
   std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback_;
   std::shared_ptr<SharedField<std::string>> current_task_name_;
@@ -65,5 +66,6 @@ public:
       std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback);
   void initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
                           autonomous_path_action_client);
+  void initPublisher(std::shared_ptr<ros::Publisher> robot_mode_publisher);
 };
 }  // namespace agribot_behavior

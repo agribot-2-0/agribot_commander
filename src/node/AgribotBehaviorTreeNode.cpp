@@ -67,13 +67,14 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto check_start_conditions = dynamic_cast<CheckStartConditions*>(node.get());
         check_start_conditions != nullptr)
     {
-      check_start_conditions->initSharedFields(current_task_name_, robot_mode_);
+      check_start_conditions->initSharedFields(current_task_name_, robot_mode_, ttcontrol_state_);
     }
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
       handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_,
                                autonomous_path_action_feedback_);
       handle->initActionlibs(autonomous_path_action_client_);
+      handle->initPublisher(robot_mode_publisher_);
       handle->initPathParser(path_folder_, task_folder_);
     }
     if (auto lights_control = dynamic_cast<LightsControl*>(node.get()); lights_control != nullptr)
@@ -99,6 +100,7 @@ void AgribotBehaviorTreeNode::initSharedData()
   path_progression_ = std::make_shared<SharedField<std::size_t>>();
   robot_mode_ = std::make_shared<SharedField<industrial_msgs::RobotMode>>();
   autonomous_path_action_feedback_ = std::make_shared<SharedField<agribot_msgs::AgribotNavigationManagerResult>>();
+  ttcontrol_state_ = std::make_shared<SharedField<agribot_msgs::AgribotTtcontrolState>>();
 }
 
 void AgribotBehaviorTreeNode::initAtomics()
@@ -126,11 +128,18 @@ void AgribotBehaviorTreeNode::initRosActionlibServers()
 
 void AgribotBehaviorTreeNode::initRosSubscribers()
 {
-  robot_mode_subscriber_ = node_handle_->subscribe("mode", 1, &AgribotBehaviorTreeNode::robotModeRosCallback, this);
   obstacle_detected_subscriber_ =
       node_handle_->subscribe("obstacle_detected", 1, &AgribotBehaviorTreeNode::obstacleDetectedRosCallback, this);
   mobile_app_error_flag_subscriber_ =
       node_handle_->subscribe("mobile_app_error", 1, &AgribotBehaviorTreeNode::mobileAppErrorFlagRosCallback, this);
+  ttcontrol_state_subscriber_ =
+      node_handle_->subscribe("/agribot/ttcontrol_state", 1, &AgribotBehaviorTreeNode::ttcontrolStateCallback, this);
+}
+
+void AgribotBehaviorTreeNode::initRosPublishers()
+{
+  robot_mode_publisher_ = std::make_shared<ros::Publisher>(
+      node_handle_->advertise<industrial_msgs::RobotMode>("/agribot/behavior_tree/robot_mode", 1));
 }
 
 void AgribotBehaviorTreeNode::initRosServices()
@@ -156,7 +165,6 @@ void AgribotBehaviorTreeNode::initRosServices()
       std::make_shared<ros::ServiceClient>(node_handle_->serviceClient<std_srvs::Trigger>("/agribot/engine_stop"));
 }
 
-// TODO(someone): while refactoring change state_machine -> behavior_tree in topic names
 AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   : factory_{ std::make_unique<BT::BehaviorTreeFactory>() }
 {
@@ -192,6 +200,7 @@ AgribotBehaviorTreeNode::AgribotBehaviorTreeNode(int argc, char** argv)
   initRosActionlibServers();
   initRosSubscribers();
   initRosServices();
+  initRosPublishers();
   initTreeNodesWithRosDependencies();
 }
 
@@ -231,6 +240,11 @@ void AgribotBehaviorTreeNode::mobileAppErrorFlagRosCallback(const agribot_msgs::
     return;
   }
   error_absent_.store(true);
+}
+
+void AgribotBehaviorTreeNode::ttcontrolStateCallback(const agribot_msgs::AgribotTtcontrolState::ConstPtr& msg)
+{
+  ttcontrol_state_->writeData(*msg);
 }
 
 void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::PerformAutonomousTaskGoalConstPtr& goal)
@@ -277,3 +291,9 @@ bool AgribotBehaviorTreeNode::pathFinished()
 }
 
 }  // namespace agribot_behavior
+
+/*
+- Wywalic subskrybowanie robot mode
+- Dodac publikowanie robot mode
+- Zamienic w warunkach na maual i auto tak, aby sprawdzany byl stan publikowany przez ttcontrol_state
+*/

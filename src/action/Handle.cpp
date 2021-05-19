@@ -63,6 +63,11 @@ void Handle::initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribo
   autonomous_path_action_client_ = autonomous_path_action_client;
 }
 
+void Handle::initPublisher(std::shared_ptr<ros::Publisher> robot_mode_publisher)
+{
+  robot_mode_publisher_ = robot_mode_publisher;
+}
+
 void Handle::halt()
 {
   halt_requested_.store(true);
@@ -79,6 +84,11 @@ void Handle::handleManualControl()
   ros::Rate rate(10);
   while (!halt_requested_ && ros::ok())
   {
+    robot_mode_publisher_->publish([] {
+      industrial_msgs::RobotMode msg;
+      msg.val = industrial_msgs::RobotMode::MANUAL;
+      return msg;
+    }());
     ros::spinOnce();
     rate.sleep();
   }
@@ -107,6 +117,11 @@ void Handle::handleAutonomousControl()
       ros::Rate rate{ 10 };
       while (!halt_requested_ && ros::ok() && navigationManagerActive())
       {
+        robot_mode_publisher_->publish([] {
+          industrial_msgs::RobotMode msg;
+          msg.val = industrial_msgs::RobotMode::AUTO;
+          return msg;
+        }());
         ros::spinOnce();
         rate.sleep();
       }
