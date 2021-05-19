@@ -47,6 +47,9 @@
                     <Action ID="ControlEngine" action="start"/>
                     <Fallback name="switch source from navigation to none">
                         <ReactiveSequence name="autonomous task">
+                            <Inverter>
+                                <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
+                            </Inverter>
                             <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for auto drive"/>
                             <Condition ID="ObstacleAbsent"/>
                             <Action ID="Handle" action_to_handle="navigation" name="handle autonomous task"/>
@@ -66,7 +69,7 @@
             <input_port name="condition_to_check" type="tool_manager::ControlSource"/>
         </Action>
         <Action ID="ControlEngine">
-            <input_port name="action"/>
+            <input_port name="action" type="agribot_behavior::ControlEngineAction"/>
         </Action>
         <Action ID="Handle">
             <input_port name="action_to_handle" type="tool_manager::ControlSource"/>
@@ -80,7 +83,7 @@
             <input_port name="control_source" type="tool_manager::ControlSource"/>
         </Action>
         <Action ID="SwitchTtcontrolState">
-            <input_port name="ttcontrol_state"/>
+            <input_port name="ttcontrol_state" type="agribot_behavior::TtcontrolState"/>
         </Action>
     </TreeNodesModel>
     <!-- ////////// -->
