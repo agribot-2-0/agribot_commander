@@ -69,8 +69,8 @@ BT::NodeStatus SwitchTtcontrolState::switchToAutonomous()
   }
   else if (trigger.response.success == false)
   {
-    ROS_ERROR_STREAM(
-        "[BehaviorTree][SwitchTtcontrolState] Failed to switch TTControl state. Enter safe state from mobile app first");
+    ROS_ERROR_STREAM("[BehaviorTree][SwitchTtcontrolState] Failed to switch TTControl state.");
+    ROS_ERROR_STREAM("[BehaviorTree][SwitchTtcontrolState] Enter safe state from mobile app first");
     return BT::NodeStatus::FAILURE;
   }
   ROS_WARN_STREAM("[BehaviorTree][SwitchTtcontrolState] TTControl state changed");

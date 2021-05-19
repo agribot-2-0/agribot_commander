@@ -291,9 +291,3 @@ bool AgribotBehaviorTreeNode::pathFinished()
 }
 
 }  // namespace agribot_behavior
-
-/*
-- Wywalic subskrybowanie robot mode
-- Dodac publikowanie robot mode
-- Zamienic w warunkach na maual i auto tak, aby sprawdzany byl stan publikowany przez ttcontrol_state
-*/
