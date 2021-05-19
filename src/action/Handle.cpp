@@ -143,7 +143,7 @@ void Handle::handleAutonomousControl()
 
 void Handle::resetAutonomousDriving()
 {
-  if (pathFinished() || pathAborted())
+  if (pathFinished())
   {
     path_progression_->writeData(0);
     current_task_name_->writeData("");
@@ -204,7 +204,16 @@ void Handle::sendAutonomousPathGoal(const std::vector<sensor_msgs::NavSatFix>& p
 void Handle::autonomousPathDoneCallback(const actionlib::SimpleClientGoalState& state,
                                         const agribot_msgs::PerformAutonomousPathResultConstPtr& result)
 {
-  static_cast<void>(state);
+  if (state.state_ == state.ABORTED)
+  {
+    autonomous_path_action_feedback_->writeData([] {
+      agribot_msgs::AgribotNavigationManagerResult feedback;
+      feedback.result = feedback.ABORTED;
+      return feedback;
+    }());
+    path_progression_->writeData(0);
+    current_task_name_->writeData("");
+  }
   static_cast<void>(result);
 }
 
@@ -225,11 +234,6 @@ bool Handle::taskUnchanged()
 bool Handle::pathFinished()
 {
   return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().COMPLETED);
-}
-
-bool Handle::pathAborted()
-{
-  return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().ABORTED);
 }
 
 }  // namespace agribot_behavior
