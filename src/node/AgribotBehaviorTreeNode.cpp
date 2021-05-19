@@ -266,18 +266,27 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
     }());
     if (pathFinished())
     {
-      // Reset feedback
-      autonomous_path_action_feedback_->writeData(agribot_msgs::AgribotNavigationManagerResult());
+      autonomous_task_action_server_->setSucceeded([this] {
+        agribot_msgs::PerformAutonomousTaskResult path_action_result;
+        path_action_result.finished = true;
+        return path_action_result;
+      }());
+      break;
+    }
+    if (pathAborted())
+    {
+      autonomous_task_action_server_->setSucceeded([this] {
+        agribot_msgs::PerformAutonomousTaskResult path_action_result;
+        path_action_result.finished = false;
+        return path_action_result;
+      }());
       break;
     }
     ros::spinOnce();
     loop_rate.sleep();
   }
-  autonomous_task_action_server_->setSucceeded([this] {
-    agribot_msgs::PerformAutonomousTaskResult path_action_result;
-    path_action_result.finished = pathFinished();
-    return path_action_result;
-  }());
+  // Reset feedback
+  autonomous_path_action_feedback_->writeData(agribot_msgs::AgribotNavigationManagerResult());
   robot_mode_->writeData([] {
     industrial_msgs::RobotMode msg;
     msg.val = industrial_msgs::RobotMode::UNKNOWN;
@@ -288,6 +297,11 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
 bool AgribotBehaviorTreeNode::pathFinished()
 {
   return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().COMPLETED);
+}
+
+bool AgribotBehaviorTreeNode::pathAborted()
+{
+  return (autonomous_path_action_feedback_->getData().result == autonomous_path_action_feedback_->getData().ABORTED);
 }
 
 }  // namespace agribot_behavior
