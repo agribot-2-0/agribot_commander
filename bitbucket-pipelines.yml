@@ -22,6 +22,7 @@ pipelines:
            - pylint --rcfile=agribot_common/pylint_conf/.pylintrc scripts/*
      - step:
          name: "ROS Build"
+         size: 2x
          services:
            - docker
          script:
@@ -35,4 +36,4 @@ pipelines:
 definitions:
   services:
     docker:
-      memory: 2048
+      memory: 7128
