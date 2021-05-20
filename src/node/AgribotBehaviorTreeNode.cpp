@@ -287,6 +287,10 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
         ROS_ERROR_STREAM("[BehaviorTree] Task aborted. Move base error");
         break;
       }
+      if(ttcontrolInManualMode())
+      {
+        break;
+      }
       ros::spinOnce();
       loop_rate.sleep();
     }
@@ -303,6 +307,12 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
     return msg;
   }());
 }  // namespace agribot_behavior
+
+
+bool AgribotBehaviorTreeNode::ttcontrolInManualMode()
+{
+  return ttcontrol_state_->getData().manual_state == agribot_msgs::AgribotTtcontrolState::STEERING_ACTIVE;
+}
 
 bool AgribotBehaviorTreeNode::pathFinished()
 {

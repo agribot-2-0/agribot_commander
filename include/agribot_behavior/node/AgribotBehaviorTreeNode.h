@@ -131,6 +131,7 @@ private:
   void performAutonomousTaskCallback(const agribot_msgs::PerformAutonomousTaskGoalConstPtr& goal);
   bool pathFinished();
   bool pathAborted();
+  bool ttcontrolInManualMode();
 
 public:
   AgribotBehaviorTreeNode(int argc, char** argv);
