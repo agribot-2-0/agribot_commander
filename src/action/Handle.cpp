@@ -212,7 +212,6 @@ void Handle::autonomousPathDoneCallback(const actionlib::SimpleClientGoalState& 
       return feedback;
     }());
     path_progression_->writeData(0);
-    current_task_name_->writeData("");
   }
   static_cast<void>(result);
 }

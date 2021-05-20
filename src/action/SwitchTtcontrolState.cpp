@@ -52,10 +52,10 @@ BT::NodeStatus SwitchTtcontrolState::switchToSafeState()
   std_srvs::Trigger trigger;
   if (!ttcontrol_safe_state_client_->call(trigger))
   {
-    ROS_ERROR_STREAM("[BehaviorTree][SwitchTtcontrolState] Failed to switch TTControl state");
+    ROS_ERROR_STREAM("[BehaviorTree][SwitchTtcontrolState] Failed to switch TTControl state to safe state");
     return BT::NodeStatus::FAILURE;
   }
-  ROS_WARN_STREAM("[BehaviorTree][SwitchTtcontrolState] TTControl state changed");
+  ROS_WARN_STREAM("[BehaviorTree][SwitchTtcontrolState] TTControl state changed to safe state");
   return BT::NodeStatus::SUCCESS;
 }
 
@@ -64,16 +64,16 @@ BT::NodeStatus SwitchTtcontrolState::switchToAutonomous()
   std_srvs::Trigger trigger;
   if (!ttcontrol_auto_state_client_->call(trigger))
   {
-    ROS_ERROR_STREAM("[BehaviorTree][SwitchTtcontrolState] Failed to switch TTControl state. Service error");
+    ROS_ERROR_STREAM("[BehaviorTree][SwitchTtcontrolState] Failed to switch TTControl state to auto. Service error");
     return BT::NodeStatus::FAILURE;
   }
   else if (trigger.response.success == false)
   {
-    ROS_ERROR_STREAM("[BehaviorTree][SwitchTtcontrolState] Failed to switch TTControl state.");
+    ROS_ERROR_STREAM("[BehaviorTree][SwitchTtcontrolState] Failed to switch TTControl state to auto");
     ROS_ERROR_STREAM("[BehaviorTree][SwitchTtcontrolState] Enter safe state from mobile app first");
     return BT::NodeStatus::FAILURE;
   }
-  ROS_WARN_STREAM("[BehaviorTree][SwitchTtcontrolState] TTControl state changed");
+  ROS_WARN_STREAM("[BehaviorTree][SwitchTtcontrolState] TTControl state changed state to auto");
   return BT::NodeStatus::SUCCESS;
 }
 

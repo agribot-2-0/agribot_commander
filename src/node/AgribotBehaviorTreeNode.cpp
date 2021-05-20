@@ -250,52 +250,59 @@ void AgribotBehaviorTreeNode::ttcontrolStateCallback(const agribot_msgs::Agribot
 void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::PerformAutonomousTaskGoalConstPtr& goal)
 {
   current_task_name_->writeData(goal->task_name);
-  robot_mode_->writeData([] {
-    industrial_msgs::RobotMode msg;
-    msg.val = industrial_msgs::RobotMode::AUTO;
-    return msg;
-  }());
-  ros::Rate loop_rate(10);
-  while (ros::ok() && !autonomous_task_action_server_->isPreemptRequested())
+  if (goal->task_name != "")
   {
-    // Publish feedback to TaskSupervisor
-    autonomous_task_action_server_->publishFeedback([this] {
-      agribot_msgs::PerformAutonomousTaskFeedback feedback;
-      feedback.feedback = autonomous_path_action_feedback_->getData();
-      return feedback;
+    robot_mode_->writeData([] {
+      industrial_msgs::RobotMode msg;
+      msg.val = industrial_msgs::RobotMode::AUTO;
+      return msg;
     }());
-    if (pathFinished())
+    ros::Rate loop_rate(10);
+    while (ros::ok() && !autonomous_task_action_server_->isPreemptRequested() && current_task_name_->getData() != "")
     {
-      autonomous_path_action_feedback_->writeData(agribot_msgs::AgribotNavigationManagerResult());
-      autonomous_task_action_server_->setSucceeded([this] {
-        agribot_msgs::PerformAutonomousTaskResult path_action_result;
-        path_action_result.finished = true;
-        return path_action_result;
+      // Publish feedback to TaskSupervisor
+      autonomous_task_action_server_->publishFeedback([this] {
+        agribot_msgs::PerformAutonomousTaskFeedback feedback;
+        feedback.feedback = autonomous_path_action_feedback_->getData();
+        return feedback;
       }());
-      break;
+      if (pathFinished())
+      {
+        current_task_name_->writeData("");
+        autonomous_path_action_feedback_->writeData(agribot_msgs::AgribotNavigationManagerResult());
+        autonomous_task_action_server_->setSucceeded([this] {
+          agribot_msgs::PerformAutonomousTaskResult path_action_result;
+          path_action_result.finished = true;
+          return path_action_result;
+        }());
+        robot_mode_->writeData([] {
+          industrial_msgs::RobotMode msg;
+          msg.val = industrial_msgs::RobotMode::UNKNOWN;
+          return msg;
+        }());
+        return;
+      }
+      if (pathAborted())
+      {
+        ROS_ERROR_STREAM("[BehaviorTree] Task aborted. Move base error");
+        break;
+      }
+      ros::spinOnce();
+      loop_rate.sleep();
     }
-    if (pathAborted())
-    {
-      autonomous_path_action_feedback_->writeData(agribot_msgs::AgribotNavigationManagerResult());
-      ROS_ERROR_STREAM("[BehaviorTree] Task aborted. Move base error");
-      autonomous_task_action_server_->setSucceeded([this] {
-        agribot_msgs::PerformAutonomousTaskResult path_action_result;
-        path_action_result.finished = false;
-        return path_action_result;
-      }());
-      break;
-    }
-    ros::spinOnce();
-    loop_rate.sleep();
   }
-  // Reset feedback
-
+  autonomous_path_action_feedback_->writeData(agribot_msgs::AgribotNavigationManagerResult());
+  autonomous_task_action_server_->setSucceeded([this] {
+    agribot_msgs::PerformAutonomousTaskResult path_action_result;
+    path_action_result.finished = false;
+    return path_action_result;
+  }());
   robot_mode_->writeData([] {
     industrial_msgs::RobotMode msg;
     msg.val = industrial_msgs::RobotMode::UNKNOWN;
     return msg;
   }());
-}
+}  // namespace agribot_behavior
 
 bool AgribotBehaviorTreeNode::pathFinished()
 {
