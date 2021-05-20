@@ -123,7 +123,6 @@ private:
   void initRosServices();
 
   void taskNameRosCallback(const std_msgs::String::ConstPtr& msg);
-  void robotModeRosCallback(const industrial_msgs::RobotMode::ConstPtr& msg);
   void obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
   void mobileAppErrorFlagRosCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
   void ttcontrolStateCallback(const agribot_msgs::AgribotTtcontrolState::ConstPtr& msg);

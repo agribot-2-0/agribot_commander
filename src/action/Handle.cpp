@@ -49,23 +49,20 @@ void Handle::initSharedFields(
     std::shared_ptr<SharedField<std::string>> current_task_name,
     std::shared_ptr<SharedField<std::string>> previous_task_name,
     std::shared_ptr<SharedField<std::size_t>> path_progression,
-    std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback)
+    std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback,
+    std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode)
 {
   current_task_name_ = current_task_name;
   previous_task_name_ = previous_task_name;
   path_progression_ = path_progression;
   autonomous_path_action_feedback_ = autonomous_path_action_feedback;
+  robot_mode_ = robot_mode;
 }
 
 void Handle::initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
                                 autonomous_path_action_client)
 {
   autonomous_path_action_client_ = autonomous_path_action_client;
-}
-
-void Handle::initPublisher(std::shared_ptr<ros::Publisher> robot_mode_publisher)
-{
-  robot_mode_publisher_ = robot_mode_publisher;
 }
 
 void Handle::halt()
@@ -82,20 +79,30 @@ void Handle::initPathParser(const std::string& path_folder, const std::string& t
 void Handle::handleManualControl()
 {
   ros::Rate rate(10);
+  robot_mode_->writeData([] {
+    industrial_msgs::RobotMode msg;
+    msg.val = industrial_msgs::RobotMode::MANUAL;
+    return msg;
+  }());
   while (!halt_requested_ && ros::ok())
   {
-    robot_mode_publisher_->publish([] {
-      industrial_msgs::RobotMode msg;
-      msg.val = industrial_msgs::RobotMode::MANUAL;
-      return msg;
-    }());
     ros::spinOnce();
     rate.sleep();
   }
+  robot_mode_->writeData([] {
+    industrial_msgs::RobotMode msg;
+    msg.val = industrial_msgs::RobotMode::UNKNOWN;
+    return msg;
+  }());
 }
 
 void Handle::handleAutonomousControl()
 {
+  robot_mode_->writeData([] {
+    industrial_msgs::RobotMode msg;
+    msg.val = industrial_msgs::RobotMode::AUTO;
+    return msg;
+  }());
   path_parser_->setPathName(current_task_name_->getData());
   std::vector<sensor_msgs::NavSatFix> path_points = path_parser_->parsePath();
   if (!path_points.empty())
@@ -117,11 +124,6 @@ void Handle::handleAutonomousControl()
       ros::Rate rate{ 10 };
       while (!halt_requested_ && ros::ok() && navigationManagerActive())
       {
-        robot_mode_publisher_->publish([] {
-          industrial_msgs::RobotMode msg;
-          msg.val = industrial_msgs::RobotMode::AUTO;
-          return msg;
-        }());
         ros::spinOnce();
         rate.sleep();
       }
@@ -139,6 +141,11 @@ void Handle::handleAutonomousControl()
   {
     ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Failed to load path from task " << current_task_name_->getData());
   }
+  robot_mode_->writeData([] {
+    industrial_msgs::RobotMode msg;
+    msg.val = industrial_msgs::RobotMode::UNKNOWN;
+    return msg;
+  }());
 }
 
 void Handle::resetAutonomousDriving()

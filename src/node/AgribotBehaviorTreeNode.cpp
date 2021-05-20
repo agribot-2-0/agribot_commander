@@ -72,9 +72,8 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
       handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_,
-                               autonomous_path_action_feedback_);
+                               autonomous_path_action_feedback_, robot_mode_);
       handle->initActionlibs(autonomous_path_action_client_);
-      handle->initPublisher(robot_mode_publisher_);
       handle->initPathParser(path_folder_, task_folder_);
     }
     if (auto lights_control = dynamic_cast<LightsControl*>(node.get()); lights_control != nullptr)
@@ -211,15 +210,11 @@ void AgribotBehaviorTreeNode::run()
   spinner.start();
   while (ros::ok())
   {
+    robot_mode_publisher_->publish(robot_mode_->getData());
     tree_->tickRoot();
     ros::spinOnce();
     rate.sleep();
   }
-}
-
-void AgribotBehaviorTreeNode::robotModeRosCallback(const industrial_msgs::RobotMode::ConstPtr& msg)
-{
-  robot_mode_->writeData(*msg);
 }
 
 void AgribotBehaviorTreeNode::obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg)
