@@ -12,6 +12,7 @@
 
 #include <ros/console.h>
 #include <industrial_msgs/RobotMode.h>
+#include <agribot_msgs/AgribotTtcontrolState.h>
 
 #include <memory>
 #include <string>
@@ -21,8 +22,9 @@ namespace agribot_behavior
 class CheckStartConditions : public BT::SyncActionNode
 {
 private:
-  std::shared_ptr<SharedField<std::string>> task_name_;
+  std::shared_ptr<SharedField<std::string>> current_task_name_;
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
+  std::shared_ptr<SharedField<agribot_msgs::AgribotTtcontrolState>> ttcontrol_state_;
 
   BT::NodeStatus checkManualCondition();
   BT::NodeStatus checkNavigationCondition();
@@ -31,7 +33,8 @@ public:
   CheckStartConditions(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
-  void initSharedFields(std::shared_ptr<SharedField<std::string>> task_name,
-                        std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode);
+  void initSharedFields(std::shared_ptr<SharedField<std::string>> current_task_name,
+                        std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode,
+                        std::shared_ptr<SharedField<agribot_msgs::AgribotTtcontrolState>> ttcontrol_state);
 };
 }  // namespace agribot_behavior

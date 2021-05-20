@@ -22,9 +22,14 @@ T SharedField<T>::getData()
 
 template void SharedField<std::string>::writeData(const std::string&);
 template std::string SharedField<std::string>::getData();
+template void SharedField<agribot_msgs::AgribotNavigationManagerResult>::writeData(
+    const agribot_msgs::AgribotNavigationManagerResult&);
+template agribot_msgs::AgribotNavigationManagerResult
+SharedField<agribot_msgs::AgribotNavigationManagerResult>::getData();
+template void SharedField<std::size_t>::writeData(const std::size_t&);
+template std::size_t SharedField<std::size_t>::getData();
+template void SharedField<agribot_msgs::AgribotTtcontrolState>::writeData(const agribot_msgs::AgribotTtcontrolState&);
+template agribot_msgs::AgribotTtcontrolState SharedField<agribot_msgs::AgribotTtcontrolState>::getData();
 template void SharedField<industrial_msgs::RobotMode>::writeData(const industrial_msgs::RobotMode&);
 template industrial_msgs::RobotMode SharedField<industrial_msgs::RobotMode>::getData();
-template void
-SharedField<agribot_msgs::AgribotMoveBaseMonitorResult>::writeData(const agribot_msgs::AgribotMoveBaseMonitorResult&);
-template agribot_msgs::AgribotMoveBaseMonitorResult SharedField<agribot_msgs::AgribotMoveBaseMonitorResult>::getData();
 }  // namespace agribot_behavior

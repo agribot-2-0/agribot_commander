@@ -36,12 +36,8 @@ inline bool PathParser::fileExists(const std::experimental::filesystem::path& na
 }
 
 void PathParser::setPose(const YAML::Node& node, std::size_t index,
-                         std::vector<agribot_msgs::NavSatFixOrientation>& path_points)
+                         std::vector<sensor_msgs::NavSatFix>& path_points)
 {
-  path_points[index].orientation.x = node["orientation"][0].as<double>();
-  path_points[index].orientation.y = node["orientation"][1].as<double>();
-  path_points[index].orientation.z = node["orientation"][2].as<double>();
-  path_points[index].orientation.w = node["orientation"][3].as<double>();
   path_points[index].latitude = node["position"][0].as<double>();
   path_points[index].longitude = node["position"][1].as<double>();
   path_points[index].altitude = node["position"][2].as<double>();
@@ -62,11 +58,11 @@ bool PathParser::setPathName(const std::experimental::filesystem::path& task_nam
   return false;
 }
 
-std::vector<agribot_msgs::NavSatFixOrientation> PathParser::parsePath()
+std::vector<sensor_msgs::NavSatFix> PathParser::parsePath()
 {
   if (path_location_ != "")
   {
-    std::vector<agribot_msgs::NavSatFixOrientation> path_points;
+    std::vector<sensor_msgs::NavSatFix> path_points;
     YAML::Node path_points_yaml = YAML::LoadFile(path_location_);
     path_points.clear();
     path_points.resize(path_points_yaml.size());
@@ -76,7 +72,7 @@ std::vector<agribot_msgs::NavSatFixOrientation> PathParser::parsePath()
     }
     return path_points;
   }
-  return std::vector<agribot_msgs::NavSatFixOrientation>();
+  return std::vector<sensor_msgs::NavSatFix>();
 }
 
 std::experimental::filesystem::path PathParser::getPathLocation() const
