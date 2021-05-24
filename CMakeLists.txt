@@ -86,7 +86,6 @@ install(TARGETS
 
 catkin_install_python(PROGRAMS
   scripts/agribot_commander/task_supervisor/agribot_task_supervisor_node.py
-  scripts/agribot_commander/state_machine/AgribotStateMachine.py
 
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}/scripts
 )
