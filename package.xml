@@ -10,11 +10,9 @@
   <license>PROPRIETARY</license>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>smach_ros</buildtool_depend>
 
   <build_depend>rospy</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>smach</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>agribot_map</build_depend>
   <build_depend>industrial_msgs</build_depend>
@@ -26,6 +24,7 @@
   <build_depend>tf</build_depend>
   <build_depend>behaviortree_cpp_v3</build_depend>
   <build_depend>yaml-cpp</build_depend>
+  <build_depend>actionlib</build_depend>
 
   <build_export_depend>agribot_map</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
@@ -39,10 +38,6 @@
 
   <exec_depend>rospy</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  <exec_depend>smach</exec_depend>
-  <exec_depend>smach_ros</exec_depend>
-  <exec_depend>smach_msgs</exec_depend>
-  <exec_depend>smach_viewer</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>agribot_map</exec_depend>
   <exec_depend>std_msgs</exec_depend>
@@ -53,4 +48,5 @@
   <exec_depend>python-can</exec_depend>
   <exec_depend>behaviortree_cpp_v3</exec_depend>
   <exec_depend>yaml-cpp</exec_depend>
+  <exec_depend>actionlib</exec_depend>
 </package>
