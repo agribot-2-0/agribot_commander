@@ -14,8 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
   behaviortree_cpp_v3
   rospy
   roscpp
-  smach
-  smach_ros
   std_msgs
   agribot_common
   agribot_msgs
@@ -78,7 +76,7 @@ add_dependencies(agribot_behavior_node ${catkin_EXPORTED_TARGETS})
 ## Install ##
 #############
 
-# -------------------SMACH----------------------------------------------------------------------------------
+# -------------------PYTHON----------------------------------------------------------------------------------
 install(TARGETS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
