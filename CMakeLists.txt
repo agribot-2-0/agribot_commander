@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   agribot_common
   agribot_msgs
+  actionlib
 )
 
 catkin_python_setup()
