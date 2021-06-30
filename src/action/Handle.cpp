@@ -103,43 +103,51 @@ void Handle::handleAutonomousControl()
     msg.val = industrial_msgs::RobotMode::AUTO;
     return msg;
   }());
-  path_parser_->setPathName(current_task_name_->getData());
-  std::vector<sensor_msgs::NavSatFix> path_points = path_parser_->parsePath();
-  if (!path_points.empty())
+  try
   {
-    if (taskUnchanged())  // continue path from last visited waypoint
+    path_parser_->setPathName(current_task_name_->getData());
+    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loading path " << path_parser_->getPathLocation());
+    std::vector<sensor_msgs::NavSatFix> path_points = path_parser_->parsePath();
+    if (!path_points.empty())
     {
-      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Path unchanged. Continuing path from waypoint "
-                      << static_cast<int>(path_progression_->getData()));
-    }
-    else
-    {
-      path_progression_->writeData(0);
-    }
-    sendAutonomousPathGoal(path_points);
-    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << path_parser_->getPathLocation());
-    if (navigationManagerReady())
-    {
-      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task");
-      ros::Rate rate{ 10 };
-      while (!halt_requested_ && ros::ok() && navigationManagerActive())
+      if (taskUnchanged())  // continue path from last visited waypoint
       {
-        ros::spinOnce();
-        rate.sleep();
+        ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Path unchanged. Continuing path from waypoint "
+                        << static_cast<int>(path_progression_->getData()));
       }
-      ROS_WARN_STREAM(
-          "[BehaviorTree][HandleAuto] Autonomous task finished with NavigationManager status "
-          << common_functions::navigationManagerResultToString(autonomous_path_action_feedback_->getData()));
+      else
+      {
+        path_progression_->writeData(0);
+      }
+      sendAutonomousPathGoal(path_points);
+      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << path_parser_->getPathLocation());
+      if (navigationManagerReady())
+      {
+        ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task");
+        ros::Rate rate{ 10 };
+        while (!halt_requested_ && ros::ok() && navigationManagerActive())
+        {
+          ros::spinOnce();
+          rate.sleep();
+        }
+        ROS_WARN_STREAM(
+            "[BehaviorTree][HandleAuto] Autonomous task finished with NavigationManager status "
+            << common_functions::navigationManagerResultToString(autonomous_path_action_feedback_->getData()));
+      }
+      else
+      {
+        ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Move base activate timeout");
+      }
+      resetAutonomousDriving();
     }
     else
     {
-      ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Move base activate timeout");
+      ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Failed to load path from task " << current_task_name_->getData());
     }
-    resetAutonomousDriving();
   }
-  else
+  catch (const std::exception& e)
   {
-    ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Failed to load path from task " << current_task_name_->getData());
+    ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] " << e.what());
   }
   robot_mode_->writeData([] {
     industrial_msgs::RobotMode msg;
