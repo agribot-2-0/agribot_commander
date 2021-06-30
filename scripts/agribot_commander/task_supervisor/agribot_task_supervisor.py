@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-
 import threading
 import rospy
 
 import actionlib
+import google.api_core.exceptions
 from agribot_msgs.msg import PerformAutonomousTaskAction
 from agribot_msgs.msg import PerformAutonomousTaskGoal
 
@@ -25,11 +25,18 @@ class AgribotTaskSupervisor(object):
         self.database.collection(u'robots').document(self.rsn).on_snapshot(self.on_callback)
 
     def delete_task(self, task_name):
-        self.database.collection(u'robots').document(self.rsn).collection(u'tasks').document(
-            task_name).delete()
+        try:
+            self.database.collection(u'robots').document(
+                self.rsn).collection(u'tasks').document(task_name).delete()
+        except google.api_core.exceptions.GoogleAPIError as my_except:
+            rospy.logerr("[AgribotTaskSupervisor] Exception: {}".format(my_except))
 
     def update_actual_task(self, task_name):
-        self.database.collection(u'robots').document(self.rsn).update({u'actual_task': task_name})
+        try:
+            self.database.collection(u'robots').document(self.rsn).update(
+                {u'actual_task': task_name})
+        except google.api_core.exceptions.GoogleAPIError as my_except:
+            rospy.logerr("[AgribotTaskSupervisor] Exception: {}".format(my_except))
 
     def on_callback(self, doc_snapshot, changes, read_time):  # pylint: disable=unused-argument
         for change in changes:
