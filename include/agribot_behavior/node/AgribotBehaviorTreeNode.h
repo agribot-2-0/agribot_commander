@@ -31,7 +31,7 @@
 #include <agribot_msgs/PerformAutonomousTaskAction.h>
 #include <agribot_msgs/ToolManagerControlSource.h>
 #include <agribot_msgs/AgribotNavigationManagerResult.h>
-#include <agribot_msgs/AgribotObstacleDetection.h>
+#include <agribot_msgs/ObstacleDetectionStatus.h>
 #include <agribot_msgs/AgribotTtcontrolState.h>
 #include <agribot_msgs/AgribotAppErrorFlag.h>
 #include <sensor_msgs/NavSatFix.h>
@@ -123,7 +123,7 @@ private:
   void initRosServices();
 
   void taskNameRosCallback(const std_msgs::String::ConstPtr& msg);
-  void obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg);
+  void obstacleDetectedRosCallback(const agribot_msgs::ObstacleDetectionStatus::ConstPtr& msg);
   void mobileAppErrorFlagRosCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
   void ttcontrolStateCallback(const agribot_msgs::AgribotTtcontrolState::ConstPtr& msg);
 

@@ -217,13 +217,29 @@ void AgribotBehaviorTreeNode::run()
   }
 }
 
-void AgribotBehaviorTreeNode::obstacleDetectedRosCallback(const agribot_msgs::AgribotObstacleDetection::ConstPtr& msg)
+void AgribotBehaviorTreeNode::obstacleDetectedRosCallback(const agribot_msgs::ObstacleDetectionStatus::ConstPtr& msg)
 {
   if (msg->status == msg->OBSTACLE_DETECTED)
   {
     obstacle_absent_.store(false);
     return;
   }
+  else if (msg->status == msg->WAITING_FOR_PATH)
+  {
+    obstacle_absent_.store(false);
+    return;
+  }
+  else if (msg->status == msg->WAITING_FOR_OBJECTS)
+  {
+    obstacle_absent_.store(false);
+    return;
+  }
+  else if (msg->status == msg->UNKNOWN)
+  {
+    obstacle_absent_.store(false);
+    return;
+  }
+
   obstacle_absent_.store(true);
 }
 
