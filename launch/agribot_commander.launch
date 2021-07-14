@@ -6,7 +6,7 @@
   <remap from="~result" to="/agribot/navigation_manager/result"/>
   <remap from="~mode" to="/agribot/state_machine/mode"/>
   <remap from="~task" to="/agribot/state_machine/task"/>
-  <remap from="~obstacle_detected" to="/agribot/obstacle_detected"/>
+  <remap from="~obstacle_detected" to="/agribot/obstacle_detection/front/status"/>
   <remap from="~mobile_app_error" to="/agribot/state_machine/error"/>
 
   <group if="$(env AGRIBOT_TASK_SUPERVISOR)">
