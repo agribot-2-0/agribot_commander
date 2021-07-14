@@ -224,11 +224,12 @@ void AgribotBehaviorTreeNode::obstacleDetectedRosCallback(const agribot_msgs::Ob
     obstacle_absent_.store(false);
     return;
   }
-  else if (msg->status == msg->WAITING_FOR_PATH)
-  {
-    obstacle_absent_.store(false);
-    return;
-  }
+  // TODO(all) - handle WAITING_FOR_PATH status
+  // else if (msg->status == msg->WAITING_FOR_PATH)
+  // {
+  //   obstacle_absent_.store(false);
+  //   return;
+  // }
   else if (msg->status == msg->WAITING_FOR_OBJECTS)
   {
     obstacle_absent_.store(false);
