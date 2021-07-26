@@ -10,8 +10,6 @@
 #include <ros/console.h>
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
-//#include <agribot_msgs/ToolManagerControlSource.h>
-//#include <agribot_common/common_enums/ControlSource.h>
 
 #include <memory>
 #include <string>
@@ -30,6 +28,5 @@ public:
   BT::NodeStatus tick() override;
   void initVideoStreamClients(std::shared_ptr<ros::ServiceClient> hal_video_stream_start_client,
                               std::shared_ptr<ros::ServiceClient> hal_video_stream_stop_client);
-  // bool controlVideoStream(const tool_manager::ControlSource selected_source);
 };
 }  // namespace agribot_behavior

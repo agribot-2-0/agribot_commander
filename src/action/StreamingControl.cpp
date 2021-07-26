@@ -50,25 +50,4 @@ void StreamingControl::initVideoStreamClients(std::shared_ptr<ros::ServiceClient
   hal_video_stream_stop_client_ = hal_video_stream_stop_client;
 }
 
-// bool StreamingControl::controlVideoStream(const tool_manager::ControlSource selected_source)
-// {
-//   std_srvs::Empty srv;
-//   bool result = false;
-//   switch (selected_source)
-//   {
-//     case tool_manager::ControlSource::Manual:
-//       result = hal_video_stream_start_client_->call(srv);
-//       break;
-//     case tool_manager::ControlSource::Navigation:
-//       result = hal_video_stream_stop_client_->call(srv);
-//       break;
-//     case tool_manager::ControlSource::None:
-//       result = hal_video_stream_stop_client_->call(srv);
-//       break;
-//     default:
-//       break;
-//   }
-//   return result;
-// }
-
 }  // namespace agribot_behavior
