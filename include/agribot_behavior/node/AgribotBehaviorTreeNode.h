@@ -7,6 +7,7 @@
 #include <agribot_behavior/action/CheckStartConditions.h>
 #include <agribot_behavior/action/Handle.h>
 #include <agribot_behavior/action/LightsControl.h>
+#include <agribot_behavior/action/StreamingControl.h>
 #include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/action/SwitchTtcontrolState.h>
 #include <agribot_behavior/action/ControlEngine.h>
@@ -93,6 +94,8 @@ private:
   std::shared_ptr<ros::ServiceClient> cmd_vel_navigation_client_;
   std::shared_ptr<ros::ServiceClient> cmd_vel_stop_client_;
   std::shared_ptr<ros::ServiceClient> hal_lights_client_;
+  std::shared_ptr<ros::ServiceClient> hal_video_stream_start_client_;
+  std::shared_ptr<ros::ServiceClient> hal_video_stream_stop_client_;
   std::shared_ptr<ros::ServiceClient> ttcontrol_safe_state_client_;
   std::shared_ptr<ros::ServiceClient> ttcontrol_auto_state_client_;
   std::shared_ptr<ros::ServiceClient> engine_start_client_;

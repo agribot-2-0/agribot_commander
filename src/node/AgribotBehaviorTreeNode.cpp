@@ -40,6 +40,7 @@ void AgribotBehaviorTreeNode::registerTreeNodes()
   factory_->registerNodeType<SwitchControlArbiters>("SwitchControlArbiters");
   factory_->registerNodeType<Handle>("Handle");
   factory_->registerNodeType<LightsControl>("LightsControl");
+  factory_->registerNodeType<StreamingControl>("StreamingControl");
   factory_->registerNodeType<SwitchTtcontrolState>("SwitchTtcontrolState");
   factory_->registerNodeType<ControlEngine>("ControlEngine");
   factory_->registerSimpleCondition(
@@ -79,6 +80,10 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto lights_control = dynamic_cast<LightsControl*>(node.get()); lights_control != nullptr)
     {
       lights_control->initLightsClient(hal_lights_client_);
+    }
+    if (auto streaming_control = dynamic_cast<StreamingControl*>(node.get()); streaming_control != nullptr)
+    {
+      streaming_control->initVideoStreamClients(hal_video_stream_start_client_, hal_video_stream_stop_client_);
     }
     if (auto switch_ttcontrol_state = dynamic_cast<SwitchTtcontrolState*>(node.get());
         switch_ttcontrol_state != nullptr)
@@ -154,6 +159,10 @@ void AgribotBehaviorTreeNode::initRosServices()
       node_handle_->serviceClient<std_srvs::Empty>("/cmd_vel_arbiter_node/switch_to_stop"));
   hal_lights_client_ = std::make_shared<ros::ServiceClient>(
       node_handle_->serviceClient<agribot_msgs::LampsControl>("/agribot/hal_lights/change_lamps_configuration"));
+  hal_video_stream_start_client_ = std::make_shared<ros::ServiceClient>(
+      node_handle_->serviceClient<std_srvs::Empty>("/hal_video_stream/start_stream"));
+  hal_video_stream_stop_client_ = std::make_shared<ros::ServiceClient>(
+      node_handle_->serviceClient<std_srvs::Empty>("/hal_video_stream/stop_stream"));
   ttcontrol_safe_state_client_ =
       std::make_shared<ros::ServiceClient>(node_handle_->serviceClient<std_srvs::Trigger>("/agribot/set_safe_state"));
   ttcontrol_auto_state_client_ = std::make_shared<ros::ServiceClient>(
