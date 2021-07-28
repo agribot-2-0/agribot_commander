@@ -30,6 +30,7 @@
                         </ReactiveSequence>
                         <Sequence>
                             <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
+                            <Action ID="StreamingControl" streaming_control="off"/>
                             <Action ID="SwitchTtcontrolState" ttcontrol_state="safe_state"/>
                         </Sequence>
                     </Fallback>
@@ -47,7 +48,6 @@
                     <Action ID="SwitchTtcontrolState" ttcontrol_state="auto"/>
                     <Action ID="LightsControl" lights_control="auto"/>
                     <Action ID="ControlEngine" action="start"/>
-                    <Action ID="StreamingControl" streaming_control="off"/>
                     <Fallback name="switch source from navigation to none">
                         <ReactiveSequence name="autonomous task">
                             <Inverter>
@@ -83,7 +83,7 @@
         <Condition ID="MobileAppErrorAbsent"/>
         <Condition ID="ObstacleAbsent"/>
         <Action ID="StreamingControl">
-            <input_port name="streaming_control"/>
+            <input_port name="streaming_control" type="bool"/>
         </Action>
         <Action ID="SwitchControlArbiters">
             <input_port name="control_source" type="tool_manager::ControlSource"/>
