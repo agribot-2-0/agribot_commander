@@ -22,7 +22,7 @@ inline bool convertFromString(StringView str)
   }
   else
   {
-    throw RuntimeError("Invalid input from convertFromString for ControlSource");
+    throw RuntimeError("Invalid input from convertFromString for StreamingControl");
   }
 }
 }  // end namespace BT

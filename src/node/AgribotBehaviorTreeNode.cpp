@@ -83,7 +83,7 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     }
     if (auto streaming_control = dynamic_cast<StreamingControl*>(node.get()); streaming_control != nullptr)
     {
-      streaming_control->initVideoStreamClients(hal_video_stream_start_client_, hal_video_stream_stop_client_);
+      streaming_control->setVideoStreamClients(hal_video_stream_start_client_, hal_video_stream_stop_client_);
     }
     if (auto switch_ttcontrol_state = dynamic_cast<SwitchTtcontrolState*>(node.get());
         switch_ttcontrol_state != nullptr)

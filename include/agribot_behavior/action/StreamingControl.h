@@ -26,7 +26,7 @@ public:
   StreamingControl(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
-  void initVideoStreamClients(std::shared_ptr<ros::ServiceClient> hal_video_stream_start_client,
-                              std::shared_ptr<ros::ServiceClient> hal_video_stream_stop_client);
+  void setVideoStreamClients(std::shared_ptr<ros::ServiceClient> hal_video_stream_start_client,
+                             std::shared_ptr<ros::ServiceClient> hal_video_stream_stop_client);
 };
 }  // namespace agribot_behavior

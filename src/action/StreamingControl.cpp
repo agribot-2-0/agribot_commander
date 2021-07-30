@@ -43,8 +43,8 @@ BT::NodeStatus StreamingControl::tick()
   return BT::NodeStatus::FAILURE;
 }
 
-void StreamingControl::initVideoStreamClients(std::shared_ptr<ros::ServiceClient> hal_video_stream_start_client,
-                                              std::shared_ptr<ros::ServiceClient> hal_video_stream_stop_client)
+void StreamingControl::setVideoStreamClients(std::shared_ptr<ros::ServiceClient> hal_video_stream_start_client,
+                                             std::shared_ptr<ros::ServiceClient> hal_video_stream_stop_client)
 {
   hal_video_stream_start_client_ = hal_video_stream_start_client;
   hal_video_stream_stop_client_ = hal_video_stream_stop_client;
