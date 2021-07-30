@@ -7,6 +7,7 @@
 #include <behaviortree_cpp_v3/action_node.h>
 
 #include <agribot_behavior/path_handle/PathParser.h>
+#include <agribot_behavior/path_handle/TplHandler.h>
 #include <agribot_behavior/common/SharedField.h>
 #include <agribot_common/common_enums/ControlSource.h>
 #pragma GCC diagnostic push
@@ -29,6 +30,7 @@ class Handle : public BT::AsyncActionNode
 {
 private:
   std::unique_ptr<PathParser> path_parser_;
+  std::unique_ptr<TplHandler> tpl_handler_;
   std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
       autonomous_path_action_client_;
   std::atomic<bool> halt_requested_;
@@ -37,6 +39,8 @@ private:
   std::shared_ptr<SharedField<std::string>> previous_task_name_;
   std::shared_ptr<SharedField<std::size_t>> path_progression_;
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
+  std::shared_ptr<ros::Publisher> tpl_front_config_publisher_;
+  std::shared_ptr<ros::Publisher> tpl_back_config_publisher_;
 
   void handleManualControl();
   void handleAutonomousControl();
@@ -59,12 +63,15 @@ public:
   BT::NodeStatus tick() override;
   void halt() override;
   void initPathParser(const std::string& path_folder, const std::string& task_folder);
+  void initTplHandler(const std::string& path_folder, const std::string& task_folder);
   void initSharedFields(
       std::shared_ptr<SharedField<std::string>> current_task_name,
       std::shared_ptr<SharedField<std::string>> previous_task_name,
       std::shared_ptr<SharedField<std::size_t>> path_progression,
       std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback,
-      std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode);
+      std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode,
+      std::shared_ptr<ros::Publisher> tpl_front_config_publisher,
+      std::shared_ptr<ros::Publisher> tpl_back_config_publisher);
   void initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
                           autonomous_path_action_client);
 };

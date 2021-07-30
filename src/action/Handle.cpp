@@ -50,13 +50,17 @@ void Handle::initSharedFields(
     std::shared_ptr<SharedField<std::string>> previous_task_name,
     std::shared_ptr<SharedField<std::size_t>> path_progression,
     std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback,
-    std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode)
+    std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode,
+    std::shared_ptr<ros::Publisher> tpl_front_config_publisher,
+    std::shared_ptr<ros::Publisher> tpl_back_config_publisher)
 {
   current_task_name_ = current_task_name;
   previous_task_name_ = previous_task_name;
   path_progression_ = path_progression;
   autonomous_path_action_feedback_ = autonomous_path_action_feedback;
   robot_mode_ = robot_mode;
+  tpl_front_config_publisher_ = tpl_front_config_publisher;
+  tpl_back_config_publisher_ = tpl_back_config_publisher;
 }
 
 void Handle::initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
@@ -73,6 +77,11 @@ void Handle::halt()
 void Handle::initPathParser(const std::string& path_folder, const std::string& task_folder)
 {
   path_parser_ = std::make_unique<PathParser>(path_folder, task_folder);
+}
+
+void Handle::initTplHandler(const std::string& path_folder, const std::string& task_folder)
+{
+  tpl_handler_ = std::make_unique<TplHandler>(path_folder, task_folder);
 }
 
 // Manual control is idle action since another ROS nodes are handling it
@@ -106,6 +115,8 @@ void Handle::handleAutonomousControl()
   try
   {
     path_parser_->setPathName(current_task_name_->getData());
+    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Setting up tools");
+    tpl_handler_->configureTpl(current_task_name_->getData());
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loading path " << path_parser_->getPathLocation());
     std::vector<sensor_msgs::NavSatFix> path_points = path_parser_->parsePath();
     if (!path_points.empty())
@@ -128,6 +139,7 @@ void Handle::handleAutonomousControl()
         while (!halt_requested_ && ros::ok() && navigationManagerActive())
         {
           ros::spinOnce();
+          tpl_handler_->publishTplConfig(tpl_front_config_publisher_, tpl_back_config_publisher_);
           rate.sleep();
         }
         ROS_WARN_STREAM(

@@ -72,9 +72,11 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
       handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_,
-                               autonomous_path_action_feedback_, robot_mode_);
+                               autonomous_path_action_feedback_, robot_mode_, tpl_front_config_publisher_,
+                               tpl_back_config_publisher_);
       handle->initActionlibs(autonomous_path_action_client_);
       handle->initPathParser(path_folder_, task_folder_);
+      handle->initTplHandler(path_folder_, task_folder_);
     }
     if (auto lights_control = dynamic_cast<LightsControl*>(node.get()); lights_control != nullptr)
     {
@@ -139,6 +141,10 @@ void AgribotBehaviorTreeNode::initRosPublishers()
 {
   robot_mode_publisher_ = std::make_shared<ros::Publisher>(
       node_handle_->advertise<industrial_msgs::RobotMode>("/agribot/behavior_tree/robot_mode", 1));
+  tpl_front_config_publisher_ = std::make_shared<ros::Publisher>(
+      node_handle_->advertise<agribot_msgs::AgribotTool>("/agribot/control/tool/front/navigation", 1));
+  tpl_back_config_publisher_ = std::make_shared<ros::Publisher>(
+      node_handle_->advertise<agribot_msgs::AgribotTool>("/agribot/control/tool/back/navigation", 1));
 }
 
 void AgribotBehaviorTreeNode::initRosServices()
