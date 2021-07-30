@@ -13,6 +13,7 @@
 #include <string>
 #include <fstream>
 #include <cstdlib>
+#include <memory>
 
 namespace agribot_behavior
 {
