@@ -72,11 +72,11 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
       handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_,
-                               autonomous_path_action_feedback_, robot_mode_, tpl_front_config_publisher_,
-                               tpl_back_config_publisher_);
+                               autonomous_path_action_feedback_, robot_mode_);
+      handle->initRosPublishers(tpl_front_config_publisher_, tpl_back_config_publisher_);
       handle->initActionlibs(autonomous_path_action_client_);
-      handle->initPathParser(path_folder_, task_folder_);
-      handle->initTplHandler(path_folder_, task_folder_);
+      handle->initTaskParser(path_folder_, task_folder_);
+      handle->initTaskParser(path_folder_, task_folder_);
     }
     if (auto lights_control = dynamic_cast<LightsControl*>(node.get()); lights_control != nullptr)
     {

@@ -50,15 +50,18 @@ void Handle::initSharedFields(
     std::shared_ptr<SharedField<std::string>> previous_task_name,
     std::shared_ptr<SharedField<std::size_t>> path_progression,
     std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback,
-    std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode,
-    std::shared_ptr<ros::Publisher> tpl_front_config_publisher,
-    std::shared_ptr<ros::Publisher> tpl_back_config_publisher)
+    std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode)
 {
   current_task_name_ = current_task_name;
   previous_task_name_ = previous_task_name;
   path_progression_ = path_progression;
   autonomous_path_action_feedback_ = autonomous_path_action_feedback;
   robot_mode_ = robot_mode;
+}
+
+void Handle::initRosPublishers(std::shared_ptr<ros::Publisher> tpl_front_config_publisher,
+                               std::shared_ptr<ros::Publisher> tpl_back_config_publisher)
+{
   tpl_front_config_publisher_ = tpl_front_config_publisher;
   tpl_back_config_publisher_ = tpl_back_config_publisher;
 }
@@ -74,14 +77,9 @@ void Handle::halt()
   halt_requested_.store(true);
 }
 
-void Handle::initPathParser(const std::string& path_folder, const std::string& task_folder)
+void Handle::initTaskParser(const std::string& path_folder, const std::string& task_folder)
 {
-  path_parser_ = std::make_unique<PathParser>(path_folder, task_folder);
-}
-
-void Handle::initTplHandler(const std::string& path_folder, const std::string& task_folder)
-{
-  tpl_handler_ = std::make_unique<TplHandler>(path_folder, task_folder);
+  task_parser_ = std::make_unique<TaskParser>(path_folder, task_folder);
 }
 
 // Manual control is idle action since another ROS nodes are handling it
@@ -114,11 +112,12 @@ void Handle::handleAutonomousControl()
   }());
   try
   {
-    path_parser_->setPathName(current_task_name_->getData());
+    task_parser_->setPathName(current_task_name_->getData());
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Setting up tools");
-    tpl_handler_->configureTpl(current_task_name_->getData());
-    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loading path " << path_parser_->getPathLocation());
-    std::vector<sensor_msgs::NavSatFix> path_points = path_parser_->parsePath();
+    task_parser_->parseTpl(current_task_name_->getData(), front);
+    task_parser_->parseTpl(current_task_name_->getData(), back);
+    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loading path " << task_parser_->getPathLocation());
+    std::vector<sensor_msgs::NavSatFix> path_points = task_parser_->parsePath();
     if (!path_points.empty())
     {
       if (taskUnchanged())  // continue path from last visited waypoint
@@ -131,7 +130,7 @@ void Handle::handleAutonomousControl()
         path_progression_->writeData(0);
       }
       sendAutonomousPathGoal(path_points);
-      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << path_parser_->getPathLocation());
+      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << task_parser_->getPathLocation());
       if (navigationManagerReady())
       {
         ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task");
@@ -139,7 +138,8 @@ void Handle::handleAutonomousControl()
         while (!halt_requested_ && ros::ok() && navigationManagerActive())
         {
           ros::spinOnce();
-          tpl_handler_->publishTplConfig(tpl_front_config_publisher_, tpl_back_config_publisher_);
+          tpl_front_config_publisher_->publish(task_parser_->getTplFrontConfig());
+          tpl_back_config_publisher_->publish(task_parser_->getTplBackConfig());
           rate.sleep();
         }
         ROS_WARN_STREAM(

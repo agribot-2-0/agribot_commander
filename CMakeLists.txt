@@ -66,7 +66,7 @@ list(APPEND agribot_behavior_sources src/action/CheckStartConditions.cpp src/act
     src/action/Handle.cpp src/action/LightsControl.cpp src/action/SwitchTtcontrolState.cpp 
     src/action/ControlEngine.cpp)
 list(APPEND agribot_behavior_sources src/common/SharedField.cpp src/common/OneTimeLogger.cpp)
-list(APPEND agribot_behavior_sources src/path_handle/PathParser.cpp src/path_handle/TplHandler.cpp)
+list(APPEND agribot_behavior_sources src/path_handle/TaskParser.cpp)
 
 add_executable(agribot_behavior_node src/node/agribot_behavior_node.cpp src/node/AgribotBehaviorTreeNode.cpp ${agribot_behavior_sources})
 target_link_libraries(agribot_behavior_node ${catkin_LIBRARIES} ${behaviortree_cpp_v3_LIBRARIES} yaml-cpp -lstdc++fs)
