@@ -7,6 +7,7 @@
                 <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
                 <Action ID="CheckStartConditions" condition_to_check="navigation" name="check conditions for manual control"/>
                 <Action ID="LightsControl" lights_control="ready"/>
+                <Action ID="StreamingControl" streaming_control="off"/>
             </Fallback>
             <Fallback name="check start conditions">
                 <Sequence name="manual condition check">
@@ -20,6 +21,7 @@
                     </SequenceStar>
                     <Action ID="SwitchControlArbiters" control_source="manual" name="switch source to manual"/>
                     <Action ID="LightsControl" lights_control="manual"/>
+                    <Action ID="StreamingControl" streaming_control="on"/>
                     <Fallback name="switch source from manual to none">
                         <ReactiveSequence name="manual control">
                             <Action ID="CheckStartConditions" condition_to_check="manual" name="check conditions for manual control"/>
@@ -28,6 +30,7 @@
                         </ReactiveSequence>
                         <Sequence>
                             <Action ID="SwitchControlArbiters" control_source="none" name="switch source to none"/>
+                            <Action ID="StreamingControl" streaming_control="off"/>
                             <Action ID="SwitchTtcontrolState" ttcontrol_state="safe_state"/>
                         </Sequence>
                     </Fallback>
@@ -79,6 +82,9 @@
         </Action>
         <Condition ID="MobileAppErrorAbsent"/>
         <Condition ID="ObstacleAbsent"/>
+        <Action ID="StreamingControl">
+            <input_port name="streaming_control" type="bool"/>
+        </Action>
         <Action ID="SwitchControlArbiters">
             <input_port name="control_source" type="tool_manager::ControlSource"/>
         </Action>
