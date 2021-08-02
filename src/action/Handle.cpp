@@ -112,10 +112,7 @@ void Handle::handleAutonomousControl()
   }());
   try
   {
-    task_parser_->setPathName(current_task_name_->getData());
-    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Setting up tools");
-    task_parser_->parseTpl(current_task_name_->getData(), front);
-    task_parser_->parseTpl(current_task_name_->getData(), back);
+    task_parser_->parseTask(current_task_name_->getData());
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loading path " << task_parser_->getPathLocation());
     std::vector<sensor_msgs::NavSatFix> path_points = task_parser_->parsePath();
     if (!path_points.empty())
