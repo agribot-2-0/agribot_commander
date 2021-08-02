@@ -97,7 +97,6 @@ void TaskParser::parseTpl(tplLocation tpl)
 
   if (fileExists(task_location_))
   {
-    bool is_all_data_set = true;
     YAML::Node task_yaml = YAML::LoadFile(task_location_);
 
     if (task_yaml["task"]["tpl"][which_tpl]["angle"])
@@ -106,7 +105,7 @@ void TaskParser::parseTpl(tplLocation tpl)
     }
     else
     {
-      is_all_data_set = false;
+      throw std::invalid_argument(which_tpl + " tpl angle value is missing");
     }
     if (task_yaml["task"]["tpl"][which_tpl]["height"])
     {
@@ -114,7 +113,7 @@ void TaskParser::parseTpl(tplLocation tpl)
     }
     else
     {
-      is_all_data_set = false;
+      throw std::invalid_argument(which_tpl + " tpl height value is missing");
     }
     if (task_yaml["task"]["tpl"][which_tpl]["red_valve_flow"])
     {
@@ -122,7 +121,7 @@ void TaskParser::parseTpl(tplLocation tpl)
     }
     else
     {
-      is_all_data_set = false;
+      throw std::invalid_argument(which_tpl + " tpl red valve flow value is missing");
     }
     if (task_yaml["task"]["tpl"][which_tpl]["green_valve_flow"])
     {
@@ -130,7 +129,7 @@ void TaskParser::parseTpl(tplLocation tpl)
     }
     else
     {
-      is_all_data_set = false;
+      throw std::invalid_argument(which_tpl + " tpl green valve flow value is missing");
     }
     if (task_yaml["task"]["tpl"][which_tpl]["blue_valve_flow"])
     {
@@ -138,7 +137,7 @@ void TaskParser::parseTpl(tplLocation tpl)
     }
     else
     {
-      is_all_data_set = false;
+      throw std::invalid_argument(which_tpl + " tpl blue valve flow value is missing");
     }
     if (task_yaml["task"]["tpl"][which_tpl]["pto_rpm"])
     {
@@ -146,23 +145,16 @@ void TaskParser::parseTpl(tplLocation tpl)
     }
     else
     {
-      is_all_data_set = false;
+      throw std::invalid_argument(which_tpl + " tpl pto rpm value is missing");
     }
 
-    if (is_all_data_set)
+    if (tpl == tplLocation::front)
     {
-      if (tpl == tplLocation::front)
-      {
-        tpl_front_config_ = tpl_config;
-      }
-      else if (tpl == tplLocation::back)
-      {
-        tpl_back_config_ = tpl_config;
-      }
+      tpl_front_config_ = tpl_config;
     }
-    else
+    else if (tpl == tplLocation::back)
     {
-      throw std::invalid_argument("There is missing data in .yaml config file.");
+      tpl_back_config_ = tpl_config;
     }
   }
 }
