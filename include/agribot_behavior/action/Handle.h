@@ -7,7 +7,6 @@
 #include <behaviortree_cpp_v3/action_node.h>
 
 #include <agribot_behavior/path_handle/TaskParser.h>
-#include <agribot_behavior/path_handle/TaskParser.h>
 #include <agribot_behavior/common/SharedField.h>
 #include <agribot_common/common_enums/ControlSource.h>
 #pragma GCC diagnostic push
