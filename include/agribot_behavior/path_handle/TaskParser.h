@@ -17,7 +17,7 @@
 
 namespace agribot_behavior
 {
-enum class tplLocation
+enum class TplLocation
 {
   front,
   back
@@ -40,7 +40,8 @@ private:
                std::vector<sensor_msgs::NavSatFix>& path_points);  // NOLINT
   void setTaskLocation(const std::experimental::filesystem::path& task_name);
   bool setPathName();
-  void parseTpl(tplLocation tpl);
+  void parseTpl(TplLocation tpl);
+  std::string convertTplLocationToString(TplLocation tpl);
 
 public:
   TaskParser() = delete;

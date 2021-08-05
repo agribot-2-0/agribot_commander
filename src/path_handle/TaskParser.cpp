@@ -82,81 +82,79 @@ std::experimental::filesystem::path TaskParser::getPathLocation() const
   return path_location_;
 }
 
-void TaskParser::parseTpl(tplLocation tpl)
+void TaskParser::parseTpl(TplLocation tpl)
 {
-  std::string which_tpl = "";
+  std::string which_tpl = convertTplLocationToString(tpl);
   agribot_msgs::AgribotTool tpl_config;
-  if (tpl == tplLocation::front)
-  {
-    which_tpl = "front";
-  }
-  else if (tpl == tplLocation::back)
-  {
-    which_tpl = "back";
-  }
 
   if (fileExists(task_location_))
   {
     YAML::Node task_yaml = YAML::LoadFile(task_location_);
+    const YAML::Node& task = task_yaml["task"]["tpl"][which_tpl];
 
-    if (task_yaml["task"]["tpl"][which_tpl]["angle"])
+    if (task["angle"])
     {
-      tpl_config.tpl_angle = task_yaml["task"]["tpl"][which_tpl]["angle"].as<double>();
+      tpl_config.tpl_angle = task["angle"].as<double>();
     }
     else
     {
       throw std::invalid_argument(which_tpl + " tpl angle value is missing");
     }
-    if (task_yaml["task"]["tpl"][which_tpl]["height"])
+    if (task["height"])
     {
-      tpl_config.tpl_height = task_yaml["task"]["tpl"][which_tpl]["height"].as<double>();
+      tpl_config.tpl_height = task["height"].as<double>();
     }
     else
     {
       throw std::invalid_argument(which_tpl + " tpl height value is missing");
     }
-    if (task_yaml["task"]["tpl"][which_tpl]["yellow_valve_flow"])
+    if (task["red_valve_flow"])
     {
-      tpl_config.red_valve_flow = task_yaml["task"]["tpl"][which_tpl]["yellow_valve_flow"].as<double>();
+      tpl_config.red_valve_flow = task["red_valve_flow"].as<double>();
     }
     else
     {
-      throw std::invalid_argument(which_tpl + " tpl yellow valve flow value is missing");
+      throw std::invalid_argument(which_tpl + " tpl red valve flow value is missing");
     }
-    if (task_yaml["task"]["tpl"][which_tpl]["green_valve_flow"])
+    if (task["green_valve_flow"])
     {
-      tpl_config.green_valve_flow = task_yaml["task"]["tpl"][which_tpl]["green_valve_flow"].as<double>();
+      tpl_config.green_valve_flow = task["green_valve_flow"].as<double>();
     }
     else
     {
       throw std::invalid_argument(which_tpl + " tpl green valve flow value is missing");
     }
-    if (task_yaml["task"]["tpl"][which_tpl]["blue_valve_flow"])
+    if (task["blue_valve_flow"])
     {
-      tpl_config.blue_valve_flow = task_yaml["task"]["tpl"][which_tpl]["blue_valve_flow"].as<double>();
+      tpl_config.blue_valve_flow = task["blue_valve_flow"].as<double>();
     }
     else
     {
       throw std::invalid_argument(which_tpl + " tpl blue valve flow value is missing");
     }
-    if (task_yaml["task"]["tpl"][which_tpl]["pto_rpm"])
+    if (task["pto_rpm"])
     {
-      tpl_config.pto_rpm = task_yaml["task"]["tpl"][which_tpl]["pto_rpm"].as<double>();
+      tpl_config.pto_rpm = task["pto_rpm"].as<double>();
     }
     else
     {
       throw std::invalid_argument(which_tpl + " tpl pto rpm value is missing");
     }
 
-    if (tpl == tplLocation::front)
+    if (tpl == TplLocation::front)
     {
       tpl_front_config_ = tpl_config;
     }
-    else if (tpl == tplLocation::back)
+    else if (tpl == TplLocation::back)
     {
       tpl_back_config_ = tpl_config;
     }
   }
+}
+
+std::string TaskParser::convertTplLocationToString(TplLocation tpl)
+{
+  return (tpl == TplLocation::front ? "front" : "back");
 }
 
 agribot_msgs::AgribotTool TaskParser::getTplFrontConfig()
@@ -172,8 +170,8 @@ agribot_msgs::AgribotTool TaskParser::getTplBackConfig()
 void TaskParser::parseTask(const std::experimental::filesystem::path& task_name)
 {
   setTaskLocation(task_name);
-  parseTpl(tplLocation::front);
-  parseTpl(tplLocation::back);
+  parseTpl(TplLocation::front);
+  parseTpl(TplLocation::back);
   setPathName();
 }
 
