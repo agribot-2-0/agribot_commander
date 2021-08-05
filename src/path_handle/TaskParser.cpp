@@ -115,13 +115,13 @@ void TaskParser::parseTpl(tplLocation tpl)
     {
       throw std::invalid_argument(which_tpl + " tpl height value is missing");
     }
-    if (task_yaml["task"]["tpl"][which_tpl]["red_valve_flow"])
+    if (task_yaml["task"]["tpl"][which_tpl]["yellow_valve_flow"])
     {
-      tpl_config.red_valve_flow = task_yaml["task"]["tpl"][which_tpl]["red_valve_flow"].as<double>();
+      tpl_config.red_valve_flow = task_yaml["task"]["tpl"][which_tpl]["yellow_valve_flow"].as<double>();
     }
     else
     {
-      throw std::invalid_argument(which_tpl + " tpl red valve flow value is missing");
+      throw std::invalid_argument(which_tpl + " tpl yellow valve flow value is missing");
     }
     if (task_yaml["task"]["tpl"][which_tpl]["green_valve_flow"])
     {
