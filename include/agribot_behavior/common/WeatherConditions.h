@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2021 Agribot. All rights reserved.
  */
-
+#pragma once
 namespace agribot_behavior
 {
 enum class Condition
