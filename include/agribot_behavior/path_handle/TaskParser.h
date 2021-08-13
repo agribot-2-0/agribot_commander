@@ -8,6 +8,8 @@
 
 #include <yaml-cpp/yaml.h>
 #include <agribot_msgs/AgribotTool.h>
+#include <agribot_behavior/common/WeatherConditions.h>
+#include <ros/ros.h>
 
 #include <experimental/filesystem>
 #include <vector>
@@ -33,6 +35,7 @@ private:
 
   agribot_msgs::AgribotTool tpl_front_config_;
   agribot_msgs::AgribotTool tpl_back_config_;
+  WeatherConditions weather_conditions_from_task_;
 
   std::experimental::filesystem::path getPathNameFromTask();
   bool fileExists(const std::experimental::filesystem::path& name);
@@ -41,7 +44,9 @@ private:
   void setTaskLocation(const std::experimental::filesystem::path& task_name);
   bool setPathName();
   void parseTpl(TplLocation tpl);
+  void parseWeatherConditions();
   std::string convertTplLocationToString(TplLocation tpl);
+  Condition convertWeatherConditionToEnumCondition(std::string condition);
 
 public:
   TaskParser() = delete;
@@ -53,6 +58,7 @@ public:
   std::experimental::filesystem::path getPathLocation() const;
   agribot_msgs::AgribotTool getTplFrontConfig();
   agribot_msgs::AgribotTool getTplBackConfig();
+  WeatherConditions getWeatherConditions();
   void parseTask(const std::experimental::filesystem::path& task_name);
 };
 }  // namespace agribot_behavior

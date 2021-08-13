@@ -72,7 +72,8 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
       handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_,
-                               autonomous_path_action_feedback_, robot_mode_);
+                               autonomous_path_action_feedback_, robot_mode_, current_atmo_press_, current_temperature_,
+                               current_humidity_, current_wind_speed_);
       handle->initRosPublishers(tpl_front_config_publisher_, tpl_back_config_publisher_);
       handle->initActionlibs(autonomous_path_action_client_);
       handle->initTaskParser(path_folder_, task_folder_);
@@ -101,6 +102,10 @@ void AgribotBehaviorTreeNode::initSharedData()
   robot_mode_ = std::make_shared<SharedField<industrial_msgs::RobotMode>>();
   autonomous_path_action_feedback_ = std::make_shared<SharedField<agribot_msgs::AgribotNavigationManagerResult>>();
   ttcontrol_state_ = std::make_shared<SharedField<agribot_msgs::AgribotTtcontrolState>>();
+  current_atmo_press_ = std::make_shared<SharedField<sensor_msgs::FluidPressure>>();
+  current_humidity_ = std::make_shared<SharedField<sensor_msgs::RelativeHumidity>>();
+  current_wind_speed_ = std::make_shared<SharedField<agribot_msgs::AgribotWind>>();
+  current_temperature_ = std::make_shared<SharedField<sensor_msgs::Temperature>>();
 }
 
 void AgribotBehaviorTreeNode::initAtomics()
@@ -134,6 +139,14 @@ void AgribotBehaviorTreeNode::initRosSubscribers()
       node_handle_->subscribe("mobile_app_error", 1, &AgribotBehaviorTreeNode::mobileAppErrorFlagRosCallback, this);
   ttcontrol_state_subscriber_ =
       node_handle_->subscribe("/agribot/ttcontrol_state", 1, &AgribotBehaviorTreeNode::ttcontrolStateCallback, this);
+  weather_conditions_atmo_press_subscriber_ = node_handle_->subscribe(
+      "/weather_station/atmospheric_pressure", 1, &AgribotBehaviorTreeNode::weatherConditionsAtmoPressCallback, this);
+  weather_conditions_humidity_subscriber_ = node_handle_->subscribe(
+      "/weather_station/humidity", 1, &AgribotBehaviorTreeNode::weatherConditionsHumidityCallback, this);
+  weather_conditions_temperature_subscriber_ = node_handle_->subscribe(
+      "/weather_station/temperature", 1, &AgribotBehaviorTreeNode::weatherConditionsTemperatureCallback, this);
+  weather_conditions_wind_speed_subscriber_ = node_handle_->subscribe(
+      "/weather_station/wind_speed", 1, &AgribotBehaviorTreeNode::weatherConditionsWindSpeedCallback, this);
 }
 
 void AgribotBehaviorTreeNode::initRosPublishers()
@@ -220,6 +233,26 @@ void AgribotBehaviorTreeNode::run()
     ros::spinOnce();
     rate.sleep();
   }
+}
+
+void AgribotBehaviorTreeNode::weatherConditionsAtmoPressCallback(const sensor_msgs::FluidPressure::ConstPtr& msg)
+{
+  current_atmo_press_->writeData(*msg);
+}
+
+void AgribotBehaviorTreeNode::weatherConditionsHumidityCallback(const sensor_msgs::RelativeHumidity::ConstPtr& msg)
+{
+  current_humidity_->writeData(*msg);
+}
+
+void AgribotBehaviorTreeNode::weatherConditionsTemperatureCallback(const sensor_msgs::Temperature::ConstPtr& msg)
+{
+  current_temperature_->writeData(*msg);
+}
+
+void AgribotBehaviorTreeNode::weatherConditionsWindSpeedCallback(const agribot_msgs::AgribotWind::ConstPtr& msg)
+{
+  current_wind_speed_->writeData(*msg);
 }
 
 void AgribotBehaviorTreeNode::obstacleDetectedRosCallback(const agribot_msgs::ObstacleDetectionStatus::ConstPtr& msg)

@@ -7,6 +7,10 @@
 #include <agribot_msgs/AgribotNavigationManagerResult.h>
 #include <industrial_msgs/RobotMode.h>
 #include <agribot_msgs/AgribotTtcontrolState.h>
+#include <agribot_msgs/AgribotWind.h>
+#include <sensor_msgs/FluidPressure.h>
+#include <sensor_msgs/Temperature.h>
+#include <sensor_msgs/RelativeHumidity.h>
 
 #include <shared_mutex>
 #include <string>

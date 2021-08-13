@@ -152,9 +152,79 @@ void TaskParser::parseTpl(TplLocation tpl)
   }
 }
 
+void TaskParser::parseWeatherConditions()
+{
+  if (fileExists(task_location_))
+  {
+    YAML::Node task_yaml = YAML::LoadFile(task_location_);
+    const YAML::Node& task = task_yaml["task"]["weather_conditions"];
+
+    if (task["pressure"])
+    {
+      weather_conditions_from_task_.pressure_.value_ = task["pressure"]["value"].as<double>();
+      weather_conditions_from_task_.pressure_.condition_ =
+          convertWeatherConditionToEnumCondition(task["pressure"]["condition"].as<std::string>());
+    }
+    else
+    {
+      throw std::invalid_argument("weather_conditions pressure value is missing.");
+    }
+    if (task["humidity"])
+    {
+      weather_conditions_from_task_.humidity_.value_ = task["humidity"]["value"].as<double>();
+      weather_conditions_from_task_.humidity_.condition_ =
+          convertWeatherConditionToEnumCondition(task["humidity"]["condition"].as<std::string>());
+    }
+    else
+    {
+      throw std::invalid_argument("weather_conditions humidity value is missing.");
+    }
+    if (task["temperature"])
+    {
+      weather_conditions_from_task_.temperature_.value_ = task["temperature"]["value"].as<double>();
+      weather_conditions_from_task_.temperature_.condition_ =
+          convertWeatherConditionToEnumCondition(task["temperature"]["condition"].as<std::string>());
+    }
+    else
+    {
+      throw std::invalid_argument("weather_conditions atmospheric pressure value is missing");
+    }
+    if (task["wind"])
+    {
+      weather_conditions_from_task_.wind_.value_ = task["wind"]["value"].as<double>();
+      weather_conditions_from_task_.wind_.condition_ =
+          convertWeatherConditionToEnumCondition(task["wind"]["condition"].as<std::string>());
+    }
+    else
+    {
+      throw std::invalid_argument("weather_conditions wind speed value is missing.");
+    }
+  }
+}
+
 std::string TaskParser::convertTplLocationToString(TplLocation tpl)
 {
   return (tpl == TplLocation::front ? "front" : "back");
+}
+
+Condition TaskParser::convertWeatherConditionToEnumCondition(std::string condition)
+{
+  if (condition == "less")
+  {
+    return Condition::less;
+  }
+  else if (condition == "equal")
+  {
+    return Condition::equal;
+  }
+  else if (condition == "more")
+  {
+    return Condition::more;
+  }
+  else
+  {
+    return Condition::none;
+  }
 }
 
 agribot_msgs::AgribotTool TaskParser::getTplFrontConfig()
@@ -167,11 +237,17 @@ agribot_msgs::AgribotTool TaskParser::getTplBackConfig()
   return tpl_back_config_;
 }
 
+WeatherConditions TaskParser::getWeatherConditions()
+{
+  return weather_conditions_from_task_;
+}
+
 void TaskParser::parseTask(const std::experimental::filesystem::path& task_name)
 {
   setTaskLocation(task_name);
   parseTpl(TplLocation::front);
   parseTpl(TplLocation::back);
+  parseWeatherConditions();
   setPathName();
 }
 
