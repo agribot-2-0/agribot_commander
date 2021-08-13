@@ -7,6 +7,7 @@
 #include <sensor_msgs/NavSatFix.h>
 
 #include <yaml-cpp/yaml.h>
+#include <agribot_msgs/AgribotTool.h>
 
 #include <experimental/filesystem>
 #include <vector>
@@ -16,24 +17,42 @@
 
 namespace agribot_behavior
 {
-class PathParser
+enum class TplLocation
+{
+  front,
+  back
+};
+
+class TaskParser
 {
 private:
   std::experimental::filesystem::path path_location_;
   std::experimental::filesystem::path path_folder_;
   std::experimental::filesystem::path task_folder_;
+  std::experimental::filesystem::path task_location_;
 
-  std::experimental::filesystem::path getPathNameFromTask(const std::experimental::filesystem::path& task_name);
+  agribot_msgs::AgribotTool tpl_front_config_;
+  agribot_msgs::AgribotTool tpl_back_config_;
+
+  std::experimental::filesystem::path getPathNameFromTask();
   bool fileExists(const std::experimental::filesystem::path& name);
   void setPose(const YAML::Node& node, std::size_t index,
                std::vector<sensor_msgs::NavSatFix>& path_points);  // NOLINT
+  void setTaskLocation(const std::experimental::filesystem::path& task_name);
+  bool setPathName();
+  void parseTpl(TplLocation tpl);
+  std::string convertTplLocationToString(TplLocation tpl);
 
 public:
-  PathParser() = delete;
-  PathParser(const std::experimental::filesystem::path& path_folder,
+  TaskParser() = delete;
+  TaskParser(const std::experimental::filesystem::path& path_folder,
              const std::experimental::filesystem::path& task_folder);
+
   bool setPathName(const std::experimental::filesystem::path& task_name);
   std::vector<sensor_msgs::NavSatFix> parsePath();
   std::experimental::filesystem::path getPathLocation() const;
+  agribot_msgs::AgribotTool getTplFrontConfig();
+  agribot_msgs::AgribotTool getTplBackConfig();
+  void parseTask(const std::experimental::filesystem::path& task_name);
 };
 }  // namespace agribot_behavior

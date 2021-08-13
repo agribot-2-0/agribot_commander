@@ -27,6 +27,7 @@
 #include <std_srvs/Trigger.h>
 #include <industrial_msgs/RobotMode.h>
 #include <agribot_msgs/LampsControl.h>
+#include <agribot_msgs/AgribotTool.h>
 #include <agribot_behavior/common/SharedField.h>
 #include <agribot_msgs/PerformAutonomousPathAction.h>
 #include <agribot_msgs/PerformAutonomousTaskAction.h>
@@ -85,6 +86,8 @@ private:
   // Publishers - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to publish something are
   // granted with shared_ptr of the Publishers
   std::shared_ptr<ros::Publisher> robot_mode_publisher_;
+  std::shared_ptr<ros::Publisher> tpl_front_config_publisher_;
+  std::shared_ptr<ros::Publisher> tpl_back_config_publisher_;
 
   // Services - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to call service are
   // granted with shared_ptr of the ServiceClient. The implementation of service call is stored inside individual tree
