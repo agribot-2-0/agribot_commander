@@ -72,8 +72,8 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
     if (auto handle = dynamic_cast<Handle*>(node.get()); handle != nullptr)
     {
       handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_,
-                               autonomous_path_action_feedback_, robot_mode_, current_atmo_press_, current_temperature_,
-                               current_humidity_, current_wind_speed_);
+                               autonomous_path_action_feedback_, robot_mode_, current_atmospheric_pressure_,
+                               current_temperature_, current_humidity_, current_wind_speed_);
       handle->initRosPublishers(tpl_front_config_publisher_, tpl_back_config_publisher_);
       handle->initActionlibs(autonomous_path_action_client_);
       handle->initTaskParser(path_folder_, task_folder_);
@@ -102,7 +102,7 @@ void AgribotBehaviorTreeNode::initSharedData()
   robot_mode_ = std::make_shared<SharedField<industrial_msgs::RobotMode>>();
   autonomous_path_action_feedback_ = std::make_shared<SharedField<agribot_msgs::AgribotNavigationManagerResult>>();
   ttcontrol_state_ = std::make_shared<SharedField<agribot_msgs::AgribotTtcontrolState>>();
-  current_atmo_press_ = std::make_shared<SharedField<sensor_msgs::FluidPressure>>();
+  current_atmospheric_pressure_ = std::make_shared<SharedField<sensor_msgs::FluidPressure>>();
   current_humidity_ = std::make_shared<SharedField<sensor_msgs::RelativeHumidity>>();
   current_wind_speed_ = std::make_shared<SharedField<agribot_msgs::AgribotWind>>();
   current_temperature_ = std::make_shared<SharedField<sensor_msgs::Temperature>>();
@@ -139,7 +139,7 @@ void AgribotBehaviorTreeNode::initRosSubscribers()
       node_handle_->subscribe("mobile_app_error", 1, &AgribotBehaviorTreeNode::mobileAppErrorFlagRosCallback, this);
   ttcontrol_state_subscriber_ =
       node_handle_->subscribe("/agribot/ttcontrol_state", 1, &AgribotBehaviorTreeNode::ttcontrolStateCallback, this);
-  weather_conditions_atmo_press_subscriber_ = node_handle_->subscribe(
+  weather_conditions_atmospheric_pressure_subscriber_ = node_handle_->subscribe(
       "/weather_station/atmospheric_pressure", 1, &AgribotBehaviorTreeNode::weatherConditionsAtmoPressCallback, this);
   weather_conditions_humidity_subscriber_ = node_handle_->subscribe(
       "/weather_station/humidity", 1, &AgribotBehaviorTreeNode::weatherConditionsHumidityCallback, this);
@@ -237,7 +237,7 @@ void AgribotBehaviorTreeNode::run()
 
 void AgribotBehaviorTreeNode::weatherConditionsAtmoPressCallback(const sensor_msgs::FluidPressure::ConstPtr& msg)
 {
-  current_atmo_press_->writeData(*msg);
+  current_atmospheric_pressure_->writeData(*msg);
 }
 
 void AgribotBehaviorTreeNode::weatherConditionsHumidityCallback(const sensor_msgs::RelativeHumidity::ConstPtr& msg)

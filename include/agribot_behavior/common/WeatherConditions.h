@@ -22,10 +22,10 @@ class WeatherConditions
 {
 public:
   WeatherCondition temperature_, pressure_, wind_, humidity_;
-  bool areWeatherConditionsOkay(double temp, double pres, double wind, double humi);
-  bool compareTemperature(double temp);
-  bool compareHumidity(double humi);
-  bool comparePressure(double pres);
-  bool compareWind(double wind);
+  bool areWeatherConditionsFullfilled(double temp, double pres, double wind, double humi);
+  bool isCurrentTemperatureFullfilled(double temp);
+  bool isCurrentHumidityFullfilled(double humi);
+  bool isCurrentAtmosphericPressureFullfilled(double pres);
+  bool isCurrentWindSpeedFullfilled(double wind);
 };
 }  // namespace agribot_behavior

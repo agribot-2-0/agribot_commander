@@ -51,7 +51,7 @@ void Handle::initSharedFields(
     std::shared_ptr<SharedField<std::size_t>> path_progression,
     std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback,
     std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode,
-    std::shared_ptr<SharedField<sensor_msgs::FluidPressure>> current_atmo_press,
+    std::shared_ptr<SharedField<sensor_msgs::FluidPressure>> current_atmospheric_pressure,
     std::shared_ptr<SharedField<sensor_msgs::Temperature>> current_temperature,
     std::shared_ptr<SharedField<sensor_msgs::RelativeHumidity>> current_humidity,
     std::shared_ptr<SharedField<agribot_msgs::AgribotWind>> current_wind_speed)
@@ -62,7 +62,7 @@ void Handle::initSharedFields(
   autonomous_path_action_feedback_ = autonomous_path_action_feedback;
   robot_mode_ = robot_mode;
   current_wind_speed_ = current_wind_speed;
-  current_atmo_press_ = current_atmo_press;
+  current_atmospheric_pressure_ = current_atmospheric_pressure;
   current_temperature_ = current_temperature;
   current_humidity_ = current_humidity;
 }
@@ -123,8 +123,8 @@ void Handle::handleAutonomousControl()
     task_parser_->parseTask(current_task_name_->getData());
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loading path " << task_parser_->getPathLocation());
     std::vector<sensor_msgs::NavSatFix> path_points = task_parser_->parsePath();
-    if (task_parser_->getWeatherConditions().areWeatherConditionsOkay(
-            current_temperature_->getData().temperature, current_atmo_press_->getData().fluid_pressure,
+    if (task_parser_->getWeatherConditions().areWeatherConditionsFullfilled(
+            current_temperature_->getData().temperature, current_atmospheric_pressure_->getData().fluid_pressure,
             current_wind_speed_->getData().average_speed, current_humidity_->getData().relative_humidity))
     {
       if (!path_points.empty())

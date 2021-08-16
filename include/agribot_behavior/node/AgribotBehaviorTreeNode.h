@@ -85,7 +85,7 @@ private:
   ros::Subscriber obstacle_detected_subscriber_;
   ros::Subscriber mobile_app_error_flag_subscriber_;
   ros::Subscriber ttcontrol_state_subscriber_;
-  ros::Subscriber weather_conditions_atmo_press_subscriber_;
+  ros::Subscriber weather_conditions_atmospheric_pressure_subscriber_;
   ros::Subscriber weather_conditions_humidity_subscriber_;
   ros::Subscriber weather_conditions_temperature_subscriber_;
   ros::Subscriber weather_conditions_wind_speed_subscriber_;
@@ -117,7 +117,7 @@ private:
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
   std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback_;
   std::shared_ptr<SharedField<agribot_msgs::AgribotTtcontrolState>> ttcontrol_state_;
-  std::shared_ptr<SharedField<sensor_msgs::FluidPressure>> current_atmo_press_;
+  std::shared_ptr<SharedField<sensor_msgs::FluidPressure>> current_atmospheric_pressure_;
   std::shared_ptr<SharedField<sensor_msgs::Temperature>> current_temperature_;
   std::shared_ptr<SharedField<sensor_msgs::RelativeHumidity>> current_humidity_;
   std::shared_ptr<SharedField<agribot_msgs::AgribotWind>> current_wind_speed_;

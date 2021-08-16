@@ -41,7 +41,7 @@ private:
   std::shared_ptr<SharedField<std::string>> previous_task_name_;
   std::shared_ptr<SharedField<std::size_t>> path_progression_;
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
-  std::shared_ptr<SharedField<sensor_msgs::FluidPressure>> current_atmo_press_;
+  std::shared_ptr<SharedField<sensor_msgs::FluidPressure>> current_atmospheric_pressure_;
   std::shared_ptr<SharedField<sensor_msgs::Temperature>> current_temperature_;
   std::shared_ptr<SharedField<sensor_msgs::RelativeHumidity>> current_humidity_;
   std::shared_ptr<SharedField<agribot_msgs::AgribotWind>> current_wind_speed_;
@@ -75,7 +75,7 @@ public:
       std::shared_ptr<SharedField<std::size_t>> path_progression,
       std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback,
       std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode,
-      std::shared_ptr<SharedField<sensor_msgs::FluidPressure>> current_atmo_press,
+      std::shared_ptr<SharedField<sensor_msgs::FluidPressure>> current_atmospheric_pressure,
       std::shared_ptr<SharedField<sensor_msgs::Temperature>> current_temperature,
       std::shared_ptr<SharedField<sensor_msgs::RelativeHumidity>> current_humidity,
       std::shared_ptr<SharedField<agribot_msgs::AgribotWind>> current_wind_speed);

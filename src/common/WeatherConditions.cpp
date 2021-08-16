@@ -4,156 +4,75 @@
 #include <agribot_behavior/common/WeatherConditions.h>
 namespace agribot_behavior
 {
-bool WeatherConditions::areWeatherConditionsOkay(double temp, double pres, double wind, double humi)
+bool WeatherConditions::areWeatherConditionsFullfilled(double current_temperature, double current_atmospheric_pressure,
+                                                       double current_wind_speed, double current_humidity)
 {
-  return (compareTemperature(temp) && compareHumidity(humi) && compareWind(wind) && comparePressure(pres));
+  return (isCurrentTemperatureFullfilled(current_temperature) && isCurrentHumidityFullfilled(current_humidity) &&
+          isCurrentWindSpeedFullfilled(current_wind_speed) &&
+          isCurrentAtmosphericPressureFullfilled(current_atmospheric_pressure));
 }
 
-bool WeatherConditions::compareTemperature(double temp)
+bool WeatherConditions::isCurrentTemperatureFullfilled(double current_temperature)
 {
   if (temperature_.condition_ == Condition::less)
   {
-    if (temp < temperature_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_temperature < temperature_.value_);
   }
   else if (temperature_.condition_ == Condition::equal)
   {
-    if (temp == temperature_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_temperature == temperature_.value_);
   }
   else if (temperature_.condition_ == Condition::more)
   {
-    if (temp > temperature_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_temperature > temperature_.value_);
   }
   return true;
 }
-bool WeatherConditions::compareHumidity(double humi)
+bool WeatherConditions::isCurrentHumidityFullfilled(double current_humidity)
 {
   if (humidity_.condition_ == Condition::less)
   {
-    if (humi < humidity_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_humidity < humidity_.value_);
   }
   else if (humidity_.condition_ == Condition::equal)
   {
-    if (humi == humidity_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_humidity == humidity_.value_);
   }
   else if (humidity_.condition_ == Condition::more)
   {
-    if (humi > humidity_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_humidity > humidity_.value_);
   }
   return true;
 }
-bool WeatherConditions::comparePressure(double pres)
+bool WeatherConditions::isCurrentAtmosphericPressureFullfilled(double current_atmospheric_pressure)
 {
   if (pressure_.condition_ == Condition::less)
   {
-    if (pres < pressure_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_atmospheric_pressure < pressure_.value_);
   }
   else if (pressure_.condition_ == Condition::equal)
   {
-    if (pres == pressure_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_atmospheric_pressure == pressure_.value_);
   }
   else if (pressure_.condition_ == Condition::more)
   {
-    if (pres > pressure_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_atmospheric_pressure > pressure_.value_);
   }
   return true;
 }
-bool WeatherConditions::compareWind(double wind)
+bool WeatherConditions::isCurrentWindSpeedFullfilled(double current_wind_speed)
 {
   if (wind_.condition_ == Condition::less)
   {
-    if (wind < wind_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_wind_speed < wind_.value_);
   }
   else if (wind_.condition_ == Condition::equal)
   {
-    if (wind == wind_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_wind_speed == wind_.value_);
   }
   else if (wind_.condition_ == Condition::more)
   {
-    if (wind > wind_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (current_wind_speed > wind_.value_);
   }
   return true;
 }
