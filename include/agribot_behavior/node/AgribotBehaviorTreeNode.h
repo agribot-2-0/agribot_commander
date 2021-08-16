@@ -141,7 +141,7 @@ private:
   void obstacleDetectedRosCallback(const agribot_msgs::ObstacleDetectionStatus::ConstPtr& msg);
   void mobileAppErrorFlagRosCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
   void ttcontrolStateCallback(const agribot_msgs::AgribotTtcontrolState::ConstPtr& msg);
-  void weatherConditionsAtmoPressCallback(const sensor_msgs::FluidPressure::ConstPtr& msg);
+  void weatherConditionsAtmosphericPressureCallback(const sensor_msgs::FluidPressure::ConstPtr& msg);
   void weatherConditionsHumidityCallback(const sensor_msgs::RelativeHumidity::ConstPtr& msg);
   void weatherConditionsTemperatureCallback(const sensor_msgs::Temperature::ConstPtr& msg);
   void weatherConditionsWindSpeedCallback(const agribot_msgs::AgribotWind::ConstPtr& msg);

@@ -46,7 +46,7 @@ private:
   void parseTpl(TplLocation tpl);
   void parseWeatherConditions();
   std::string convertTplLocationToString(TplLocation tpl);
-  Condition convertWeatherConditionToEnumCondition(std::string condition);
+  Condition convertWeatherConditionToEnumCondition(const std::string& condition);
 
 public:
   TaskParser() = delete;

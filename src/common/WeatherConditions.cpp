@@ -14,15 +14,15 @@ bool WeatherConditions::areWeatherConditionsFullfilled(double current_temperatur
 
 bool WeatherConditions::isCurrentTemperatureFullfilled(double current_temperature)
 {
-  if (temperature_.condition_ == Condition::less)
+  if (temperature_.condition_ == Condition::Less)
   {
     return (current_temperature < temperature_.value_);
   }
-  else if (temperature_.condition_ == Condition::equal)
+  else if (temperature_.condition_ == Condition::Equal)
   {
     return (current_temperature == temperature_.value_);
   }
-  else if (temperature_.condition_ == Condition::more)
+  else if (temperature_.condition_ == Condition::More)
   {
     return (current_temperature > temperature_.value_);
   }
@@ -30,15 +30,15 @@ bool WeatherConditions::isCurrentTemperatureFullfilled(double current_temperatur
 }
 bool WeatherConditions::isCurrentHumidityFullfilled(double current_humidity)
 {
-  if (humidity_.condition_ == Condition::less)
+  if (humidity_.condition_ == Condition::Less)
   {
     return (current_humidity < humidity_.value_);
   }
-  else if (humidity_.condition_ == Condition::equal)
+  else if (humidity_.condition_ == Condition::Equal)
   {
     return (current_humidity == humidity_.value_);
   }
-  else if (humidity_.condition_ == Condition::more)
+  else if (humidity_.condition_ == Condition::More)
   {
     return (current_humidity > humidity_.value_);
   }
@@ -46,15 +46,15 @@ bool WeatherConditions::isCurrentHumidityFullfilled(double current_humidity)
 }
 bool WeatherConditions::isCurrentAtmosphericPressureFullfilled(double current_atmospheric_pressure)
 {
-  if (pressure_.condition_ == Condition::less)
+  if (pressure_.condition_ == Condition::Less)
   {
     return (current_atmospheric_pressure < pressure_.value_);
   }
-  else if (pressure_.condition_ == Condition::equal)
+  else if (pressure_.condition_ == Condition::Equal)
   {
     return (current_atmospheric_pressure == pressure_.value_);
   }
-  else if (pressure_.condition_ == Condition::more)
+  else if (pressure_.condition_ == Condition::More)
   {
     return (current_atmospheric_pressure > pressure_.value_);
   }
@@ -62,15 +62,15 @@ bool WeatherConditions::isCurrentAtmosphericPressureFullfilled(double current_at
 }
 bool WeatherConditions::isCurrentWindSpeedFullfilled(double current_wind_speed)
 {
-  if (wind_.condition_ == Condition::less)
+  if (wind_.condition_ == Condition::Less)
   {
     return (current_wind_speed < wind_.value_);
   }
-  else if (wind_.condition_ == Condition::equal)
+  else if (wind_.condition_ == Condition::Equal)
   {
     return (current_wind_speed == wind_.value_);
   }
-  else if (wind_.condition_ == Condition::more)
+  else if (wind_.condition_ == Condition::More)
   {
     return (current_wind_speed > wind_.value_);
   }

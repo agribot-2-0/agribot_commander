@@ -139,8 +139,9 @@ void AgribotBehaviorTreeNode::initRosSubscribers()
       node_handle_->subscribe("mobile_app_error", 1, &AgribotBehaviorTreeNode::mobileAppErrorFlagRosCallback, this);
   ttcontrol_state_subscriber_ =
       node_handle_->subscribe("/agribot/ttcontrol_state", 1, &AgribotBehaviorTreeNode::ttcontrolStateCallback, this);
-  weather_conditions_atmospheric_pressure_subscriber_ = node_handle_->subscribe(
-      "/weather_station/atmospheric_pressure", 1, &AgribotBehaviorTreeNode::weatherConditionsAtmoPressCallback, this);
+  weather_conditions_atmospheric_pressure_subscriber_ =
+      node_handle_->subscribe("/weather_station/atmospheric_pressure", 1,
+                              &AgribotBehaviorTreeNode::weatherConditionsAtmosphericPressureCallback, this);
   weather_conditions_humidity_subscriber_ = node_handle_->subscribe(
       "/weather_station/humidity", 1, &AgribotBehaviorTreeNode::weatherConditionsHumidityCallback, this);
   weather_conditions_temperature_subscriber_ = node_handle_->subscribe(
@@ -235,7 +236,8 @@ void AgribotBehaviorTreeNode::run()
   }
 }
 
-void AgribotBehaviorTreeNode::weatherConditionsAtmoPressCallback(const sensor_msgs::FluidPressure::ConstPtr& msg)
+void AgribotBehaviorTreeNode::weatherConditionsAtmosphericPressureCallback(
+    const sensor_msgs::FluidPressure::ConstPtr& msg)
 {
   current_atmospheric_pressure_->writeData(*msg);
 }

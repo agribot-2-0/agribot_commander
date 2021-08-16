@@ -6,10 +6,10 @@ namespace agribot_behavior
 {
 enum class Condition
 {
-  less,
-  equal,
-  more,
-  none
+  Less,
+  Equal,
+  More,
+  None
 };
 
 struct WeatherCondition
