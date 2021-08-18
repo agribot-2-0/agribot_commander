@@ -35,7 +35,6 @@ private:
 
   agribot_msgs::AgribotTool tpl_front_config_;
   agribot_msgs::AgribotTool tpl_back_config_;
-  WeatherConditions weather_conditions_from_task_;
 
   std::experimental::filesystem::path getPathNameFromTask();
   bool fileExists(const std::experimental::filesystem::path& name);
@@ -52,7 +51,7 @@ public:
   TaskParser() = delete;
   TaskParser(const std::experimental::filesystem::path& path_folder,
              const std::experimental::filesystem::path& task_folder);
-
+  WeatherConditions weather_conditions_from_task_;
   bool setPathName(const std::experimental::filesystem::path& task_name);
   std::vector<sensor_msgs::NavSatFix> parsePath();
   std::experimental::filesystem::path getPathLocation() const;

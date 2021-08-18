@@ -123,53 +123,56 @@ void Handle::handleAutonomousControl()
     task_parser_->parseTask(current_task_name_->getData());
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loading path " << task_parser_->getPathLocation());
     std::vector<sensor_msgs::NavSatFix> path_points = task_parser_->parsePath();
-    if (task_parser_->getWeatherConditions().areWeatherConditionsFullfilled(
+
+    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Checking weather conditions...");
+    if (!task_parser_->weather_conditions_from_task_.areWeatherConditionsFullfilled(
             current_temperature_->getData().temperature, current_atmospheric_pressure_->getData().fluid_pressure,
             current_wind_speed_->getData().average_speed, current_humidity_->getData().relative_humidity))
     {
-      if (!path_points.empty())
+      // ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Weather conditions won't allow to start task "
+      //                  << current_task_name_->getData() << "."
+      //                  << task_parser_->weather_conditions_from_task_.getMessage());
+    }
+    ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Weather conditions are fullfilled to start task "
+                    << current_task_name_->getData());
+
+    if (!path_points.empty())
+    {
+      if (taskUnchanged())  // continue path from last visited waypoint
       {
-        if (taskUnchanged())  // continue path from last visited waypoint
-        {
-          ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Path unchanged. Continuing path from waypoint "
-                          << static_cast<int>(path_progression_->getData()));
-        }
-        else
-        {
-          path_progression_->writeData(0);
-        }
-        sendAutonomousPathGoal(path_points);
-        ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << task_parser_->getPathLocation());
-        if (navigationManagerReady())
-        {
-          ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task");
-          ros::Rate rate{ 10 };
-          while (!halt_requested_ && ros::ok() && navigationManagerActive())
-          {
-            ros::spinOnce();
-            tpl_front_config_publisher_->publish(task_parser_->getTplFrontConfig());
-            tpl_back_config_publisher_->publish(task_parser_->getTplBackConfig());
-            rate.sleep();
-          }
-          ROS_WARN_STREAM(
-              "[BehaviorTree][HandleAuto] Autonomous task finished with NavigationManager status "
-              << common_functions::navigationManagerResultToString(autonomous_path_action_feedback_->getData()));
-        }
-        else
-        {
-          ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Move base activate timeout");
-        }
-        resetAutonomousDriving();
+        ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Path unchanged. Continuing path from waypoint "
+                        << static_cast<int>(path_progression_->getData()));
       }
       else
       {
-        ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Failed to load path from task " << current_task_name_->getData());
+        path_progression_->writeData(0);
       }
+      sendAutonomousPathGoal(path_points);
+      ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loaded path " << task_parser_->getPathLocation());
+      if (navigationManagerReady())
+      {
+        ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Move base is active. Started executing task");
+        ros::Rate rate{ 10 };
+        while (!halt_requested_ && ros::ok() && navigationManagerActive())
+        {
+          ros::spinOnce();
+          tpl_front_config_publisher_->publish(task_parser_->getTplFrontConfig());
+          tpl_back_config_publisher_->publish(task_parser_->getTplBackConfig());
+          rate.sleep();
+        }
+        ROS_WARN_STREAM(
+            "[BehaviorTree][HandleAuto] Autonomous task finished with NavigationManager status "
+            << common_functions::navigationManagerResultToString(autonomous_path_action_feedback_->getData()));
+      }
+      else
+      {
+        ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Move base activate timeout");
+      }
+      resetAutonomousDriving();
     }
     else
     {
-      ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Weather conditions won't allow to start task "
-                       << current_task_name_->getData());
+      ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Failed to load path from task " << current_task_name_->getData());
     }
   }
   catch (const std::exception& e)

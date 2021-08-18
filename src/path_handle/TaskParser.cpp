@@ -161,8 +161,9 @@ void TaskParser::parseWeatherConditions()
 
     if (task_weather_conditions["pressure"])
     {
-      weather_conditions_from_task_.pressure_.value_ = task_weather_conditions["pressure"]["value"].as<double>();
-      weather_conditions_from_task_.pressure_.condition_ =
+      weather_conditions_from_task_.atmospheric_pressure_.value_ =
+          task_weather_conditions["pressure"]["value"].as<double>();
+      weather_conditions_from_task_.atmospheric_pressure_.condition_ =
           convertWeatherConditionToEnumCondition(task_weather_conditions["pressure"]["condition"].as<std::string>());
     }
     else
@@ -187,12 +188,12 @@ void TaskParser::parseWeatherConditions()
     }
     else
     {
-      throw std::invalid_argument("weather_conditions atmospheric pressure value is missing");
+      throw std::invalid_argument("weather_conditions atmospheric temperature value is missing");
     }
     if (task_weather_conditions["wind"])
     {
-      weather_conditions_from_task_.wind_.value_ = task_weather_conditions["wind"]["value"].as<double>();
-      weather_conditions_from_task_.wind_.condition_ =
+      weather_conditions_from_task_.wind_speed_.value_ = task_weather_conditions["wind"]["value"].as<double>();
+      weather_conditions_from_task_.wind_speed_.condition_ =
           convertWeatherConditionToEnumCondition(task_weather_conditions["wind"]["condition"].as<std::string>());
     }
     else
