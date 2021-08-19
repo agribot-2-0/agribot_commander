@@ -2,234 +2,107 @@
  * Copyright (C) 2021 Agribot. All rights reserved.
  */
 #include <agribot_behavior/common/WeatherConditions.h>
-#include <ros/ros.h>
 namespace agribot_behavior
 {
+std::string WeatherCondition::typeToString()
+{
+  switch (type_)
+  {
+    case WeatherType::Temperature:
+      return "Temperature";
+
+    case WeatherType::Humidity:
+      return "Humidity";
+
+    case WeatherType::AtmosphericPressure:
+      return "Atmospheric pressure";
+
+    case WeatherType::WindSpeed:
+      return "Wind speed";
+  }
+  return "";
+}
+
+std::string WeatherCondition::conditionToString()
+{
+  switch (condition_)
+  {
+    case Condition::Less:
+      return "less than ";
+
+    case Condition::Equal:
+      return "equal to ";
+
+    case Condition::More:
+      return "more than ";
+    case Condition::None:
+      return "";
+  }
+  return "";
+}
+
+bool WeatherCondition::isFullfilled(double current_value)
+{
+  switch (condition_)
+  {
+    case Condition::Less:
+      if (current_value < value_)
+      {
+        return true;
+      }
+      else
+      {
+        throw(std::logic_error(getExceptionMessage(value_, current_value, unit_)));
+      }
+
+    case Condition::Equal:
+      if (value_ == current_value)
+      {
+        return true;
+      }
+      else
+      {
+        throw(std::logic_error(getExceptionMessage(value_, current_value, unit_)));
+      }
+
+    case Condition::More:
+      if (current_value > value_)
+      {
+        return true;
+      }
+      else
+      {
+        throw(std::logic_error(getExceptionMessage(value_, current_value, unit_)));
+      }
+
+    default:
+      return true;
+  }
+}
+WeatherConditions::WeatherConditions()
+{
+  temperature_.unit_ = temperature_unit_;
+  humidity_.unit_ = humidity_unit_;
+  wind_speed_.unit_ = wind_speed_unit_;
+  atmospheric_pressure_.unit_ = atmospheric_pressure_unit_;
+}
+
 bool WeatherConditions::areWeatherConditionsFullfilled(double current_temperature, double current_atmospheric_pressure,
                                                        double current_wind_speed, double current_humidity)
 {
-  return (isCurrentTemperatureFullfilled(current_temperature) && isCurrentHumidityFullfilled(current_humidity) &&
-          isCurrentWindSpeedFullfilled(current_wind_speed) &&
-          isCurrentAtmosphericPressureFullfilled(current_atmospheric_pressure));
+  return (temperature_.isFullfilled(current_temperature) && humidity_.isFullfilled(current_humidity) &&
+          wind_speed_.isFullfilled(current_wind_speed) &&
+          atmospheric_pressure_.isFullfilled(current_atmospheric_pressure));
 }
 
-bool WeatherConditions::isCurrentTemperatureFullfilled(double current_temperature)
+std::string WeatherCondition::getExceptionMessage(double from_task, double current, const std::string unit)
 {
-  if (temperature_.condition_ == Condition::Less)
-  {
-    if (current_temperature < temperature_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << temperature_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_temperature;
-      throw(std::logic_error(error_message_ + "Temperature should be less than " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C."));
-    }
-  }
-  else if (temperature_.condition_ == Condition::Equal)
-  {
-    if (current_temperature == temperature_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << temperature_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_temperature;
-      throw(std::logic_error(error_message_ + "Temperature should be equal to " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C."));
-    }
-  }
-  else if (temperature_.condition_ == Condition::More)
-  {
-    if (current_temperature > temperature_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::fixed << std::setprecision(1) << temperature_.value_;
-      std::stringstream value_current;
-      value_current << std::fixed << std::setprecision(1) << current_temperature;
-      throw(std::logic_error(error_message_ + "Temperature should be more than " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C."));
-    }
-  }
-
-  return true;
-}
-bool WeatherConditions::isCurrentHumidityFullfilled(double current_humidity)
-{
-  if (humidity_.condition_ == Condition::Less)
-  {
-    if (current_humidity < humidity_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << humidity_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_humidity;
-      throw(std::logic_error(error_message_ + "Humidity should be less than " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C."));
-    }
-  }
-  else if (humidity_.condition_ == Condition::Equal)
-  {
-    if (current_humidity == humidity_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << humidity_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_humidity;
-      throw(std::logic_error(error_message_ + "Humidity should be equal to " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C. "));
-    }
-  }
-  else if (humidity_.condition_ == Condition::More)
-  {
-    if (current_humidity > humidity_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << humidity_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_humidity;
-      throw(std::logic_error(error_message_ + "Humidity should be more than " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C. "));
-    }
-  }
-
-  return true;
-}
-bool WeatherConditions::isCurrentAtmosphericPressureFullfilled(double current_atmospheric_pressure)
-{
-  if (atmospheric_pressure_.condition_ == Condition::Less)
-  {
-    if (current_atmospheric_pressure < atmospheric_pressure_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << atmospheric_pressure_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_atmospheric_pressure;
-      throw(std::logic_error(error_message_ + "Atmospheric pressure should be less than " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C. "));
-      return false;
-    }
-  }
-  else if (atmospheric_pressure_.condition_ == Condition::Equal)
-  {
-    if (current_atmospheric_pressure == atmospheric_pressure_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << atmospheric_pressure_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_atmospheric_pressure;
-      throw(std::logic_error(error_message_ + "Atmospheric pressure should be equal to " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C. "));
-    }
-  }
-  else if (atmospheric_pressure_.condition_ == Condition::More)
-  {
-    if (current_atmospheric_pressure > atmospheric_pressure_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << atmospheric_pressure_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_atmospheric_pressure;
-      throw(std::logic_error(error_message_ + "Atmspheric pressure should be more than " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C. "));
-    }
-  }
-
-  return true;
-}
-bool WeatherConditions::isCurrentWindSpeedFullfilled(double current_wind_speed)
-{
-  if (wind_speed_.condition_ == Condition::Less)
-  {
-    if (current_wind_speed < wind_speed_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << wind_speed_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_wind_speed;
-      throw(std::logic_error(error_message_ + "Wind speed should be less than " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C. "));
-    }
-  }
-  else if (wind_speed_.condition_ == Condition::Equal)
-  {
-    if (current_wind_speed == wind_speed_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << wind_speed_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_wind_speed;
-      throw(std::logic_error(error_message_ + "Wind speed should be equal to " + value_from_task.str() +
-                             " deg C, but is " + value_current.str() + " deg C. "));
-    }
-  }
-  else if (wind_speed_.condition_ == Condition::More)
-  {
-    if (current_wind_speed > wind_speed_.value_)
-    {
-      return true;
-    }
-    else
-    {
-      std::stringstream value_from_task;
-      value_from_task << std::setprecision(1) << wind_speed_.value_;
-      std::stringstream value_current;
-      value_current << std::setprecision(1) << current_wind_speed;
-      throw(std::logic_error(error_message_ + "Wind speed should be more than " + value_from_task.str() + ", but is " +
-                             value_current.str() + ". "));
-    }
-  }
-
-  return true;
-}
-std::string WeatherConditions::getMessage()
-{
-  ROS_ERROR_STREAM(error_message_);
-  return error_message_;
+  std::stringstream value_from_task;
+  value_from_task << std::fixed << std::setprecision(1) << from_task;
+  std::stringstream value_current;
+  value_current << std::fixed << std::setprecision(1) << current;
+  return (beginning_of_exception_message_ + typeToString() + " should be " + conditionToString() +
+          value_from_task.str() + unit + ", but is " + value_current.str() + unit + ".");
 }
 
 }  // namespace agribot_behavior
