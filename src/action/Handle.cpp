@@ -123,16 +123,10 @@ void Handle::handleAutonomousControl()
     task_parser_->parseTask(current_task_name_->getData());
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Loading path " << task_parser_->getPathLocation());
     std::vector<sensor_msgs::NavSatFix> path_points = task_parser_->parsePath();
-
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Checking weather conditions...");
-    if (!task_parser_->weather_conditions_from_task_.areWeatherConditionsFullfilled(
-            current_temperature_->getData().temperature, current_atmospheric_pressure_->getData().fluid_pressure,
-            current_wind_speed_->getData().average_speed, current_humidity_->getData().relative_humidity))
-    {
-      // ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Weather conditions won't allow to start task "
-      //                  << current_task_name_->getData() << "."
-      //                  << task_parser_->weather_conditions_from_task_.getMessage());
-    }
+    task_parser_->weather_conditions_from_task_.areWeatherConditionsFullfilled(
+        current_temperature_->getData().temperature, current_atmospheric_pressure_->getData().fluid_pressure,
+        current_wind_speed_->getData().average_speed, current_humidity_->getData().relative_humidity);
     ROS_WARN_STREAM("[BehaviorTree][HandleAuto] Weather conditions are fullfilled to start task "
                     << current_task_name_->getData());
 
