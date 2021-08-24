@@ -79,6 +79,7 @@ bool WeatherCondition::isFullfilled(double current_value)
       return true;
   }
 }
+
 WeatherConditions::WeatherConditions()
 {
   temperature_.unit_ = temperature_unit_;
@@ -104,5 +105,4 @@ std::string WeatherCondition::getExceptionMessage(double from_task, double curre
   return (beginning_of_exception_message_ + typeToString() + " should be " + conditionToString() +
           value_from_task.str() + unit + ", but is " + value_current.str() + unit + ".");
 }
-
 }  // namespace agribot_behavior
