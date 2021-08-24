@@ -141,8 +141,8 @@ void WeatherCondition::writeExceptionMessage(double from_task, double current, c
   }
   else
   {
-    exception_message = (weatherTypeToString() + " should be " + conditionToString() + value_from_task.str() + unit +
-                         ", but is " + value_current.str() + unit + ". ");
+    exception_message = (weatherTypeToString() + " for this task should be " + conditionToString() +
+                         value_from_task.str() + unit + ", but it is currently " + value_current.str() + unit + ". ");
   }
 }
 std::string WeatherCondition::getExceptionMessage()
