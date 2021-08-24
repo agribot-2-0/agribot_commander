@@ -4,7 +4,7 @@
 #include <agribot_behavior/common/WeatherConditions.h>
 namespace agribot_behavior
 {
-std::string WeatherCondition::typeToString()
+std::string WeatherCondition::weatherTypeToString()
 {
   switch (type_)
   {
@@ -102,7 +102,7 @@ std::string WeatherCondition::getExceptionMessage(double from_task, double curre
   value_from_task << std::fixed << std::setprecision(1) << from_task;
   std::stringstream value_current;
   value_current << std::fixed << std::setprecision(1) << current;
-  return (beginning_of_exception_message_ + typeToString() + " should be " + conditionToString() +
+  return (beginning_of_exception_message_ + weatherTypeToString() + " should be " + conditionToString() +
           value_from_task.str() + unit + ", but is " + value_current.str() + unit + ".");
 }
 }  // namespace agribot_behavior
