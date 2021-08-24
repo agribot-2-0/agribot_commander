@@ -12,7 +12,8 @@ enum class Condition
   Less,
   Equal,
   More,
-  None
+  None,
+  Undefined
 };
 
 enum class WeatherType
@@ -26,7 +27,7 @@ enum class WeatherType
 class WeatherCondition
 {
 private:
-  inline static const std::string beginning_of_exception_message_ = "Abort task execution. ";
+  std::string exception_message = "";
 
 public:
   Condition condition_;
@@ -34,7 +35,9 @@ public:
   WeatherType type_;
   std::string unit_;
   bool isFullfilled(double current_value);
-  std::string getExceptionMessage(double from_task, double current, const std::string unit);
+  std::string getExceptionMessage();
+  void writeExceptionMessage(double from_task, double current, const std::string unit);
+
   std::string weatherTypeToString();
   std::string conditionToString();
 };
@@ -42,6 +45,7 @@ public:
 class WeatherConditions
 {
 private:
+  inline static const std::string beginning_of_exception_message_ = "Abort task execution. ";
   inline static const std::string temperature_unit_ = " deg C";
   inline static const std::string humidity_unit_ = " %";
   inline static const std::string wind_speed_unit_ = " m/s";

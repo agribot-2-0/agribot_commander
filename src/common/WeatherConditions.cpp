@@ -37,6 +37,8 @@ std::string WeatherCondition::conditionToString()
       return "more than ";
     case Condition::None:
       return "";
+    case Condition::Undefined:
+      return "undefined";
   }
   return "";
 }
@@ -52,7 +54,8 @@ bool WeatherCondition::isFullfilled(double current_value)
       }
       else
       {
-        throw(std::logic_error(getExceptionMessage(value_, current_value, unit_)));
+        writeExceptionMessage(value_, current_value, unit_);
+        return false;
       }
 
     case Condition::Equal:
@@ -62,7 +65,8 @@ bool WeatherCondition::isFullfilled(double current_value)
       }
       else
       {
-        throw(std::logic_error(getExceptionMessage(value_, current_value, unit_)));
+        writeExceptionMessage(value_, current_value, unit_);
+        return false;
       }
 
     case Condition::More:
@@ -72,8 +76,13 @@ bool WeatherCondition::isFullfilled(double current_value)
       }
       else
       {
-        throw(std::logic_error(getExceptionMessage(value_, current_value, unit_)));
+        writeExceptionMessage(value_, current_value, unit_);
+        return false;
       }
+
+    case Condition::Undefined:
+      writeExceptionMessage(value_, current_value, unit_);
+      return false;
 
     default:
       return true;
@@ -91,18 +100,53 @@ WeatherConditions::WeatherConditions()
 bool WeatherConditions::areWeatherConditionsFullfilled(double current_temperature, double current_atmospheric_pressure,
                                                        double current_wind_speed, double current_humidity)
 {
-  return (temperature_.isFullfilled(current_temperature) && humidity_.isFullfilled(current_humidity) &&
-          wind_speed_.isFullfilled(current_wind_speed) &&
-          atmospheric_pressure_.isFullfilled(current_atmospheric_pressure));
+  std::string exception_message;
+
+  if (!temperature_.isFullfilled(current_temperature))
+  {
+    exception_message += temperature_.getExceptionMessage();
+  }
+  if (!atmospheric_pressure_.isFullfilled(current_atmospheric_pressure))
+  {
+    exception_message += atmospheric_pressure_.getExceptionMessage();
+  }
+  if (!humidity_.isFullfilled(current_humidity))
+  {
+    exception_message += humidity_.getExceptionMessage();
+  }
+  if (!wind_speed_.isFullfilled(current_wind_speed))
+  {
+    exception_message += wind_speed_.getExceptionMessage();
+  }
+
+  if (exception_message.size() > 0)
+  {
+    throw(std::logic_error(beginning_of_exception_message_ + exception_message));
+  }
+  else
+  {
+    return true;
+  }
 }
 
-std::string WeatherCondition::getExceptionMessage(double from_task, double current, const std::string unit)
+void WeatherCondition::writeExceptionMessage(double from_task, double current, const std::string unit)
 {
   std::stringstream value_from_task;
   value_from_task << std::fixed << std::setprecision(1) << from_task;
   std::stringstream value_current;
   value_current << std::fixed << std::setprecision(1) << current;
-  return (beginning_of_exception_message_ + weatherTypeToString() + " should be " + conditionToString() +
-          value_from_task.str() + unit + ", but is " + value_current.str() + unit + ".");
+  if (condition_ == Condition::Undefined)
+  {
+    exception_message = (weatherTypeToString() + " condition is " + conditionToString() + ". ");
+  }
+  else
+  {
+    exception_message = (weatherTypeToString() + " should be " + conditionToString() + value_from_task.str() + unit +
+                         ", but is " + value_current.str() + unit + ". ");
+  }
+}
+std::string WeatherCondition::getExceptionMessage()
+{
+  return exception_message;
 }
 }  // namespace agribot_behavior

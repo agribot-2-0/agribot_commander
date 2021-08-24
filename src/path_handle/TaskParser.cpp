@@ -163,6 +163,7 @@ void TaskParser::parseWeatherConditions()
     {
       weather_conditions_from_task_.atmospheric_pressure_.value_ =
           task_weather_conditions["pressure"]["value"].as<double>();
+      weather_conditions_from_task_.atmospheric_pressure_.type_ = WeatherType::AtmosphericPressure;
       weather_conditions_from_task_.atmospheric_pressure_.condition_ =
           convertWeatherConditionToEnumCondition(task_weather_conditions["pressure"]["condition"].as<std::string>());
     }
@@ -173,6 +174,7 @@ void TaskParser::parseWeatherConditions()
     if (task_weather_conditions["humidity"])
     {
       weather_conditions_from_task_.humidity_.value_ = task_weather_conditions["humidity"]["value"].as<double>();
+      weather_conditions_from_task_.humidity_.type_ = WeatherType::Humidity;
       weather_conditions_from_task_.humidity_.condition_ =
           convertWeatherConditionToEnumCondition(task_weather_conditions["humidity"]["condition"].as<std::string>());
     }
@@ -183,6 +185,7 @@ void TaskParser::parseWeatherConditions()
     if (task_weather_conditions["temperature"])
     {
       weather_conditions_from_task_.temperature_.value_ = task_weather_conditions["temperature"]["value"].as<double>();
+      weather_conditions_from_task_.temperature_.type_ = WeatherType::Temperature;
       weather_conditions_from_task_.temperature_.condition_ =
           convertWeatherConditionToEnumCondition(task_weather_conditions["temperature"]["condition"].as<std::string>());
     }
@@ -193,6 +196,7 @@ void TaskParser::parseWeatherConditions()
     if (task_weather_conditions["wind"])
     {
       weather_conditions_from_task_.wind_speed_.value_ = task_weather_conditions["wind"]["value"].as<double>();
+      weather_conditions_from_task_.wind_speed_.type_ = WeatherType::WindSpeed;
       weather_conditions_from_task_.wind_speed_.condition_ =
           convertWeatherConditionToEnumCondition(task_weather_conditions["wind"]["condition"].as<std::string>());
     }
@@ -222,9 +226,13 @@ Condition TaskParser::convertWeatherConditionToEnumCondition(const std::string& 
   {
     return Condition::More;
   }
-  else
+  else if (condition == "none")
   {
     return Condition::None;
+  }
+  else
+  {
+    return Condition::Undefined;
   }
 }
 
