@@ -36,7 +36,7 @@ public:
   std::string unit_;
   bool isFullfilled(double current_value);
   std::string getExceptionMessage();
-  void writeExceptionMessage(double from_task, double current, const std::string unit);
+  void writeExceptionMessage(double from_task, double current, const std::string& unit);
 
   std::string weatherTypeToString();
   std::string conditionToString();

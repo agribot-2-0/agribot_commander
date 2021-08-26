@@ -129,7 +129,7 @@ bool WeatherConditions::areWeatherConditionsFullfilled(double current_temperatur
   }
 }
 
-void WeatherCondition::writeExceptionMessage(double from_task, double current, const std::string unit)
+void WeatherCondition::writeExceptionMessage(double from_task, double current, const std::string& unit)
 {
   std::stringstream value_from_task;
   value_from_task << std::fixed << std::setprecision(1) << from_task;
