@@ -32,4 +32,13 @@ template void SharedField<agribot_msgs::AgribotTtcontrolState>::writeData(const 
 template agribot_msgs::AgribotTtcontrolState SharedField<agribot_msgs::AgribotTtcontrolState>::getData();
 template void SharedField<industrial_msgs::RobotMode>::writeData(const industrial_msgs::RobotMode&);
 template industrial_msgs::RobotMode SharedField<industrial_msgs::RobotMode>::getData();
+template void SharedField<agribot_msgs::AgribotWind>::writeData(const agribot_msgs::AgribotWind&);
+template agribot_msgs::AgribotWind SharedField<agribot_msgs::AgribotWind>::getData();
+template void SharedField<sensor_msgs::FluidPressure>::writeData(const sensor_msgs::FluidPressure&);
+template sensor_msgs::FluidPressure SharedField<sensor_msgs::FluidPressure>::getData();
+template void SharedField<sensor_msgs::RelativeHumidity>::writeData(const sensor_msgs::RelativeHumidity&);
+template sensor_msgs::RelativeHumidity SharedField<sensor_msgs::RelativeHumidity>::getData();
+template void SharedField<sensor_msgs::Temperature>::writeData(const sensor_msgs::Temperature&);
+template sensor_msgs::Temperature SharedField<sensor_msgs::Temperature>::getData();
+
 }  // namespace agribot_behavior

@@ -36,7 +36,11 @@
 #include <agribot_msgs/ObstacleDetectionStatus.h>
 #include <agribot_msgs/AgribotTtcontrolState.h>
 #include <agribot_msgs/AgribotAppErrorFlag.h>
+#include <agribot_msgs/AgribotWind.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/FluidPressure.h>
+#include <sensor_msgs/RelativeHumidity.h>
+#include <sensor_msgs/Temperature.h>
 #include <behaviortree_cpp_v3/bt_factory.h>
 #include <behaviortree_cpp_v3/loggers/bt_zmq_publisher.h>
 
@@ -82,6 +86,10 @@ private:
   ros::Subscriber obstacle_detected_subscriber_;
   ros::Subscriber mobile_app_error_flag_subscriber_;
   ros::Subscriber ttcontrol_state_subscriber_;
+  ros::Subscriber weather_conditions_atmospheric_pressure_subscriber_;
+  ros::Subscriber weather_conditions_humidity_subscriber_;
+  ros::Subscriber weather_conditions_temperature_subscriber_;
+  ros::Subscriber weather_conditions_wind_speed_subscriber_;
 
   // Publishers - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to publish something are
   // granted with shared_ptr of the Publishers
@@ -112,6 +120,10 @@ private:
   std::shared_ptr<SharedField<industrial_msgs::RobotMode>> robot_mode_;
   std::shared_ptr<SharedField<agribot_msgs::AgribotNavigationManagerResult>> autonomous_path_action_feedback_;
   std::shared_ptr<SharedField<agribot_msgs::AgribotTtcontrolState>> ttcontrol_state_;
+  std::shared_ptr<SharedField<sensor_msgs::FluidPressure>> current_atmospheric_pressure_;
+  std::shared_ptr<SharedField<sensor_msgs::Temperature>> current_temperature_;
+  std::shared_ptr<SharedField<sensor_msgs::RelativeHumidity>> current_humidity_;
+  std::shared_ptr<SharedField<agribot_msgs::AgribotWind>> current_wind_speed_;
 
   std::atomic<bool> obstacle_absent_;
   std::atomic<bool> error_absent_;
@@ -132,6 +144,10 @@ private:
   void obstacleDetectedRosCallback(const agribot_msgs::ObstacleDetectionStatus::ConstPtr& msg);
   void mobileAppErrorFlagRosCallback(const agribot_msgs::AgribotAppErrorFlag::ConstPtr& msg);
   void ttcontrolStateCallback(const agribot_msgs::AgribotTtcontrolState::ConstPtr& msg);
+  void weatherConditionsAtmosphericPressureCallback(const sensor_msgs::FluidPressure::ConstPtr& msg);
+  void weatherConditionsHumidityCallback(const sensor_msgs::RelativeHumidity::ConstPtr& msg);
+  void weatherConditionsTemperatureCallback(const sensor_msgs::Temperature::ConstPtr& msg);
+  void weatherConditionsWindSpeedCallback(const agribot_msgs::AgribotWind::ConstPtr& msg);
 
   void performAutonomousTaskCallback(const agribot_msgs::PerformAutonomousTaskGoalConstPtr& goal);
   bool pathFinished();
