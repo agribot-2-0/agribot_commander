@@ -5,44 +5,44 @@
 #pragma once
 
 #include <agribot_behavior/action/CheckStartConditions.h>
+#include <agribot_behavior/action/ControlEngine.h>
 #include <agribot_behavior/action/Handle.h>
 #include <agribot_behavior/action/LightsControl.h>
 #include <agribot_behavior/action/StreamingControl.h>
 #include <agribot_behavior/action/SwitchControlArbiters.h>
 #include <agribot_behavior/action/SwitchTtcontrolState.h>
-#include <agribot_behavior/action/ControlEngine.h>
 #include <agribot_behavior/common/OneTimeLogger.h>
 #include <agribot_common/CommonFunctions/ros_common_functions.h>
-
-#include <ros/ros.h>
 #include <ros/package.h>
+#include <ros/ros.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/server/simple_action_server.h>
 #pragma GCC diagnostic pop
 
-#include <std_srvs/Empty.h>
-#include <std_msgs/String.h>
-#include <std_srvs/Trigger.h>
-#include <industrial_msgs/RobotMode.h>
-#include <agribot_msgs/LampsControl.h>
-#include <agribot_msgs/AgribotTool.h>
 #include <agribot_behavior/common/SharedField.h>
+#include <agribot_msgs/AgribotAppErrorFlag.h>
+#include <agribot_msgs/AgribotNavigationManagerResult.h>
+#include <agribot_msgs/AgribotTool.h>
+#include <agribot_msgs/AgribotTtcontrolState.h>
+#include <agribot_msgs/AgribotWind.h>
+#include <agribot_msgs/LampsControl.h>
+#include <agribot_msgs/ObstacleDetectionStatus.h>
 #include <agribot_msgs/PerformAutonomousPathAction.h>
 #include <agribot_msgs/PerformAutonomousTaskAction.h>
 #include <agribot_msgs/ToolManagerControlSource.h>
-#include <agribot_msgs/AgribotNavigationManagerResult.h>
-#include <agribot_msgs/ObstacleDetectionStatus.h>
-#include <agribot_msgs/AgribotTtcontrolState.h>
-#include <agribot_msgs/AgribotAppErrorFlag.h>
-#include <agribot_msgs/AgribotWind.h>
-#include <sensor_msgs/NavSatFix.h>
-#include <sensor_msgs/FluidPressure.h>
-#include <sensor_msgs/RelativeHumidity.h>
-#include <sensor_msgs/Temperature.h>
 #include <behaviortree_cpp_v3/bt_factory.h>
 #include <behaviortree_cpp_v3/loggers/bt_zmq_publisher.h>
+#include <industrial_msgs/RobotMode.h>
+#include <nav_msgs/Path.h>
+#include <sensor_msgs/FluidPressure.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/RelativeHumidity.h>
+#include <sensor_msgs/Temperature.h>
+#include <std_msgs/String.h>
+#include <std_srvs/Empty.h>
+#include <std_srvs/Trigger.h>
 
 #include <atomic>
 // when migrating to GCC version >= 8.0 experimental part of header should be removed
@@ -96,6 +96,7 @@ private:
   std::shared_ptr<ros::Publisher> robot_mode_publisher_;
   std::shared_ptr<ros::Publisher> tpl_front_config_publisher_;
   std::shared_ptr<ros::Publisher> tpl_back_config_publisher_;
+  std::shared_ptr<ros::Publisher> local_path_publisher_;
 
   // Services - initialized inside AgribotBehaviorTreeNode. The tree nodes, which need to call service are
   // granted with shared_ptr of the ServiceClient. The implementation of service call is stored inside individual tree

@@ -4,26 +4,26 @@
 
 #pragma once
 
-#include <behaviortree_cpp_v3/action_node.h>
-
-#include <agribot_behavior/path_handle/TaskParser.h>
 #include <agribot_behavior/common/SharedField.h>
+#include <agribot_behavior/path_handle/TaskParser.h>
 #include <agribot_common/common_enums/ControlSource.h>
+#include <behaviortree_cpp_v3/action_node.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <actionlib/client/simple_action_client.h>
 #pragma GCC diagnostic pop
-#include <ros/ros.h>
-#include <ros/console.h>
 #include <agribot_msgs/AgribotWind.h>
-#include <sensor_msgs/NavSatFix.h>
+#include <agribot_msgs/PerformAutonomousPathAction.h>
+#include <nav_msgs/Path.h>
+#include <ros/console.h>
+#include <ros/ros.h>
 #include <sensor_msgs/FluidPressure.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/RelativeHumidity.h>
 #include <sensor_msgs/Temperature.h>
-#include <agribot_msgs/PerformAutonomousPathAction.h>
 
-#include <memory>
 #include <atomic>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -47,6 +47,7 @@ private:
   std::shared_ptr<SharedField<agribot_msgs::AgribotWind>> current_wind_speed_;
   std::shared_ptr<ros::Publisher> tpl_front_config_publisher_;
   std::shared_ptr<ros::Publisher> tpl_back_config_publisher_;
+  std::shared_ptr<ros::Publisher> local_path_publisher_;
 
   void handleManualControl();
   void handleAutonomousControl();
@@ -80,7 +81,8 @@ public:
       std::shared_ptr<SharedField<sensor_msgs::RelativeHumidity>> current_humidity,
       std::shared_ptr<SharedField<agribot_msgs::AgribotWind>> current_wind_speed);
   void initRosPublishers(std::shared_ptr<ros::Publisher> tpl_front_config_publisher,
-                         std::shared_ptr<ros::Publisher> tpl_back_config_publisher);
+                         std::shared_ptr<ros::Publisher> tpl_back_config_publisher,
+                         std::shared_ptr<ros::Publisher> local_path_publisher);
   void initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
                           autonomous_path_action_client);
 };
