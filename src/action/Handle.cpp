@@ -68,10 +68,12 @@ void Handle::initSharedFields(
 }
 
 void Handle::initRosPublishers(std::shared_ptr<ros::Publisher> tpl_front_config_publisher,
-                               std::shared_ptr<ros::Publisher> tpl_back_config_publisher)
+                               std::shared_ptr<ros::Publisher> tpl_back_config_publisher,
+                               std::shared_ptr<ros::Publisher> local_path_publisher)
 {
   tpl_front_config_publisher_ = tpl_front_config_publisher;
   tpl_back_config_publisher_ = tpl_back_config_publisher;
+  local_path_publisher_ = local_path_publisher;
 }
 
 void Handle::initActionlibs(std::shared_ptr<actionlib::SimpleActionClient<agribot_msgs::PerformAutonomousPathAction>>
@@ -99,6 +101,12 @@ void Handle::handleManualControl()
     msg.val = industrial_msgs::RobotMode::MANUAL;
     return msg;
   }());
+  local_path_publisher_->publish([] {
+    nav_msgs::Path msg;
+    msg.header.frame_id = "odom";
+    return msg;
+  }());
+
   while (!halt_requested_ && ros::ok())
   {
     ros::spinOnce();

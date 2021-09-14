@@ -75,7 +75,7 @@ void AgribotBehaviorTreeNode::initTreeNodesWithRosDependencies()
       handle->initSharedFields(current_task_name_, previous_task_name_, path_progression_,
                                autonomous_path_action_feedback_, robot_mode_, current_atmospheric_pressure_,
                                current_temperature_, current_humidity_, current_wind_speed_);
-      handle->initRosPublishers(tpl_front_config_publisher_, tpl_back_config_publisher_);
+      handle->initRosPublishers(tpl_front_config_publisher_, tpl_back_config_publisher_, local_path_publisher_);
       handle->initActionlibs(autonomous_path_action_client_);
       handle->initTaskParser(path_folder_, task_folder_);
     }
@@ -163,6 +163,8 @@ void AgribotBehaviorTreeNode::initRosPublishers()
       node_handle_->advertise<agribot_msgs::AgribotTool>("/agribot/control/tool/front/navigation", 1));
   tpl_back_config_publisher_ = std::make_shared<ros::Publisher>(
       node_handle_->advertise<agribot_msgs::AgribotTool>("/agribot/control/tool/back/navigation", 1));
+  local_path_publisher_ = std::make_shared<ros::Publisher>(
+      node_handle_->advertise<nav_msgs::Path>("/move_base/AgribotLocalPlanner/local_path", 1));
 }
 
 void AgribotBehaviorTreeNode::initRosServices()
