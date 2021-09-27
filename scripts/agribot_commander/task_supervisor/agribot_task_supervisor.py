@@ -7,8 +7,6 @@ import actionlib
 import google.api_core.exceptions
 from agribot_msgs.msg import PerformAutonomousTaskAction
 from agribot_msgs.msg import PerformAutonomousTaskGoal
-from agribot_msgs.msg import PerformAutonomousTaskFeedback
-from agribot_msgs.msg import AgribotNavigationManagerResult
 
 
 class AgribotTaskSupervisor(object):
