@@ -7,6 +7,8 @@ import actionlib
 import google.api_core.exceptions
 from agribot_msgs.msg import PerformAutonomousTaskAction
 from agribot_msgs.msg import PerformAutonomousTaskGoal
+from agribot_msgs.msg import PerformAutonomousTaskFeedback
+from agribot_msgs.msg import AgribotNavigationManagerResult
 
 
 class AgribotTaskSupervisor(object):
@@ -56,6 +58,24 @@ class AgribotTaskSupervisor(object):
     def goal_task_callback_feedback(self, feedback):  # pylint: disable=unused-argument,no-self-use
         # TODO(lchojnacki): implement sending some reaction to goal task action feedback
         # (eg. sending feedback to firestore)
+        feedback_dict = {
+            0: 'NOACTION',
+            1: 'ACTIVE',
+            2: 'PREEMPTED',
+            3: 'SUCCES',
+            4: 'ABORTED',
+            5: 'FAILED',
+            7: 'RECALLED',
+            10: 'PAUSED',
+            100: 'COMPLETED'
+        }
+        try:
+            self.database.collection(u'robots').document(
+                self.rsn).collection(u'state').document(u'task').update(
+                    {u'feedback': feedback_dict[feedback.feedback.result]})
+        except google.api_core.exceptions.GoogleAPIError as my_except:
+            rospy.logerr("[AgribotTaskSupervisor] Exception: {}".format(my_except))
+
         return
 
     def goal_task_callback_done(self, state, result):  # pylint: disable=unused-argument,no-self-use
