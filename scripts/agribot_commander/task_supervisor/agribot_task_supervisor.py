@@ -57,20 +57,19 @@ class AgribotTaskSupervisor(object):
         # TODO(lchojnacki): implement sending some reaction to goal task action feedback
         # (eg. sending feedback to firestore)
         feedback_dict = {
-            0: 'NOACTION',
+            0: 'PAUSED',
             1: 'ACTIVE',
-            2: 'PREEMPTED',
-            3: 'SUCCES',
-            4: 'ABORTED',
-            5: 'FAILED',
-            7: 'RECALLED',
-            10: 'PAUSED',
+            2: 'ABORTED',
+            3: 'CANCELLED',
+            4: 'OBSTACLE_DETECTED',
+            5: 'ERROR',
             100: 'COMPLETED'
         }
+        rospy.logerr(type(feedback))
         try:
             self.database.collection(u'robots').document(
                 self.rsn).collection(u'state').document(u'task').update(
-                    {u'feedback': feedback_dict[feedback.feedback.result]})
+                    {u'feedback': feedback_dict[feedback.feedback]})
         except google.api_core.exceptions.GoogleAPIError as my_except:
             rospy.logerr("[AgribotTaskSupervisor] Exception: {}".format(my_except))
 

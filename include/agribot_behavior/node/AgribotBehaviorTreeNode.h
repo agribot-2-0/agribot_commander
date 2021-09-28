@@ -80,6 +80,9 @@ private:
   std::unique_ptr<actionlib::SimpleActionServer<agribot_msgs::PerformAutonomousTaskAction>>
       autonomous_task_action_server_;
 
+  // autonomous task feedback is used only in AgribotBehaviorTreeNode, and is not shared with other tree nodes
+  agribot_msgs::PerformAutonomousTaskFeedback autonomous_task_action_feedback_;
+
   // Subscribers - initialized inside AgribotBehaviorTreeNode. Also the callbacks are defined in
   // AgribotBehaviorTreeNode. The callbacks are thread-safe and are distributing ros messages to proper class fields.
   // The tree nodes, which need access to the fileds, are granted with shared_ptr to desired field
