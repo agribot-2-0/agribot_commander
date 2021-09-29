@@ -157,6 +157,7 @@ private:
   bool pathFinished();
   bool pathAborted();
   bool ttcontrolInManualMode();
+  void setTaskActionFeedback();
 
 public:
   AgribotBehaviorTreeNode(int argc, char** argv);

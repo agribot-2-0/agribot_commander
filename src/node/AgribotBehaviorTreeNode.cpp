@@ -310,6 +310,35 @@ void AgribotBehaviorTreeNode::ttcontrolStateCallback(const agribot_msgs::Agribot
   ttcontrol_state_->writeData(*msg);
 }
 
+void AgribotBehaviorTreeNode::setTaskActionFeedback()
+{
+  if (autonomous_path_action_feedback_->getData().result == agribot_msgs::AgribotNavigationManagerResult::PAUSED)
+  {
+    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::PAUSED;
+  }
+  else if (autonomous_path_action_feedback_->getData().result == agribot_msgs::AgribotNavigationManagerResult::ABORTED)
+  {
+    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::ABORTED;
+  }
+  else if (autonomous_path_action_feedback_->getData().result ==
+           agribot_msgs::AgribotNavigationManagerResult::COMPLETED)
+  {
+    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::COMPLETED;
+  }
+  else if (autonomous_path_action_feedback_->getData().result == agribot_msgs::AgribotNavigationManagerResult::ACTIVE)
+  {
+    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::ACTIVE;
+  }
+  else if (!obstacle_absent_.load())
+  {
+    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::OBSTACLE_DETECTED;
+  }
+  else
+  {
+    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::ERROR;
+  }
+}
+
 void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::PerformAutonomousTaskGoalConstPtr& goal)
 {
   current_task_name_->writeData(goal->task_name);
@@ -329,34 +358,9 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
     while (ros::ok() && !autonomous_task_action_server_->isPreemptRequested() && current_task_name_->getData() != "")
     {
       // Publish feedback to TaskSupervisor
-      if (autonomous_path_action_feedback_->getData().result == agribot_msgs::AgribotNavigationManagerResult::PAUSED)
-      {
-        autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::PAUSED;
-      }
-      else if (autonomous_path_action_feedback_->getData().result ==
-               agribot_msgs::AgribotNavigationManagerResult::ABORTED)
-      {
-        autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::ABORTED;
-      }
-      else if (autonomous_path_action_feedback_->getData().result ==
-               agribot_msgs::AgribotNavigationManagerResult::COMPLETED)
-      {
-        autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::COMPLETED;
-      }
-      else if (autonomous_path_action_feedback_->getData().result ==
-               agribot_msgs::AgribotNavigationManagerResult::ACTIVE)
-      {
-        autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::ACTIVE;
-      }
-      else if (!obstacle_absent_.load())
-      {
-        autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::OBSTACLE_DETECTED;
-      }
-      else
-      {
-        autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::ERROR;
-      }
+      setTaskActionFeedback();
       autonomous_task_action_server_->publishFeedback(autonomous_task_action_feedback_);
+
       if (pathFinished())
       {
         current_task_name_->writeData("");
@@ -387,15 +391,11 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
     }
   }
   autonomous_path_action_feedback_->writeData(agribot_msgs::AgribotNavigationManagerResult());
-  // autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::CANCELLED;
-  // autonomous_task_action_server_->publishFeedback(autonomous_task_action_feedback_);
-
   autonomous_task_action_server_->setSucceeded([this] {
     agribot_msgs::PerformAutonomousTaskResult path_action_result;
     path_action_result.finished = false;
     return path_action_result;
   }());
-
   robot_mode_->writeData([] {
     industrial_msgs::RobotMode msg;
     msg.val = industrial_msgs::RobotMode::UNKNOWN;

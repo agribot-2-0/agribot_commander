@@ -65,7 +65,6 @@ class AgribotTaskSupervisor(object):
             5: 'ERROR',
             100: 'COMPLETED'
         }
-        rospy.logerr(type(feedback))
         try:
             self.database.collection(u'robots').document(
                 self.rsn).collection(u'state').document(u'task').update(
