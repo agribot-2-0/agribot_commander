@@ -312,7 +312,15 @@ void AgribotBehaviorTreeNode::ttcontrolStateCallback(const agribot_msgs::Agribot
 
 void AgribotBehaviorTreeNode::setTaskActionFeedback()
 {
-  if (autonomous_path_action_feedback_->getData().result == agribot_msgs::AgribotNavigationManagerResult::PAUSED)
+  if (!obstacle_absent_.load())
+  {
+    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::OBSTACLE_DETECTED;
+  }
+  else if (autonomous_path_action_feedback_->getData().result == agribot_msgs::AgribotNavigationManagerResult::SUCCES)
+  {
+    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::ACTIVE;
+  }
+  else if (autonomous_path_action_feedback_->getData().result == agribot_msgs::AgribotNavigationManagerResult::PAUSED)
   {
     autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::PAUSED;
   }
@@ -329,13 +337,9 @@ void AgribotBehaviorTreeNode::setTaskActionFeedback()
   {
     autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::ACTIVE;
   }
-  else if (!obstacle_absent_.load())
-  {
-    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::OBSTACLE_DETECTED;
-  }
   else
   {
-    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::ERROR;
+    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::UNKNOWN;
   }
 }
 
@@ -344,8 +348,10 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
   current_task_name_->writeData(goal->task_name);
   if (goal->task_name == "")
   {
-    autonomous_task_action_feedback_.feedback = agribot_msgs::PerformAutonomousTaskFeedback::CANCELLED;
-    autonomous_task_action_server_->publishFeedback(autonomous_task_action_feedback_);
+    if (autonomous_task_action_feedback_.feedback)
+    {
+      autonomous_task_action_server_->publishFeedback(autonomous_task_action_feedback_);
+    }
   }
   else
   {
@@ -389,7 +395,9 @@ void AgribotBehaviorTreeNode::performAutonomousTaskCallback(const agribot_msgs::
       ros::spinOnce();
       loop_rate.sleep();
     }
+    autonomous_task_action_server_->publishFeedback(autonomous_task_action_feedback_);
   }
+
   autonomous_path_action_feedback_->writeData(agribot_msgs::AgribotNavigationManagerResult());
   autonomous_task_action_server_->setSucceeded([this] {
     agribot_msgs::PerformAutonomousTaskResult path_action_result;

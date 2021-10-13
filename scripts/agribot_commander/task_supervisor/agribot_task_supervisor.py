@@ -54,16 +54,14 @@ class AgribotTaskSupervisor(object):
         return
 
     def goal_task_callback_feedback(self, feedback):  # pylint: disable=unused-argument,no-self-use
-        # TODO(lchojnacki): implement sending some reaction to goal task action feedback
-        # (eg. sending feedback to firestore)
         feedback_dict = {
-            0: 'PAUSED',
-            1: 'ACTIVE',
-            2: 'ABORTED',
-            3: 'CANCELLED',
-            4: 'OBSTACLE_DETECTED',
-            5: 'ERROR',
-            100: 'COMPLETED'
+            0: u'PAUSED',
+            1: u'ACTIVE',
+            2: u'ABORTED',
+            3: u'CANCELLED',
+            4: u'OBSTACLE_DETECTED',
+            5: u'UNKNOWN',
+            100: u'COMPLETED'
         }
         try:
             self.database.collection(u'robots').document(
