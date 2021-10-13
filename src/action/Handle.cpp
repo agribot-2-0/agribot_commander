@@ -172,7 +172,6 @@ void Handle::handleAutonomousControl()
       {
         ROS_ERROR_STREAM("[BehaviorTree][HandleAuto] Move base activate timeout");
       }
-      ROS_ERROR_STREAM("[BT task action feedback] when does this happen");
       resetAutonomousDriving();
     }
     else
