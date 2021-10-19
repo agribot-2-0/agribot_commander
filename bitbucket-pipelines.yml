@@ -16,7 +16,7 @@ pipelines:
      - step:
          name: "Check pylint"
          script:
-           - apk add --update bash coreutils tar python py-pip
+           - apk add --update bash coreutils tar python-dev py-pip gcc musl-dev
            - pip install pylint==1.9.5
            - if [ -z "$(git ls-remote --heads https://github.com/panpawelchmiel/agribot_common.git $(git rev-parse --abbrev-ref HEAD))" ]; then git clone https://github.com/panpawelchmiel/agribot_common.git; else git clone https://github.com/panpawelchmiel/agribot_common.git -b $(git rev-parse --abbrev-ref HEAD); fi
            - pylint --rcfile=agribot_common/pylint_conf/.pylintrc scripts/*
