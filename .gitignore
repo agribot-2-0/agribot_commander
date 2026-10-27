@@ -5,3 +5,17 @@ src/__pycache__
 scripts/aux/live_view/data
 scripts/aux/live_view/.ipynb_checkpoints
 scripts/aux/live_view/_map.html
+
+# Local credentials excluded from publication
+.env
+.env.*
+!.env.example
+credentials.properties
+google_play_api_key.json
+google-services.json
+*.jks
+*.keystore
+*.p12
+*.pfx
+*firebase-adminsdk*.json
+*service-account*.json
